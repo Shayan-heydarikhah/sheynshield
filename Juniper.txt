@@ -1,0 +1,585 @@
+Juniper
+	company has established in 1996 in usa wors like cisco
+	srx is the best product
+	has m40 router series products 
+	in juniper we have asic chips (application specific integrted circute)
+	product series:
+		small office > 300-550
+		middel office > 1500-4600
+		large office > 5400-5800
+		p
+		n
+		m : are multi services and l3 works better on these series has more and higher throughput, seperated data and control plane
+		acx : small office series has passive config (no fan colling) , support mpls
+		ln : wors like utm appliance, high application
+		mx : enterprise level products 960gig
+		ptx : packet transport switch  16 tb in each chasis use for isp and cloud companies video streaming
+		ex : full duplex switches 6.2 tb aggregate and ethernet use for large office
+		qfx : fiber optic support 10 tb
+		security products :
+			srx : use for isp and datacenters 
+			j : use for small office, data and control plane are seperated logically 120gb fullduplex 
+
+		in vm versions shoulld use v 18.2 and 15
+
+	licenses :
+		associate
+		specialist
+		profesional
+		export
+
+	jncp (juniper network certificate program)
+
+	kernel > freebsd unix
+		modular
+		scalable
+		robust
+
+	control plane > routing engine (the brain of the system)
+	forwarding plane > packet forward enigne (seperated socket)
+
+	in some items we have a cop of forward plane in routing engine to process more threads and faster on forwarding plane
+
+	exception traffics are device destination traffics like telnet , icmp , traceroute
+
+	juniper os or jonos can handel processes seperated from each other has no confilict
+
+	cli config and jweb on http + https support
+
+	has console port
+
+	> : operational mode 
+	# : configuration mode
+
+	root@% cli (goes to cli mode)
+
+	in webmode :
+		username root
+		password : (blank)
+
+	we use set command in cli and use delete to clear config
+
+	commands :
+		help topic
+		help refrence
+		help apropas
+
+		set cli complete-on-space off (disable space)
+
+	emacs :
+		ctrl + b : move left one character
+		ctrl + a : move to start a line
+		ctrl + f : move right one character
+		ctrl + e : move to end of line
+		ctrl + d : delete the courser position word
+		ctrl + k : delete words from end line
+		ctrl + u : totaly delete line
+
+	jonos need commit to apply change	
+
+	we have active config > like startup config
+	and candidate config > before commit and close cli works our commands afte close our configs get lost (runing config)
+
+	from last 50 configs can recover after commit
+		set max-configuration-on-flash 0-49
+
+	we can use jonos and works parallel mode to force one ession changing must :
+		config exclusive
+
+		config private (each user config for himself)
+
+		if 2 user apply same things, generate error
+
+	up : one command upper
+	up n : command on step n
+	top : command befor edit commands
+	exit
+
+	active
+	deactive
+	insert
+	copy
+	unmount
+
+	top show ospf (show ospf commands)
+
+	commite check (check commands before add to configs)
+
+	commte at time
+	commite confirmed
+	commite synchronize
+
+	show config | compare rollback 5
+	show config | compare a.file
+
+	save a.file (like do wr)
+	save path\file (save)
+	save scp://user@router/path/filename
+
+	factory default (reset factory)
+
+	edit security screen (security way)
+
+	load path ftp://..... (restore)
+	load merge .....
+
+	we have same things on jonos 
+
+	at the first start of juniper devices must set password for root user
+	for power off device must set command not unplug power cable
+
+	edit system 
+	set service ssh
+	show 
+	show system services
+	edit system
+	set services telnet
+	commite
+
+	set system root-authentication plain-text-password
+	commite check
+	commite
+
+	set host-name x
+	set system ntp
+	set system time-zone
+
+	set date (in operational mode must set)
+
+	sfae power off :
+		(operational mode) 	> request system halt
+							> request system power-off
+
+	rescue config (restorre point) :
+		request system config rescue save  
+
+		request system config rescue delete
+
+		rollback rescue 
+		commite
+
+		run show config (show run)
+
+	edit interface 
+	set ge-0/0/0 unit 0 family inet address .....
+	exit
+	commite
+
+	interface type :
+		management (logical unit must be on 0)
+			logic properties :
+				inet (ipv4)
+				inet6 (ipv6)
+				mpls
+				iso
+				ethernet
+				switching
+
+		internal (interface between forwarding plane and control plane)
+		network	(xe = 10gig)
+		services (link \ tunnel)
+		loopback
+
+	* we can set 2 different ip address on same interface and can set priority with prefered, if don't set our smallest ip address use for l3 addressing with primary can do this but in different subnets
+
+	with terse we can se status of interfaces
+
+	show interface ge-0/0/0 |displaye inheriante | exept # (comments)
+	run show int terse (run works like do)
+
+	edit interface
+	set ge-0/0/0 unit 0 family init address ........ /24 prefered	(must set subnets if lost parameter  take \32)
+	commite
+
+	fpc : felexible pic connector (pci slot)
+
+	edit groups
+	set x
+	edit x
+	set interface <ge> unit 20 family inet mtu 1544
+	exit
+	interface
+	set apply-group x
+
+	local users in lost connection from tacacs+ or radius must use, also must change authentication order
+	temp user > user local database = remote
+
+	edit system login
+	set user x class
+	set user x authentication plain-text-password
+	set user x full-name "x-x"
+
+	each user has seperated home directory
+
+	file list /var/
+
+	set authentication-orer [radius pasword]
+	set radius-server ....... timeout secret
+	set group
+	set global system login class custom permission [snmp view system]
+
+	edit system loging
+	set apply-group customer
+	set class
+
+	edit system syslog
+	set user * any
+	set host {dns name}
+	set file
+	set archive
+	set console
+
+	it's better disable trace
+
+	set traceoption file x size 128k no-word-readable
+	set traceoption flag lsa-update details
+
+	* synchronization must be on maximum 128msec not more
+
+	edit system ntp
+	set server ....
+	set authentication .... key ...
+	set ...
+	set boot server ... (system boot time must be near ntp server)
+	show ntp status
+	set date ntp  .... (take time from ntp server)
+	show ntp associateion
+
+	edit system archive
+	set config archhive-site ftp://.... password ...
+	set config transfer-interval 15 (min)
+	set config transfer-on-commite (each time set commite make backup)
+
+	operational mode :
+		file copy ./.... (src) ftp:/... (des)
+
+	edit snmp 
+	set community x
+	set community x authorization read-only clients (anser to these group)
+	set trap-group x-x set version v2 categories chassis target .... (des)
+
+	show system memory
+	shw system  alarm 
+	show chassis frameware
+	show chasis hardware
+
+	monitor start x (log name)
+	monitor interface traffic
+	show ntp status
+	show system uptime
+
+	rpm : return packet monitoring (monitor a host)(sla)
+	set services rpm probe x test icmp-test prob-interval 15 (seconds)
+	set services rpm probe x test icmp-test prob-type icmp-ping-timestamp
+	set services rpm probe x test icmp-test target address ....
+	set services rpm probe x test icmp-test threshold ingress-time 300 msec
+	commite
+	show system rpm
+	
+	show versions
+
+		jinstall-12.1r1.9-demostic-signed.tgs
+
+			j : 
+				jsr
+				mx
+				tx
+				m
+
+			install (package)
+			12 > release number
+			r means release and type of software if b\i means test , s service release for special customers
+			9 is spin
+			demostic means edition with powerfull encryption has export mode works in opposite site of demostic
+			signed means digital signed & compress
+
+	fips (special options) : federal information processing standard
+
+	request system software add /var/temp/... reboot
+	request storage clean-up
+	show system storage
+
+	inservice software-update	(must update without no unormaly and no problem in dat plane)
+	unified issu > not applicated in dual routing engine in lsr and jres should be enable (nonstop active routing)
+	lsr is not active every where
+
+	request system software in-service-upgrade
+
+	password recovery :
+		must use space key in boot sequence
+		boot -s (single user mode)
+		recovery
+		set root password
+
+	jweb :
+		edit system service
+		set web-management https http (https need certs)
+		set web-manage https local-cert test
+		run request	security pki local-cert generate-self-sig
+		commite
+
+	after login must set :
+		domain name
+		hostname
+		dns server
+
+	configure > device setup > basic setting :
+		management access
+		usermanage :
+			admin > super user (here must set user group)
+			tacacs+/radius
+		date time
+		snmp
+		syslog
+
+	configure > interface :
+		port :
+			by default all interfaces are in l2 must create logical interface with + under original interface
+			can create sub-interface
+				unit > 10
+				description > vlan10
+				van id > 10
+
+				unite > 0
+				ethernet switch > interface mode (trunk)
+
+		link aggregation :
+			global setting (enable)
+			device count (port count number)
+
+			lacp 
+			link protection
+
+			if need add port must set name ue\ae
+
+		vlan :
+			after create vlans must set under ports
+
+	config > network :
+		static routing (first set destination then set next hop)
+		dhcp (server):
+			dhcp pool
+			dhcp attribute
+			dhcp group (under wich port)
+
+			relay agent (cli) :
+				set forward-option dhcp-relay group dhcp interface ge-0/0/0.10
+				set forward-option dhcp-relay server-group dhcp-server ...
+				set forward-option dhcp-relay active-server-group dhcp-server
+				set security zones sezurity-zone lan interface .10 host-inbound-traffic system-services dhcp
+
+	configure > security > object :
+		zone\screens :
+			zone type :
+				security
+				functional
+
+			screen : dos protection, ip scan, spoofing
+
+		zone address :
+			address group
+
+		global address :
+			address book contains many places
+
+		application :
+			custom
+			predefine
+			application group
+
+	config > security :
+		firewall policy :
+			schedule
+			rules
+
+		firewall filter :
+			works like acl
+			ipv4 and assign mode
+
+		nat :
+			source nat :
+				nat pool
+				source role nat (if not set all options selected)
+
+			source dnat :
+				source 0.0.0.0
+				destination ip server + port
+				ip pool destination
+
+				access from internet to this ip address and port nd ip pool (dmz) 
+		
+			proxy arp (publish) :
+				edit security nat proxy-arp
+				set interface ge-0/0/0.0 address ..../24
+
+		after nat rule must set rules in firewall
+
+		utm :
+			antivirus :
+				sophos engine
+
+			custom object :
+				dlp patterns
+
+			webfilter :
+				redirect
+				local
+				enhanced (better option)(juniper database with latest update list)
+			content filter
+			antispan
+
+		*must set options in utm policy
+
+		application secure
+			application firewall
+			app signiture
+
+		threat prevention :
+			policies
+
+		ips :
+			paloalto has more performance in ips (set action on recomended)
+
+	gre tunnel :
+		set int gr-0/0/0 unit 0 family int add .....
+		set int gr-0/0/0 unit 0 tunnel source ...
+		set int gr-0/0/0 unit 0 tunnel des .....
+	
+		show interface | display set | match gr
+
+		set routing-option static route .... nexth-op ....
+		
+		set security zones security-zone vpn interface gr-0/0/0
+		set security zones security-zone vpn interface gr-0/0/0.0
+		set security zones security-zone vpn interface gr-0/0/0.0 host-inbound-traffic protocols all
+		set security zones security-zone vpn interface gr0/0/0.0 host-inbound-traffic system services all
+		set security zones security-zone vpn  host-inbound-traffic protocols all
+		set security zones security-zone vpn  host-inbound-traffic system services all
+
+		set security zones security-zone lan interface ge-0/0/0
+		set security zones security-zone lan interface ge-0/0/0.0
+		set security zones security-zone lan interface ge-0/0/0.0 host-inbound-traffic protocols all
+		set security zones security-zone lan interface ge-0/0/0.0 host-inbound-traffic system services all
+		set security zones security-zone lan host-inbound-traffic protocols all
+		set security zones security-zone lan host-inbound-traffic system services all
+			
+		set security policy from-zone lan to-zone vpn policy lan-to-vpn set match source-add any
+		edit security policy from-zone lan to-zone vpn policy lan-to-vpn 
+		set match des-add any
+		set match application any
+		set then permit
+
+		edit security policies from-zone vpn to-zone lan
+		edit policy	vpn-to-lan
+		set match source-add any
+		set match des-add any
+		set match application any
+		set then permit
+
+		commit
+
+		show interface | display sets
+		show routing-option | display sets
+		show security zone
+
+	ipsec :
+		phase 1 :
+			set interface st0 unite 0 family init add ...
+			set routing-option static route .... next-hop st0.0
+			set security ike proposal ike-pr
+			ser authenrication-algo sha1
+			set encryption-algo 3des
+			set authenticate-method preshared
+			set dh-group group 5
+	
+			edit security ike policy ike-pol
+			set preshared-key ascii-text ...
+			set proposal ike-pr
+			set mode main
+
+			edit security ike gateway ike-gw
+			set ike-policy ike-pol
+			set add .... (front view ip public)
+			set local-identity inet ...(tunnel ip)
+			set version v1-only
+			set external-interface ge-0/0/0
+			exit
+
+		set security zones security-zone vpn interface st0.0
+		set security zones security-zone vpn interface st0.0
+		set security zones security-zone vpn interface st0.0 host-inbound-traffic protocols all
+		set security zones security-zone vpn interface st0.0 host-inbound-traffic system services all
+		set security zones security-zone vpn host-inbound-traffic protocols all
+		set security zones security-zone vpn host-inbound-traffic system services all
+
+		set security zones security-zone lan interface ge-0/0/0
+		set security zones security-zone lan interface ge-0/0/0.0
+		set security zones security-zone lan interface ge-0/0/0.0 host-inbound-traffic protocols all
+		set security zones security-zone lan interface ge-0/0/0.0 host-inbound-traffic system services all
+		set security zones security-zone lan host-inbound-traffic protocols all
+		set security zones security-zone lan host-inbound-traffic system services all
+
+		set security policy from-zone lan to-zone vpn policy lan-to-vpn set match source-add any
+		edit security policy from-zone lan to-zone vpn policy lan-to-vpn 
+		set match des-add any
+		set match application any
+		set then permit
+
+		edit security policies from-zone vpn to-zone lan
+		edit policy	vpn-to-lan
+		set match source-add any
+		set match des-add any
+		set match application any
+		set then permit
+
+		phase 2 :
+			edit security ipsec propsal ipsec-pr
+			set authentication-algo hmac-sha1-96
+			set encryption-algo 3des
+			set protocol esp
+
+			edit security ipsec policy ipsec-pol
+			set proposal ipsec-pr
+
+			edit security ipsec vpn ipsec-vpn
+			set ike ipsec-policy ipsec-pol
+			set ike gateway ike-gw
+			set established-tunnle immediately
+			set bind-interface st0.0
+			set security zones security-zone vpn interface st0.0 host-inbound-traffic protocols all
+			set security zones security-zone vpn interface st0.0 host-inbound-traffic system services all
+			
+			commit
+
+			show security ipsec | display set
+			show security policies | display ets
+			show security ike security-association
+
+	ha :
+		support.juniper.net\tools\srxha
+		reth(vrrp)
+		use fabric link and control link
+
+	web authentication :
+		under our interfaces must enble web-authentication
+		
+		set interface ge0/0/0 unit 0 family inet add ... web-authentication http
+		set access profile lan-group client user1 client-group
+		set access profile lan-group client user1 firewall-user password 123
+		
+		set access firewall-authentication pass-through default-profile lan-group
+		set access firewall-authentication pass-through http banner login login
+		set access firewall-authentication pass-through http banner success success
+		set access firewall-authentication pass-through http banner faild faild
+		
+		set access firewall-authentication web-authentication default-profile lan-group
+		set access firewall-authentication web-authentication banner success correct
+		
+		set security policy from-zone lan to-zone wan policy lan-wan match source-add any
+		set security policy from-zone lan to-zone wan policy lan-wan match des-add any
+		set security policy from-zone lan to-zone wan policy lan-wan match application any
+		set security policy from-zone lan to-zone wan policy lan-wan then permit firewall-authentication user-firewall access-profile lan-group
+		
+		set then permit firewall-authentication pass-through web-redirect
+		
+		show security firewall-authentication user

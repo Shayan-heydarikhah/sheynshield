@@ -1,0 +1,407 @@
+concept
+			cia
+				confidentiality
+					if x1 andx2 are talking just these 2 x could realize , no more no less
+					ensuring that information is accessible only to those authorized to have access
+
+					protection from unauthorized access and use
+					protecting data on systems, in transit,in process
+
+				integrity
+					if from x1 forward packet to x2  just see same packet not modified packets
+					Safeguarding the accuracy  and completeness of information and processing methods
+
+					Includes the detection of alterations that occurred in storage, transit, process, ...
+
+				availablity
+					if forward on time 1 recieved on time 2 not more 
+					Ensuring that authorized users have access to information and associated assets when required
+
+					acceptable level of performance
+					fauit clerance
+					prevention of data loss and
+					destruction
+					reliable backups, redundancy, ...
+
+				these 3 components must be cosnidered as base trust and secure connection
+
+			when need ipsec must used  mixed of many protocols
+				encryption layer
+					des (data encryption standard)
+					3des
+					aes (advance encryption standard)
+
+					**here we can set encryption layer but hackers could used decryption methods and crack our secure layers so need another layer like authentication
+
+				authentication layer
+					md5 (message digest)
+					sha (secure hash algorithem)
+						160
+						128
+						256
+						512
+
+					**these called as integrity**
+
+					after encryption we need a more secure layers like authentication to set valid and trusted users as reader
+					here we have some methods
+						presharedkey (just unique values between 2 side)
+						rsa (a private and public key between 2 side)
+
+						**base on method in authentication and integrity level (sha..) we mix data with this layers
+							from source to destination we encrypt like this and how  decrypt on reciever?
+								after decode by encryption method (preshared or rsa) and reverse integrity as sha160bit , we see simple data
+
+								to be sure about trusted data and non-manipulated data we do encryption and integrity again
+
+								*if were same value means trusted packet
+
+				deffie-hellman
+					dh-1 (760 bit)
+					dh-2 (1024 bit)
+					dh-5 (1500 bit)
+					...
+
+					on network we have key which has some key teeth must be same on both side
+
+					**package all above compnents inside one section
+
+				ipsec protocol
+					ah (authentication header)(just protect headers not more)
+						transport mode
+							ip (global)
+							ah header
+							tcp
+							data
+
+						tunnel mode
+							new ip header (external)
+							ah header
+							ip (internal)
+							tcp
+							data
+
+					esp (encapsulation security payload)(protect whole data, port , header..)
+						transport mode (main ip header and no new ip header)
+							ip (global ip)
+							esp header
+							tcp*
+							data*
+							esp trailer*
+							esp auth
+
+							*protect part
+								esp encrypt
+									esp trailer + data
+
+								esp authenticated
+									esp encrypt + esp header
+
+								**used protocol 50 
+
+						tunnel mode (change ip header to fake ip header and hide main ip header(main destination) inside it)
+							new ip header (external)
+							esp header
+							ip* (internal)
+							tcp*
+							data*
+							esp trailer*
+							esp auth
+
+							*protect part
+								esp encrypt
+									esp trailer + data + internal ip header
+
+								esp authenticated
+									esp encrypt + esp header
+
+								**used protocol 50 
+
+					esp+ah
+
+					ike (internet key exchnage)
+						v1
+							phase1 (tunnel creation or  control plane) (isakmp (internet security association and key management protocol) tuunel)
+								used single proposal for each connection
+
+								contain
+									ike policy negotiation
+										des , 3des ..
+										integrity
+
+									deffie-hellman groups
+									authentication
+
+								modes
+									main
+										initiator
+											mm1 (authentication)
+												sa (security association)
+												vid
+
+											mm3 (anti-reply)
+												nonce (used for sequence for ipsec as anti-reply)
+												ke
+												vid
+
+											mm5 (encryption)
+												id
+												auth
+												cert
+												cert req
+
+										reponder
+											mm2 (deffie-hellman groups)
+												sa
+												vid
+												
+											mm4 (create isakmp tunel)
+												nonce
+												ke
+												vid
+												cert
+												req
+
+											mm6 (encryption)
+												id
+												auth
+												cert
+
+										unencrypted and unauthenticated
+											negotiation crypto setting
+												mm 1 & 2
+
+											secret key exchange
+												mm3 & 4
+
+										encrypted but unauthenticated
+											prove identity
+												mm 5 & 6
+
+										--------------------------
+										initiator new state mm_wait_msg2
+											initiator sends encr/hash/dh ike policy details to create initial contact
+
+											initiator will wait at mm_wait_msg2 until it hears back from its peer
+
+										receiver new state mm_wait_msg3
+											if receiver has this peer in the crypto map, it looks to see if it has a matching ike policy and sends its agreed ike policy back
+											usually if the receiver stays at this state it means it doesn't have a return route back to the peer
+
+										initiator new state mm_wait_msg4
+											initiator sends a hash of its psk
+											initiator will stay at msg4 until it gets a psk back from its peer
+											if the receiver is missing a tunnel group or psk the initiator will stay at mm_wait_msg4
+
+										receiver new state mm_wait_msg5
+											receiver does not yet check if psk hashes match
+											if receiver has a tunnel-group and psk configured for this peer it will send the psk hash to the peer
+											if psks don't match, receiver will stay at mm_wait_msg5
+
+										initiator new state mm_wait_msg6 or mm_active
+											if psk keys match, initiator becomes mm_active and lets receiver know of match
+											if psk doesn't match, initiator stays at mm_wait_msg6
+
+										receiver new state mm_active
+											receiver checks if psks match, if so it becomes mm_active and lets mate know
+
+										phase1 complete
+
+									aggresive
+										am1
+											contain
+												mm 135
+												key exchange
+												authentication
+
+										am2
+											mm 246
+											behave like initiator
+
+										am3
+											hash values
+											authentication
+
+										initiator
+											isakmp header, sa, key, nonce, idii
+											isakmp header, hash 
+
+										responder
+											isakmp header, sa, key, nonce, idir, hash_r
+											ike sa established
+
+							phase2 (data forward or data plane)(same with ike-v2) (ipsec tunnel)
+								contain 
+									ipsec securty association exchange (sa exchange)
+										all approved items at above , mixed here and create tunnel to forward 
+
+								mode 
+									quick
+										qm1
+											peer
+
+										qm2
+											approving sa 
+
+										qm3
+											single way or unidirectional tunnel creation 
+											differences between this and isakmp 
+												isakmp is 2 way but this is one way
+
+							**session learning mechanism
+								detection on  requests and keepalive feature
+
+						v2 (faster and lighter than v1 (used 4 message))
+							phase1 (tunnel creation or  control plane) (isakmp tuunel)
+								used proposal repository for many connection
+									initiator
+										ike sa init request
+											vid
+											sa
+											ke
+											nounce
+
+									responder	
+										ike sa init response
+											vid
+											sa
+											ke
+											nounce
+
+									**merge negotiate crypto setting and secret key exchnage (unencrypted and unauthenticated)
+
+							phase2 (data forward or data plane) (same with ike-v1) (ipsec tunnel)
+								prove identity
+									initiator
+										ike auth request
+											id
+											auth
+											cert
+											sa
+											ts
+											nat 
+											spi
+
+									reponder
+										ike auth response
+											id
+											auth
+											cert
+											sa
+											ts
+											nat 
+											spi
+
+									**encrypted but unauthenticated
+
+							**features
+								eap
+									extensible authenticate protocol
+									help us to provide authenitication with certificate
+
+								lower bandwidth
+
+								nat-traversal
+
+								keepalive timers (built-in)
+
+							**simulate message
+								mm 1 to 4 will be on first message
+									exchange ikev2 sa initiator
+
+								mm 5 and 6 will be on second message
+									exchange ikev2 authentication	
+
+								request and response will be third message
+
+							**per conenction behavior
+								child sa
+									from one conenction we create many stable child conenction base on edsa signature
+										elliptic curve digital signature 
+						---------------------------------------------------------
+						ipsec concept ccnp
+							has 2 phase
+								phase 1 > management traffics
+									we must negotiate on this step
+										isakmp 
+											version 1 (ikev1) > tunnel get up with what status
+												has problem 
+													for each tunnel connection profile must set seperated values but in ikev2 we
+												
+												set group of values with proposal
+										
+											version 2 (ikev2) > data can transfer through the phase 1 (flex vpn use this) (ipsec)
+												more secure and faster on gdoi (group domain of interpretion (is faster and flexible))
+										
+												version 1 send 6 packet 
+												version 2 sends 4 packets
+												
+												assymetric authentication in verson 2
+
+								phase 2
+									in each version is same but firs phase in each version is different
+								
+								default type of tunnels on cisco is gre
+
+								int tunnel 0
+								keep alive 3 3 (3 time chck with first value, 3 seconds wait fith second parameter)
+
+								for site to site vpn must use ipsec
+								and for ra (remote access) vpn must use ssl-vpn
+
+				at the first steps we have isakmp tunnel then ipsec tunnel , inside this we have security association (sa) then inside sa we have spi , insied spi we have main mode or aggresive mode
+
+				on cisco
+					crypto isakmp policy 10
+					encryption aes
+					hash sha256
+					authentication pre-share
+					group 14
+					#create isakmp policy for phase1 negotiate
+
+
+					crypto isakmp key vpnuser address 10.0.0.2
+					#specify the pre-shared key and the remote peer address  
+					
+					crypto ipsec transform-set myset esp-aes esp-sha256-hmac
+					#create the phase 2 policy for ipsec negotiation
+
+					access-list 100 permit ip 192.168.101.0 0.0.0.255 192.168.102.0 0.0.0.255
+
+					crypto map mymap 10 ipsec-isakmp
+					set peer 10.0.0.2
+					set transform-set myset
+					match address 100
+
+					interface GigabitEthernet0/1
+					ip address 192.168.101.1 255.255.255.0
+
+					interface GigabitEthernet0/0
+					ip address 192.168.102.1 255.255.255.0
+					crypto map  mymap
+					------------------------------------------
+					crypto keyring preshare
+					pre-shared-keyi address 11.12.13.2 key secret
+					
+					crypto isakmp policy 1
+					encr 3des
+					authentication pre-share
+					group 5
+					crypto isakmp profile preshare
+					keyring preshare
+					match identity address 11.12.13.2 255.255.255.255
+					crypto ipsec transform-set aes-sha1 esp-aes esp-sha-hmac
+					mode tunnel
+					
+					crypto ipsec profile ipsec-preshare
+					set transform-set aes-sha1
+					set isakmp-profile preshare
+					
+					interface tunnel111
+					ip address 192.168.111.1 255.255.255.0
+					tunnel source 11.12.13.1
+					tunnel mode ipsec ipv4
+					tunnel destination 11.12.13.2
+					tunnel protection ipsec profile ipsec-preshare
+					
+					ip route 192.168.102.0 255.255.255.0 tunnel111

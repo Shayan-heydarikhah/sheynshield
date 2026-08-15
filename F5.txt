@@ -1,0 +1,545 @@
+F5
+start at 1996
+Can Use  In 2 Mode :
+    HardWare
+    SoftWare
+
+We Can't use  Hardware  And Software Together
+
+TMOS:
+    Traffic Management  Operartion System
+    event driven
+    real time dicision maker
+    it's like operating system
+
+LTM:
+    Local Traffic Manger
+    proxy traffic handling 
+    use for implement virtual servers and authentications, security profiles
+    it is basic module for implement another modules in big-ip company
+
+DNS :
+    formerly  global  traffic manager
+    similar security and load balancing features that LTM offers but in larger scale
+    traffics are distribute and secure in many name spaces
+
+APM :
+    Access Policy Manager
+    federation, sso, application access policies, and secure web tunneling
+
+    granula:
+        service oriented goals:
+            the composability of loosely-coupled services
+            the reusability of individual services in different contexts.
+
+    SAML :
+        Security Assertion Markup Language
+        created in 2005
+        target is convergence
+        change login style of users
+        is protocol works on port 9444
+        idp, sp, provide secure connectivity between applications and users on internet
+        in deep  we see sso (single sign on)
+        If you host your SP on F5 you can allows/denies user to access a particular SAML Attributes or LDAP attributes
+        per request policy allow user to access to a specific URI depending an LDAP/AD Attributes        
+
+    what is the alternatives?
+        OpenID (youtube, google, facebook)
+        OAuth  (facebook, google)
+        WS-Federation (active directory)
+
+SWG:
+    Secure Web Gateway Services
+    use with apm 
+    set policies to control access  and usage internet
+    we can set who can access which part
+    
+ASM:
+    Application Security Manager
+    its like web application firewall (waf)
+    allow us to tailor acceptable and expected application behavior on a per application basis 
+        Zero day, DoS
+
+    ASM fills the gap between traditional firewall and tailored granular application protection.
+
+AFM:
+    Advanced Firewall Manager
+    is designed to reduce the hardware and extra hops
+    required when ADC's are paired with traditional firewalls.
+    works in  layers 3 / 4 and protect our traffics to dc
+    if aggregate with asm can handle traffics in layer 3 -7
+
+what is adc?
+    application delivery controller
+    is a computer network device in a datacenter
+    part of an application delivery network
+    helps perform common tasks
+    web accelerators to remove load from the web servers themselves
+    place is in dmz
+    between the outer firewall or router and a web farm
+    provide load balancing
+    Global Server Load Balancing
+    anycast
+    active-active
+    active-passive
+    use many algorithms and  policies to distribute traffic
+    can handle packet headers  to transfer requests to specific servers
+    has own monitoring option to use high availability
+
+what is the differences  between cdn and adn?
+    they are same but 
+    have much in common, including performance benefits, on-demand pricing, security and availability.They also share many techniques, including TCP optimization, load balancing and cache
+
+    CDNs work by storing digital content that is often accessible in geographically distributed locations
+        If your website does not have a heavy performance / interactive application, CDN will be your best bet not only on performance but also on cost-effectiveness for your organization.
+    
+    ADN is a combination of features that provide program access, security, visibility and acceleration
+        If your website is constantly evolving or acting as an interactive terminal to web-based software, ADN is an ideal candidate.
+        
+        Remember that ADN is not yet a common term, so some CDN products may actually be DNA. Be careful and be sure to ask questions before making a decision
+
+FPGA :    
+    Field Programmable Gate Arrays
+    hardware  base scalability
+    are semiconductor devices that are based around a matrix of configurable logic blocks (CLBs)
+    This feature distinguishes FPGAs from Application Specific Integrated Circuits (ASICs)
+    one-time programmable (OTP)
+    FPGAs used to be selected for lower speed/complexity/volume designs in the past, today’s FPGAs easily push the 500 MHz performance barrier. With unprecedented logic density increases and a host of other features, such as embedded processors, DSP blocks, clocking, and high-speed serial at ever lower price points
+
+designed in two model:
+    single chassis
+    viprion modular
+    
+    each type has advantages in internal and collocated infrastructure
+    big ip systems:
+        compatible with cloud systems and next generation of f5 devices
+        next-generation F5 ADC platform
+        necessary flexibility and security for current and emerging applications.
+        TCO (total cost of ownership)
+           
+    viprion:
+        VIPRION platform is a professional application distribution controller (ADC) that you can change by 
+        adding or removing development modules without disturbing users or applications
+    
+    Instead of adding devices and segmenting apps, just add the power you need to the infrastructure. VIPRION provides you with the scalability you need to create a sustainable DNA strategy
+    application delivery controller (adc)
+
+    levels of certificates :    
+        101-201 > administrator
+        301-302 > specialist
+
+    local traffic manager task was optimize loadbalancing and distribute traffics to vips
+
+    traditional ltm vs adc newest version
+        adc :
+            redirection (on vendor base values and aseragent also use loadbalance)
+            health check monitor (1 hour interval check srv health)
+            geographical
+            loadbalancing
+            http compression (to reach content faster and manage bandwidth)
+            ram cache (in reply request from srvs use cache for 1 hour)
+
+    ntp : 10.2.2.123
+
+    version 13.1.0 is the best version for vm
+
+    192.168.1.245
+    user > root
+    password > default
+
+    web user > admin
+    web password > default
+
+    registerkey
+        evaluation information > downloads.f5.com\trial
+    activation method > manaul
+    dessier file > after enter register key we see hash
+    active.f5.com > eneter dessier cide on this section and generate license
+
+    tmos :
+        afm > advance firewall manager
+        ltm > local traffic manager
+        gtm > global traffic manager
+        asm > application security manager
+        apm > access policy manager
+        aam > application acceleration manager
+
+    provisioning mode
+        dedicate (all resources)
+        nomind (the minimum values use then other can use left over)
+        minimum (the minimum use and don't access use left over )
+
+    f5 > setup utility :
+        platform
+            ssh access
+            root & admin user password
+            hostname & management ip
+    
+        network
+            internal network config
+                vlan > define zones
+                intenal > web server
+                ip address
+                redundant > ha
+            
+            internal vlan config
+                vlan name
+                vlan tag id
+                vlan interface
+                tagging \ untagging (tag means trunk + untag means access)
+
+            external network config
+                vlan 
+                ha
+                ip address
+
+            external network config 
+                tag > untag
+                vlan interface
+                valn tagid
+                vlan name
+
+        ha
+            active passive
+            acitve active
+
+            ip self > an ip set on interface
+            floating ip > set for users and vip like shared ip (hsrp and vrrp)(clients gateway)
+
+            must be same version on ltm
+
+            f5 > system > ha > ha wizard
+            setp 1 :
+                    f5 > setup > runing config sync > ha utility & steps
+                    config sync
+                    high availability
+                        mirror
+                            failover
+                                network
+                                serial cable
+                                network and serial cable
+            step 2 :
+                internal vlan
+                    self ip 
+                    floating ip 
+                        port lockdown (means wich services can reachable on ip)
+                            all default (ospf + iquery (4353(tcp+udp) + snmp + rip + dns + ssh)
+                            allow none (block)
+                            allow 443 (https)
+
+            network failover
+                udp 1026
+
+                external ports : 443 <<<<<<<<<<<<<<<< f5 >>>>>>>>>>>>>>>>>>> internal ports (port lock down > allow default)
+
+            step 3 + 4 :
+                ntp server ip + dns name
+
+            step 5 :
+                ha link on config sync configuration
+                    set heartbeat interface ip address
+
+            step 6 :
+                failover unicast configuration
+                    if send heartbeat must sent on which link
+
+                    default :
+                        management interface & ha interface
+
+            step 7 :
+                mirroring configuration
+                    ha interface
+                        must see sync and same state
+
+            at the end of steps we have a one active device > finish but for passive device must make last step 
+                discover configured peer or suordinated devices (select next)
+
+                retrive device credential 
+                    device type > peer
+                        ip 
+                        username 
+                        password
+
+                device certificate matches
+                    must use on retrieve section
+
+                then use add device
+                    under f5 logo can see awaiting initial sync
+                        select this and goes to 
+                            device management > overview
+                                ltm1 > sync
+
+            failover and loadbalance
+                priority group activation
+                    fall back host
+                        irule
+
+                    server pools have a priority if set higher or lower than value get active or passive
+                    local traffic > pool > member
+                        loadbalancing > priority group
+                            active > less than available member
+                            default is 0
+                            after detectgoes to servers pool and change priority of servers
+                            in ip or priority group
+
+        local traffic object
+            node > ip servers
+                inject srv ip address
+
+            local traffic > node > node list
+                name 
+                address
+
+            poal member > node + services on node
+
+            local traffics > pool > pool list
+                name
+                ip address
+                services port
+
+            pool > pool member
+                local traffics > pool > pool list
+                    properties name
+                    member pool members
+
+            health monitor
+                each 5 seconds use http get to check servers health if 16 seconds didn't recieve reply ommite from pool
+
+        virtual server 
+            ip and services (published services)
+                local traffic > virtual servers > virtual server list
+                name
+                destination address > public ip
+                service port > 80
+                default pool > use maked pool
+                type
+
+            local traffic 
+                network map
+                    show us all task road map
+
+        load balancing methods
+            static
+            round robin (default pool algorithem)
+            ration base
+
+            methods :
+                dynamic
+                fastest
+                    dependes on server speed
+                    which have less load use more than others
+                    if need use this option must enable tp profile and layer 7 (fall back > least connection) > virtual server on outgoing interface to internet interface f5 
+                    if not set works like last method
+                    use distributed for no central mechanism
+
+                least ssession
+                    wich server has lower load and sessions 
+                    check persistant table 
+                    each user use a code for connection
+                    users code write on table
+                    after this use that section always
+                    coockie persistant has no compatiablity
+
+                weighted least session
+                    works on connection limits(same time requests)
+                    works on lower capacity session
+
+                observed
+                    layer 4 connections detect and use auto ration 
+                    higher ration have more priority
+
+                predective
+                    like observe but have interval ranking categorization
+                    if our connections changed set new ratio
+                    ratio have most priority
+
+            local traffic > pool > pool list
+                members 
+                    load balancing methods
+                    ratio
+                     (maximum value can use on nodes)
+
+                node > use total services for one ip (use aggregated connections and process)
+                member > use services and ip for range of ip (seperated connections and proces each one)
+
+        change pendig > on logo section we have sync attribute 
+            device management > device groups > sync type > auutomative
+
+        proxy modes :
+            full > seperated connection between each side
+            half > clients connected to servers directly (port maping / route / nat ...)
+
+            full :
+                >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>f5<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                client1 >>>>>>>>>>>>>>>>>tcp<<<<<<<<<<<<<< f5 >>>>>>>>>>>>>>>>>tcp<<<<<<<<<<<< client2
+            172.16.0.12                     172.16.0.111 (gap) 10.3.3.200                   10.3.3.20
+
+                                                    gap > prefilter
+                                                    use ssl offloading
+                                                    use dnat
+
+                SIP : client port 4000      >>>>>>>>>>>>>>>>>>>>> SIP client : 4000
+                DIP 1 : F5 port 80          >>>>>>>>>>>>>>>>>>>>> DIP server : 80
+
+                SIP : F5 port 80            <<<<<<<<<<<<<<<<<<<<< SIP server : 80
+                DIP 1 : client port 4000    <<<<<<<<<<<<<<<<<<<<< DIP client : 4000
+
+    monitors :
+        f5 knows the servers or nodes states use http in 5 seconds
+        before recieve ack from servers show us available state
+
+        monitroing categorization 
+        health monitor 
+        performance monitor 
+            use snmp and collect data 
+            use dynamic load balancing to distribute loads on servers
+
+        icmp sends to servers ip 
+            type monitors > address check
+            tcp connection and use 3wayhandshake also use finish at the end we have servicess check to server in random intervals
+
+        content check
+            http > check content
+
+        interactive check ftp
+        multiple command
+
+        local traffic > monitor 
+            have 14 roles on default values
+
+            configure monitor and http monitor > post man
+                send string :
+                    get /\r\n
+                    get /http/1.1\r\nhost10.3.3.10\r\nconnection:close\r\n
+
+                    webserver > recieve string
+                    maintrance > recieve disable string
+
+                    local traffic > pool > properties
+                        halth monitor
+
+                        profiles :
+                            check traffics controll on virtual servers
+                            standards and behaviors on layer 7
+                            have many traffic types on data
+
+                        dependencies
+                            type ssl
+                                authentication > security radius\ldap
+                                protocol > layer 4 (tcp\udp)
+                                persistance > sessions (coockies)
+                                content
+                                services > layer 7
+
+
+
+    vios version 5 > tos
+
+    profiles :
+        local traffic > profiles
+            protocol > tcp
+            name > tcp_tos_5_prof
+            parent profile > tcp
+            security and quality of services
+                ip tos specify 5 (default is 0)
+
+        local traffic > virtual server
+            properties
+                prptocol > tcp
+                protocol profile
+                    client
+                        tcp
+                    server
+                        use client profile
+
+                tos > dscp
+
+        persistance profile > sessions (track all traffics then add to persistance table)
+            have time out
+            bypass loadbalancing methods
+
+            persistance profile type > coockies > like http
+
+            source address affinity persistance (simple) (works on source)
+            destination address affinity persistance (sticky)
+
+            microsoft remote desktop protocol persistance (rdp)
+
+            ssl > based on session
+            sip
+
+            local traffic > profile > persistance > src address
+                properties
+                    name
+                    partition path
+                    persistance type
+                    mirrror persistance > ha(mirror)
+                    timeout 180 seconds
+
+            local traffic > virtual server > virtual server list
+                resources
+                    loadbalance
+                        default persistance profile
+
+
+
+    coockies
+        poolname
+            pool member (encoded)
+        rewrite (server send blank to ltm)
+            blank coockie
+            mark special coockie
+        passive
+            specoa; cppclies
+            ltm lets it through....
+        with coockies can transfer and make connections
+
+        insert mode
+            in first phase works on full proxy mode
+            in phase 2 transfer server coockie to client
+
+            dependes on session continue transfering
+
+
+            local traffic 
+                virtual server
+                properties > http profile > http
+                resources 
+                    default persistance > profile name
+                    fall back persistance 
+                        sip persist
+                        fat client
+                profiles
+                    persistance
+                        persistance  type
+                            coockie
+                                expiration
+
+    one connection profile
+        client 1 send 3way handshake to srv1 then sessions transfer to ltm after this ltm send requests to server
+        if have client number 2 we have same steps 
+        if have 10k request what happend?
+
+        f5 make one-connection 
+            on each srv we have http keep alive session and low load 
+
+        use connection rease pool and don't override loadbalancing methods
+
+        local traffic > profile > other > one connect
+            parent profile > one connect
+                maxsize 10k
+                max age 24h
+                max rease 1000 (each connection handle how many connection)
+
+        local traffic > virtual server > accelaration
+            one connect profile
+
+        statics > module statics > local traffic
+            statics type > profile summary
+                oneconnect (view)
+
+    secure nat
+        local traffic > virtual server > properties
+            configure source address translation
+                actmp (floating ip)
+                src nat

@@ -1,0 +1,1526 @@
+ISE
+	common :
+		ise version 2 support radius and tacacs+
+		earlier versions just use radius
+		if need tacacs+ usage in network must use cisco acs
+
+		we can set standalone or cluster mode for ise
+			for cluster must set fqdn name and be reachable
+
+		we can use secure network servers to install ise on them these servers are cisco exclusive 3500-3600
+		ise support cold vmotion
+		need vmfs disk
+		has iso and ovf
+		need 10 gig ethernet
+		in installations must set os type on redhat enterprise version 7
+		4 core, 8 gig ram, 200 gig hdd
+		on 15k hdd rpm we have 50 m write and 300 m read
+
+		on ise cli :
+			show version
+			show application status ise
+			application configure ise ...
+			application start ise
+
+			most important application is application server (must be on running)
+
+		plugine use need active flash on chrome
+
+		license :
+			ise > administration 
+				license
+					license method :
+						transparent (smart call home)
+						proxy
+						direct (unique device identifier)
+							on primary and secondary has a one license
+
+					on smart license we have tokens
+
+					base
+						permanent license
+						aaa + dot1x
+
+					plus
+						profiling
+						1,3,5 years license
+						need base license
+
+					appex
+						posture
+						1,3,5 years license
+						need base license
+
+					device administration
+						permanent license
+						tacacs+
+						need base license
+
+					mobility
+						give vpn access on posture, profiling, tacacs+
+						1,3,5 years license
+						need base license
+
+					mobility upgrade
+						give wireless access on posture, profiling, tacacs+
+						permanent license
+
+				ise pic (ppassive identity service) > collect active directory logs to ise
+
+				setting
+					transport gateway (like linux)
+						can use a gateway on another virtaul machine to access cisco
+
+		we can set our network persona with ise on psn
+
+				persona : rules 		
+				pan : policy administartion node 														2
+				psn : policy service node 																50
+				mnt : monitoring and troubleshooting 													2
+				pxgrid : a platform that secure all devices and multiplexer (platform exchange grid)
+
+			must set primary and secondary on ise if lost a primary device we can't set preemt must do it on manual
+
+			ise > administration
+				deployement 
+					register
+					failover pan
+
+				for register ise2 on ise1 must add their certificates to each other
+				don't need fqdn
+				we want make ise2 on primary must set ise2 on promote to primary (ise services get restart)
+
+				we can set on switch a dns record on local db :
+					ip host .... (ise2 ip address)
+
+		accounting > log the commands
+		authorization > access level
+		authentication > who are u
+
+		device access > access device to config or ... (privilege level)
+		network access > access to port and servicess in our networks ....
+			wire
+			wireless
+			vpn
+	
+		supplicant > a user who wants access
+		aaa client > a device which connect to ise server and wants make connection
+
+		tacacs+ :
+			cisco exclusive
+			tcp 49
+			all packets encrypt
+			we have limited encryption method (extensible authentication protocol (eap))
+			encryption entire payload
+			use pap and chap
+	
+			messages in tacacs+ :
+				authentication :
+					start > authentication request
+					coontinue > username and passwords
+					reply > accept, reject, error, coontinue (need more informatiion)
+	
+				authorization :
+					request > shell access
+					response > fail, pass add (add these to another users parameters), pass repl (replace these with last parameters), follow (coontinue authentication in this step sends to another 	server), error	
+	
+				accounting :
+					request > start, stop, coontinue (watchdog)
+					response > success, error, follow
+	
+		radius :
+			standard protocol
+			in cisco use  1645 + 1646 udp
+			in gobal use 1812 + 1813 udp
+			no authorization packets (use vendor specification attribute)
+			use eap and dot1x
+			we have limitation in authentication
+			just use network access
+			coa (change of authorization) > posture + agent
+			only encrypt authentication packets (username and passwords)
+			whole packets have payload
+	
+			messages in radius :
+				authentication :
+					access-request, access-accept, access-reject, access-challenge
+	
+				accounting :
+					request, response
+	
+		we have authentication methods in radius :
+			eap tls (need client and server certs)
+			peap
+			eap ttls
+			eap fast
+			eap md5 (ip phone)
+			eapol (eap over lan)
+
+			eap has modes :
+				native 
+					a header include credential
+				
+				tunnel
+					a internal header include credential and external header contains tls
+
+			ise > operation > live logs
+			we can set many actions on coa (force users to login again)
+
+		policies > roles
+			we have if (conditions) then (results) in policies
+	
+		administration > admin access (password policy)
+	
+		administration > identity source sequence (set source for authentication username and password check)
+	
+		in ise bydefault radius is enable and tacacs+ is disable
+		administration > deployement (edit ise)
+			enable device admin service (tacacs+ get enable)
+
+		ise > workcenter > device admin > network resource (define users)
+	
+		ise > administration > network resource > network devices (we can make groups and define devices to ise)
+			better make categories in ise
+	
+		ise > administration > network devices group (location and device type)
+	
+		policy sets > mixed up the results and conditions
+			default role for connectivity
+	
+		better set ntp at first login
+	
+		ise > workcenter > device admin policy sets (from which location connect to ise)
+
+		update posture db ise :
+			administration > posture > update
+
+	client provisioning > when we don't have posture on system should run this for unknown clients, give them security updates :
+		has the clients machines enough security?
+		authentication is not enough must check more items to give network access
+		if don't have the necessary qualifications must redirect to dacls and limited access levels
+
+		after authentication we must check security ellement on clients machines with posture
+		then give a suitable authorization access level
+
+		posture levels :
+			unknown > redirect to client provisioning (don't have tools)
+			no compliance > redirect to client provisioning (has tools with no updates)
+			compliance
+
+		ise > administration 
+			network resource > network devices
+			identity > users
+			identity source sequence
+			external identity source
+
+		ise  > policy 
+			results
+				authentication
+					allowed protocol
+						peap
+
+				authorization
+					dacl
+						unknown
+							permit access to ise and dns and ad
+
+						no compliance
+							permit to internet only
+
+						compliance		
+							permit any
+
+					profile
+						unknown
+							web redirection
+								client provisioning
+								acl (webauth-redirect)
+								value (client provisioning portal)(default)
+
+						no compliance
+							web redirection
+							client provisioning
+							acl (webauth-redirect)
+							value (client provisioning portal)(default)
+
+						compliance
+							no redirection
+
+				client provisioning 
+					define resources
+					agent resources from local disk (cisco provided packets)
+					nac agent or annyconnect posturre profile (anny connect)
+						remediation time out
+						discover host (ise ip)
+						server name rule (*)
+					anny connect config (just ise)
+
+				posture 
+					set requirement
+
+			condition
+				posture
+					create compound condition for posture
+
+			authentication
+				nas port type > ethernet
+				service type > framed
+				user db > rayka user db
+
+			authorization
+				compliance
+					external group > domain users
+					posture status > compliance
+					permit access
+
+				no compliance (means compliance)
+					external group > domain users
+					posture status > no compliance
+					set authorization profile in result
+
+				unknown (means compliance)
+					external group > domain users
+					posture status > unknown
+					set authorization profile in result
+
+			client provisioning 
+				if unknown user send traffics what should we do ?
+				also we can set byod here 
+
+			posture
+
+		ise > workcenter > posture > client provisioning
+			resource
+				netway nac (define certs)
+				any connect configs
+
+					on users config must set these :
+						on machine and user must set which files have use certs and where is the cert
+							in credential set smart card or certificate
+							checked last option tls
+
+						security level > enable port exception > allow traffic before authentication (with this give access to unknown clients to use certs and download them from ca servre)
+
+			better sync the certs 
+				ise > administration > certificate 
+					system ca
+					trusted ca
+
+	bring your own device (byod) > after authentication with ise, client redirect to essential installations (updates) :
+		ise > administration
+			device portal manager
+				black list portal
+				byod portal
+				mobile device management portal
+				client provisioning 
+
+			guest portal 
+				enable allow guest to register devices
+				disable automatically register guest devices
+
+				byod setting 
+					enable
+						allow employee
+						dispay deviice
+				
+				device compliance setting
+					posture
+
+		ise > administration 
+			network resource > network devices
+			identity > users
+			external identity source
+			identity source sequence
+			group
+				endpoint identity group
+					blacklist
+			my devices (copy linnk here)
+				select the employees users and say lost my devices
+
+		ise > policy
+			results
+				authorization
+					profile
+						waiting byod
+							web redirection
+							acl > webauth-redirect
+							value > sponsored portal
+
+						blackhole wired access
+							at the end of page we have setting ;
+								advance attribute setting
+									redirect acl in part two must be > webauth-redirect
+
+						permit access
+							dacl ...
+					dacl
+
+				client provisioning
+					resource
+						native supplicant profile
+							wired profile
+								allowed protocol peap
+								authentication mode > user
+								disabe fast reconnect
+
+			authentication
+				mab policy (setting > if not found user > continue)
+					allowed protocol default network access
+					nas port > ethernet + wireless
+					service type > call checked
+					internal endpoint
+
+			authorization
+				waiting byod
+					wired mab
+					set the authorization profile on result authorization profile
+
+				byod register
+					external group > domain users
+					byod register (use eap tls \ peap) > yes
+					network access eatp tunnel > peap
+					set the authorization profile on result authorization profile
+
+				wired black list
+					nas port type > ethernet
+					set the authorization profile on result authorization profile
+
+			client provisioning
+				add profile on new roles
+				external group > domain users
+				set the clients provisioning profile on result client provisioning profile
+
+	change of authorization (coa) > ise generate and analyze systems
+
+	mobile device management (mdm)
+
+	mac authentication bypass (mab) :
+		we need mab for ip phone + printers + ip camera
+		must disable dot1x authentication on these device
+
+		must send number 6 attribute on these switch ports
+		and must set on rule callchecked
+
+		must set mab command on ports and set priority and order of mab and dot1x
+
+		ise > administration
+			identity 
+				endpoint (find users here)(better add mac on manual mode)
+			identity source sequence > set endpoint users on higher level
+
+
+		ise > policy
+			result
+				authentication
+					protocols 
+						process host lookup
+						allow pap ascii
+			authentication
+				protocol (default network access)
+				service type > call cheked
+				nas port type > ethernet
+
+				*set default mab role on all network users
+
+	trustsec > manage every thing in central mode with tagging and matrix :
+		access controll \ firewall \ acl
+		identity based
+		centrilized and scalable
+
+		we have trustsec domain 
+
+		add sg tag to users traffics when authorize
+			security group tag
+			802.1ae
+			advertise in domain
+			sgt is on cmd (vendor specific)
+
+		mac sec is securing trustsec option that secure network link by link (encryption + integrity)
+			switch to host
+				mac sec key aggregation (mka)
+
+			switch to switch
+				security associate protocol (sap)
+
+		apply security group acl on firewall to make connection with trustsec domain
+
+		if our device can't realize trustsec tags and packets can use sxp
+
+		sxp is sgt exchange protocol 
+			tcp 64999
+
+		on ingress add tags
+		we can make mapping and add tags on interface
+
+		must make authentication for devices which add to trustsec domain, either endpoint devices or firewalls with sgacl
+
+	profiling > on vendor or versions can set many roles :
+		categories the device types by ise
+		each psn has own profiling
+
+		collect data for profiling with probs that recieve from switches (ise > administration > deployement > profiling configuration )
+
+		better use lld an cdp for profiling concept
+
+		switch :
+			device-sensor filter-list cdp list cdplist
+			tlv name device-name
+			tlv name address-type
+			tlv name capability-type
+			tlv name platform-type
+
+			device-sensor filter-list lld list lldplist
+			tlv name system-name
+			tlv name system-description
+
+			device-sensor filter-list dhcp list dhcplist
+			option name host-name
+			option name default-ip-ttl
+			option name requested-address
+			option name parameter-request-list
+			option name class-identifier
+			option name client-identifier
+
+			device-sensor filter-spec dhcp include dhcplist
+			device-sensor filter-spec lldp include lldplist
+			device-sensor filter-spec cdp include cdplist
+
+			device-sensor accounting
+			device-sensor notify all-changes
+
+			no macro auto monitor
+			access-session template monitor (send to ise our accounts and prevent to make dulicate)
+
+			show device-sensor cache all
+
+			tlv means type lentgh value
+
+
+		ise > workcenter 
+			profiler 
+			endpoint classification
+			manual scans
+				set snmp traps and query enable 
+				better define devices on ise with snmp
+
+			feeds
+				ise profile update
+
+			profile policies
+			device administration 
+				profile
+					tacacs+ profile 
+						shell profile (privilege level)
+							command sets (which commands can execute)
+							allowed protocol (pap ascii (telnet and ssh))
+			node config
+				deployement
+					profiling config
+						probe options
+
+		ise > administration >
+			deployement
+				ise2v2 
+					enable profiling service
+					profiling configuration
+					snmp trap 162
+					netflow 9996
+
+			setting
+				profiling
+					global setting
+
+			group
+				endpoint identity group
+					profiled devices are here
+
+		ise > policy
+			profiling
+				
+			conditions
+				profiling
+					association coa type (after connection to ise on which prameters must change accessability)
+						global setting
+							 reauth
+							 port bounc (port shut - no shut)
+							 no coa
+
+ 	some switch config :
+		aaa new model
+		aaa authentication login vty group tacacs+ local 
+			(login means device access we can set enable, vty is a name for our profile in aaa we have default value if change to another value most define it to all parts)
+		aaa authentication enable vty group tacacs+ local
+		aaa authorization exec
+		aaa authorization command
+		aaa authorization network
+		aaa authorization config-commands
+		aaa accounting exec
+		aaa accounting command
+		aaa accounting network
+
+		username shayan secret 123
+		enable secret 123
+
+		line vty 0 15
+		login authentication vty
+
+		debug aaa authorization
+		debug aaa authentication
+		debug aaa accounting
+		debug aaa tacacs+
+
+		tacacs-server host ..... key rayka
+
+		test aaa group tacacs+ username+passwords legacy
+
+	in authentication > result need 2 parameters :
+		protocol and users datastore
+		we can set them through following steps
+
+		ise > policy > results 
+			authentication > allowed protocol 
+				add new
+	
+		ise > administration > identity source sequence
+			enable trust as if the user was not found and procees to the next store in the sequence
+
+	in tacacs+ authorization we have 2 privilege leve in default value 15 and 1
+
+	ise > workcenter : 
+		identity 
+			users \ device administration (define users and device)
+			identity group (define groups)
+
+		network devices > network resource > network devices group (users not in specific group after create groupps must join to groups)
+		conditions > authorization (simple and compound)
+		results > tacacs profile
+		device admin policy sets
+
+		on router :
+			aaa authorization exec EXEC1 group tacacs+ local (exec means shell access)
+			aaa authorization exec EXEC15 group tacacs+ local
+			line vty 0 15
+			authorization exec EXEC1
+			authorization exec EXEC15
+
+		for command limitation :
+			ise > workcenter > device admin > policy results > command sets
+			ise > workcenter > device admin policy sets (apply our policies on roles)
+
+		on router :
+			aaa authorization command 1 com1 group tacacs+ local if-authenticate (number 1 means privilege level)
+			aaa authorization command 15 com15 group tacacs+ local if-authenticate
+
+			aaa authorization config-commands (each commands in shell)
+
+			aaa accounting exec 1 EXEC1 start-stop group tacacs+
+			aaa accounting command 1 com1 start-stop group tacacs+
+			aaa accounting exec 15 EXEC15 start-stop group tacacs+
+			aaa accounting command 15 com15 start-stop group tacacs+
+
+			line vty 0 15
+			authorization command 1 com1
+			authorization command 15 com15
+			authorization exec 1 EXEC1
+			authorization exec 15 EXEC15
+
+			accounting command 1 com1
+			accounting command 15 com15
+			accounting exec 1 EXEC1
+			accounting exec 15 EXEC15
+
+	join active directory to ise :
+		ise > administration > external identity source
+			groups > domain users and computers
+
+		ise > policy > authorization
+			network access > raykaad > external group > domain users
+
+	certificates :
+		ise > administration certificates (better use encode base64)
+			trsted
+				enable all trusted certs
+
+				trust for authentication with ise
+				trust for authentication and syslog
+
+			cert signing request (csr) (better use eap authenticate for our certs)(pxgrid is not compatiable)
+				request to ca server on web 
+				san + cn is important
+				uncheced the allow wild card
+				multiuse (admin and eap authentication) in binding
+
+	all configs on switch :
+		ip domain-name x.ir
+		crypto key gen rsa mod 4098
+		ip http server
+		ip http source-server (enable web authentication)
+		
+		aaa new model
+		aaa authentication dot1x default group radius
+		aaa authorization network default group radius
+		aaa accounting dot1x default start-stop group radius
+
+		usename shayan secret 123
+
+		radius-server host ... auth-port 1812 acct-port 1813 test username felani key felan (in many intervals test the connections wiyh user)
+		radius-server dead-critia time5 times 5 (test interval times)
+
+		radius server ise1
+		address ipv4 ....
+		key cisco123
+
+		radius server ise2
+		address ipv4 ...
+		key cisco123
+
+		aaa group server radius ise
+		server name ise1
+		server name ise2 
+
+		aaa server radius dynamic-authorize (coa)
+
+		client .... serverkey ... (after authentication and login if lost every thing what should we do? web authentication + force user to login again)
+
+		radius-server vsa send authentication
+		radius-server vsa send accounting
+			
+		(transfer cisco attributes)
+
+		radius-server attribute 6 on-for-login-auth
+		radius-server attribute 8 include-in-access-request
+		radius-server attribute 25 access-request include
+
+		ip radius source-interface fa 0/0
+
+		snmp-server trap-source .....
+		snmp-server source-interface information ...
+		snmp-server communnity ... r0
+		snmp-server enable traps mac-notification change move threshold
+		snmp-server enable traps snap linked-down linked-up
+		snmp-server host enable version 2c comm mac-notification
+
+		snmp trap mac-notification change removed
+		snmp trap mac-notification change added
+
+		mac address-table notification change
+		mac address-table notification mac-move
+
+
+		int gig0/0
+		ip adhcp snooping trust
+		ip dhcp snooping
+		ip dhcp snooping vlan ....
+
+		ip access-list extended acl-allow
+		permit ip any any
+
+		ip access-list extended acl-webauth-redirect
+		deny udp any nay eq 53
+		permit tcp any any eq 80
+		permit tcp any any eq 443
+
+		ip access-list extended acl-agent-redirect
+		deny udp any nay eq 53
+		permit tcp any any eq 80
+
+		dot1x system-auth-control (globaly enable)
+
+		ip device tracking (attribute 8 use this + update ip address update)
+
+		loging monitor informational
+		loging origin-id ip
+		loging source-interface
+		loging host ... transport udp port 20514
+		epm loging
+
+		interface range fas 0/0-3
+		switchport
+		switchport host
+		authentication priority dot1x mab
+		authentication order dot1x mab
+
+			*book > flexiable authentication order priority and faild authentication
+
+		authentication event fail action next-method
+		authentication event server-dead action reinitialize vlan ...
+		authentication event server-dead action authorize voice
+		authentication host-mode multi-auth (piggy pack)
+		authentication host-mode multi-domain (use when have ip phones)
+		authentication violation restirict
+		authentication open
+		
+		mab
+
+		dot1x pae authenticator (deploy on port dot1x)
+		dot1x timeout tx-period 10 (default is 3 minuts)
+		dot1x max-reauth-req 3 (default is 2 times try)
+
+		authentication port-control auto (authentication will be on port)
+
+		better set our cisco devices on latest os version or set on ios version > 15.02st5
+
+		show authentication session interface ...
+
+		debug authentication all
+		debug aaa authentication
+		debug radius
+
+	modes for client monitorng and restriction :
+		monitor
+			int gig0/0
+			authentication host-mode multi-auth
+			authentication open
+			mab
+			dot1x pae authenticator
+
+		low impact
+			int gig0/0
+			authentication host-mode multi-auth
+			ip access-group pre-auth in (just in direction)
+			authentication open
+			mab
+			dot1x pae authenticator
+
+		close
+			after 2 steps at above must enable this step
+
+	eap methods to authenticate :
+		eap tls (transport layer security) :
+			from windows xp was working, native 
+			client and server must be on same cert or authenticate each other with certs
+			has alot overhead
+			high security
+			rfc 2716
+			verification on oscp
+			different tunneling because use cert and pac for tunnels
+
+			need log off
+
+			protected eap or peap and eap ttls designed for easier way
+			these protocols just need server side certificate
+			eap tls need eap base 
+			peap use mschap v2 and token
+			eap ttls use attributes and maybe use eap base protocols
+
+			these are outer tunneling or encryption but we have internal encryption
+
+			clients use servers public key to encrypt data and create secure tunnel
+
+			certificates :
+				ise > administration certificates 
+					trsted
+						enable all trusted certs
+		
+					cert signing request (csr) 
+						request to ca server on web 
+						san + cn is important
+						uncheced the allow wild card
+						multiuse (admin and eap authentication) in binding
+
+			in ca server we should edit a template on the user certs
+				edit ca serrver and subject name
+				distinguished name and upn must enable 
+				on extention tab > srver authentication (add)
+				on security > auto enrollment and enroll must enable for all users
+				make a copy from workstation authentication
+				in group policy enable certs and auto enroll (for users and computers)
+					windows setting > security setting > public key policies (user and computer)
+						certificate service (enable) (enroll)
+						certificate client (enable check boxes at above)	
+
+			ise > administration 
+				network resource > network devices
+				identity > users
+				external identity source > certificate authentication profile (add new > use identity from (subject common name))
+				identity source sequence > certificate base authentication (add new  > select cert auth profile)
+
+			ise > policy > 
+				results
+					authentication  > allowed protocol
+						eap tls
+						mschap v1 + v2
+
+					authorization > dacl and profile authorize
+
+				conditions 
+					authentication > compound
+						service type > frame (dot1x) \ call cheked (mac)
+						nas port type > ethernet
+
+				authentication (write roles)
+
+				authorization
+					external group > domain users
+					nas port type > ethernet
+					service type > framed
+					eap tunnel > peap
+					after conditions must set results with profiles and dacl in result > authentication
+		
+					----------------------
+					machine in active directory
+						service type > framed
+						nas port > ethernet
+						external group > domain computers
+
+						set results on dacl (access list with many commands)
+
+					----------------------
+					user and machine in active directory
+						service type > framed
+						nas port > ethernet
+						external group > domain users
+						was machine authenticated > true (means network access)
+
+						set results on dacl (access list with many commands)
+						
+		eap fast :
+			don't need log off with eap fast chaning
+			use pac files (protected access credential) that has symetric
+			cisco exclusive
+			don't need server side certs
+			any connect use dtls udp 510 
+
+			must install agent anyconnect on clients
+
+			anny connect use 
+				pre deploye package > client os
+				web deploye package > ise server
+
+			network adaptor manager (nam) module replace with windows network manager and handle dot1x
+				profile editor (connection details)
+				key deploy (make connection)
+
+			must create our settings then export it (save as) on configure.xml
+				c:\program data \ appdata \ cisco \ anyconnect \ nam \ new config file
+
+			must disable windows dot1x
+
+			eap chaning use client authentication and users authentication in seperately parameters
+
+			for eap chaning must set these values on anyconnect :
+				disable validate and fast reconnect
+				disable eap gtc
+				enable ifpac and pac
+				enable siging on
+				dart
+				lockdown
+				start before login
+				nam (network access manager)
+				profile editor
+
+			ise > administration 
+				network resource > network devices
+				identity > users
+				identity source sequence
+				external identity source
+
+			ise > policy
+				result
+					authentication > allowed protocol
+						eap fast 
+						mschap v2
+
+						allow eap gtc
+						allow password change
+						allow anonymous inbound pac provisioning
+						allow machine authentication
+						eanble stateless session rescan (with this don't need login or logoff)
+						enable eap chaning
+
+					userdb
+
+					authorization 
+						must change values
+ 
+				conditions
+					authentication > compound
+						service type > frame (dot1x) \ call cheked (mac)
+						nas port type > ethernet
+
+					authorization 
+						eap chaning :
+							external group > domain computers \ domain users
+
+							network access 
+								eap authentication > mschap v2
+								eap tunnel > eap fast
+								eap chaning > users and machine
+	
+							network access
+								eap tunnel > eap fast
+								eap chaning > no chaning
+	
+							network access
+								eap authentication > mschap v2
+								eap chaning > users succcess and machine failed \ users failed and machine success
+								eap tunnel > eap fast
+
+				authentication
+					authentication method + user data base definition
+
+				authorization
+					external group > domain users
+					nas port type > ethernet
+					service type > framed
+
+					for eap chaing must write new roles
+
+			eap fast and posture on ise
+				policy > 
+					results
+						authentication
+							allowed protocol
+								eap fast
+		
+						authorization
+							dacl
+								admin\user unknown
+									permit access to ise and dns and ad
+		
+								admin\user no compliance
+									permit to internet only
+		
+								admin\user compliance		
+									permit any
+		
+							profile
+								admin\user unknown
+									web redirection
+										client provisioning
+										acl (webauth-redirect)
+										value (client provisioning portal)(default)
+		
+								admin\user no compliance
+									web redirection
+									client provisioning
+									acl (webauth-redirect)
+									value (client provisioning portal)(default)
+		
+								admin\user compliance
+									no redirection
+		
+					authentication
+						nas port type > ethernet
+						service type > framed
+						user db > rayka user db
+						network access > eap tunnel > eap fast
+						network access > eap authentication > eap tls
+		
+					authorization
+						admin\user compliance
+							external group > domain users \ ad
+							posture status > compliance
+							eap tunnel > eap fast
+							eap chaining result > user and machine both	succcess
+							permit access
+		
+						admin\user no compliance (means compliance)
+							external group > domain users
+							posture status > no compliance
+							eap tunnel > eap fast
+							set authorization profile in result
+		
+						admin\user unknown
+							external group > domain users
+							posture status > unknown
+							eap tunnel > eap fast
+							network access > use case > guest flow (cpp)
+							network access > authentication status > unknown user (cwa)
+							set authorization profile in result
+		
+					on windows 8 and higher versions we have problem to machine accessability on using credential
+						regedit on cmd
+							hkey-localmachine > system > currnet controll set > controll > lsa
+								must create a key
+									lsallowreturningnenecryptedsecrets
+										dword > 1
+
+					if use tls for inner method can solve this automatically but in mschapv2 has problem
+						if use tls must disable allow anonymous inbound pac provisioning on
+							ise > policy > result > authenrication policy > allowed protocol 
+		
+				ise > workcenter > posture
+					policy
+						aggregate conditions and results together
+						setting
+							set remidiation time
+
+				context visibility > endpoint visibility (deploy automatic client checing and apply many roles)
+		
+		peap authentication :
+			need log off
+
+			ise > administration 
+				network resource > network devices
+				identity > users
+				identity > groups
+					internal users  (ip phone groups)
+
+					for ip phones device id must goes to this way on cisco phones ;
+						cisco phones > security configuration 
+							802.1x authentication (enable)
+							eap md5 passwordset
+
+				identity source sequence
+				external identity source 
+					set groups here 
+					certificate authenticate profile
+						create a profile to check users certificates
+							set identity store
+							use identity from 
+								any subject (ca srv+ ad srv)
+								subject name
+
+			ise > policy > 
+				results
+					authentication  > allowed protocol
+						peap (external)
+						mschap v2 (inside or internal)
+						eap gtc (token \ user pass)
+						eap tls
+						eap md5 (ip phones)
+
+					authorization > dacl and profile authorize
+						in profiles when we assign dacl to profile can set voice domain permission for ip phones
+
+				conditions 
+					authentication > compound
+						service type > frame (dot1x) \ call cheked (mac)
+						nas port type > ethernet
+
+				authentication
+					network access > eap tunnel > peap
+					use > user data base
+
+				authorization
+					external group > domain users
+					nas port type > ethernet
+					service type > framed
+					eap tunnel > peap
+					after conditions must set results with profiles and dacl in result > authentication
+
+					----------------------
+					machine in active directory
+						service type > framed
+						nas port > ethernet
+						external group > domain computers
+
+						set results on dacl (access list with many commands)
+
+					----------------------
+					user and machine in active directory
+						service type > framed
+						nas port > ethernet
+						external group > domain users
+						was machine authenticated > true (means network access)
+
+						set results on dacl (access list with many commands)
+
+		eap ttls :
+			ise > administration 
+				network resource > network devices
+				identity > users
+				identity source sequence
+				external identity source
+
+			ise > policy > 
+				results
+					authentication  > allowed protocol
+						eap ttls (external) (enable all checked boxes)
+						mschap v2 (inside or internal)
+
+					authorization > dacl and profile authorize
+
+				conditions 
+					authentication > compound
+						service type > frame (dot1x) \ call cheked (mac)
+						nas port type > ethernet
+
+				authentication (write roles)
+
+				authorization
+					external group > domain users
+					nas port type > ethernet
+					service type > framed
+					eap tunnel > peap
+					after conditions must set results with profiles and dacl in result > authentication
+
+	web base authentication  :
+		if users send to devices web traffic redirect them to ise login page
+		authentication triggered by ise
+
+		switch :
+			aaa server radius dynamic-authorize 
+			client ... server-key ...
+
+		ise > administration
+			identity 
+				endpoint
+
+			identity source sequence > set endpoint users on higher level
+
+		ise > policy
+			results
+				authorization
+					dacl
+						1 :
+							permit ip any any
+						2 :
+							permit ip any any
+
+						better set dns server and ise and ad ip address
+
+					profile :
+						authenticated	
+							web redirection 
+								centrilized web auth
+								value :default (ise)
+								acl name (switch acl name > acl-webauth-redirect)
+
+						waiting
+							web redirection 
+								centrilized web auth
+								value :default (ise)
+								acl name (switch acl name > acl-webauth-redirect)
+
+			authentication
+				protocol (default network access)
+				nas port type > ethernet
+				identity source > internal endpoint > if not found on coontinue
+
+			authorization
+				roles :
+					authenticated 	
+						external group > domain users 
+						network access > use case > guest flow (cpp)
+						network access > authentication status > unknown user (cwa)
+						set profiles created on result > authorization profile
+
+					waiting
+						network access > authenticate pass 
+						set profiles created on result > authorization profile
+
+			we can edit portal on :
+				guest access > guest portal
+					self registered guest portal
+
+	guest access :
+		user comes to network and don't use dot1x and mab, solution is web authentication
+
+		ise > guest access
+			hotspot models :
+				hotspot guest portal
+					open login page and access many zones
+					just need access code
+
+				self registered guest portal
+					a guest after sending web traffics redirect to ise web authentication page then define a user for her\him self 
+
+				sponsored guest portal
+					goes to authenticated user in organization then the employee create user and send access request to manager after approve can access
+
+			guest type
+				dayly 5 days
+				weekly 14 days
+				contract 1 year
+
+			sponsored group
+				all account > manage all groups and users
+				group accounts > manage just special groups
+				own account > just self account
+
+			sponsored portal 
+				manage guests who are in portal
+
+
+		ise > administration
+			external identity source
+			identity source sequence
+			group
+			endpoint
+
+	upgrade to ise 3.0 :
+		in v2.3 must upgrade 2steps first upgrade to 2.4 / 2.6 / 2.7 then upgrade to 3.0
+		in versions 2.4 / 2.6 / 2.7 we just upgrade to v 3.0 with single step
+
+		ise cersions		redhat versions
+		1.3 				6.4
+		1.4					6.4
+		2 					7
+		2.1 				7
+		2.2 				7
+		2.3 				7
+		2.4 				7.3
+		2.6 				7.5
+		2.7 				7.6
+		3.0 				7.6
+
+		cisco upgrade readiness tool or cisco urt help us to upgrade ise with prepare device prerequisites
+			clone from database then upgrade
+			give us spend time and error log
+
+			must install on secondary ise with admin role not primary
+
+			first make backup 
+			then make our secondary ise to standalone upgrade to version 3 and make it primary
+
+		better use ftp
+		save our backups with x.gpg
+
+		ise > administration 
+			maintrance > repository
+			backup and restore
+				config
+				operational (means logs)
+
+				policy eport
+
+			upgrade
+				first deploye upgrade files on secondary because in upgrade our systems swap	
+
+		ise cli :
+			show restore status
+			patch install name-package netway-ftp
+			show repository netway-ftp
+			application install file-name netway-ftp 
+
+				better patch packages in seperated parts
+				first patch on primary and gui then applied on secondaries on automatic mode
+				after patch must logout 
+				our services stopped
+				after start them goes next node to patch
+
+		we can upgrade on ise cli :
+			application upgrade prepare file-name netway-ftp (ise download upgrade file on local disk)
+			application upgrade proceed (start process of upgrade)
+			application upgrade cleanup (clear all process nd files for upgrade)
+
+		use html 5
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	ISE & AAA Farzad Heydari :
+		authentication	(who want access)
+		accounting	(monitor the traffics till specific hour)	
+		authorization (access levels)
+	
+		this is a concept not a protocol 
+		use some protocol inside it like tacacs+ and radius
+	
+		radius :
+			standard verson of aaa protocol
+			just encrypt passwords
+			port 1812/1813
+	
+		tacacs+ :
+			cisco exclusive
+			encrypt all data (pass + username + commands on telnet )
+			port 49
+
+		aaa new-model
+		tacacs server host 192.168.1.1 key cisco
+		aaa authentication logging default group tacacs+ local
+	
+		default : is list of users and passwords 
+		group : means have many servers
+		local : means if our aaa server get down or fail the authentication can be transfer to local user and passwords databse on devices
+	
+		username shayan secret 123
+		enable secret 123
+	
+		line vty 0
+		login authentication mytelnet
+	
+		aaa new-model
+		tacacs server host 192.168.1.1 key cisco
+		aaa authentication logging mytelnet group tacacs+ local
+	
+		mytelnet : can define in line vty
+	
+		in ccna security we have enable view for users on cisco devices and can define access levels
+	
+		ACS :
+			user : acsadmin
+			password: P@ssw0rd
+	
+			we should set ip address on router in same range acs
+	
+			http server enable
+			http 0.0.0.0 0.0.0.0 mgmt
+			username admin pass 123 previledge 15
+			ssh encryption aes128-sha1 rc4-md5
+	
+			802.1x > whit 802.1x, when plug the cable to client, bypass all protocols except eapol, we known this protocol as dynamic vlan, works on radius, must enable on windows
+				eapol is a protocol goes to aaa server and take our authentication from server then take dhcp options
+
+				before send this our ports are off (amber)
+	
+				we should goes to services.msc and (wired auto config), set on automatic, start
+				make dot1x enable on windows
+				ncpa.cpl > ether0 > properties > authentication (header) > uncheck 2 check boxs on bottom page (remember and fail) > in setting uncheck verify... > in setting set 	mschap v2 and click on configure button cheched automatic option > go back to authentication (header) and goes to additional > set specify option on user authentic	ation
+	
+			show application status acs (if show us all rtasks running state we can use it)
+			application start acs
+			ip name-server 192.168.168.16 (active directory ip add, ntp, dns)
+			ntp server 192.168.168.16
+	
+			authentication port :1645
+			accounting port : 1646
+			
+			ACS server :
+				Creat devices 				Network Resources > Network Devices and AAA Clients
+				Creat users 				Users and Identity Stores > Internal Identity Stores > Users
+				Enable PEAP Session 		System Administration > Configuration > Global System Options > PEAP Settings
+				Download Certificates   	System Administration > Configuration > Local Server Certificates > Local Certificates
+		
+			ACS client :
+				sw1 :
+					aaa new-model
+					radius server acs
+					address ipv4 192.168.244.144 auth-port 1645 acct-port 1646(acs ip address)
+					key cisco123
+					exit
+					aaa authentication dot1x default group radius (maeasured by acs and dot1x)
+					dot1x system-auth-control (all interfaces goes to dot1x)
+					interface GigabitEthernet 0/1
+					switchport host
+					authentication port-control auto (authentication checked with dot1x)
+					dot1x pae authenticator (authentication checked with dot1x)
+					dot1x port-control auto
+					interface gig 0/0
+					authentication host-mode multi-host (behinde of interface we have many users)
+					authentication violation restrict (if unauthorize user comes what sould we do)
+					authentication event fail action authorize vlan 200 (if can not recognize take member to vlan 200)
+					authentication event no-response action authorize vlan 300 (old nic doesn't support dot1x so must use this command to set unauthorize user vlan)
+					authentication timer restart 30 ()
+					dot1x timeout ?	
+	
+			
+			in priviledge :
+				test aaa group radius gholi 123456 new-code (check connections)
+				show authentication sessions	
+
+		>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			ise and aaa farzad heydari 2022:
+				ise is like inside firewall
+				device access (tacacs +)
+				network access (dot1x + radius)
+				byod (bring your own device)
+				posture	
+
+				has many terms:																		maximum count
+					persona : rules 		
+					pan : policy administartion node 														2
+					psn : policy service node 																50
+					mnt : monitoring and troubleshooting 													2
+					pxgrid : a platform that secure all devices and multiplexer (platform exchange grid)
+
+						we can launch one ise server (standalone) / distributed roles
+
+				user : admin
+				pass : password
+
+				application stop ise
+				application start ise 
+				show application status ise
+
+				work center > system > persona
+				at the end of the page we have enable device admin must enable it
+
+				we can define a range of switches ip and ... with excel
+
+				administartion :
+					identity
+						identity management > groups 
+							end point identity group 
+							identities > users
+							mab (mac authentication bypass) : printers
+					network resources 
+						network devices group
+						network devices :
+							ip 
+							name
+
+								add each link or object beetwen ise and ... must set password
+
+					policy > policy sets > 	authorized policy > conditions (attribute)
+						network devices (all switches type)
+							and
+						identity group (admin)
+
+					policy > policy elements > authorization > results 
+							permit access \ vlan 10
+							profile name (vlan 10)
+							common task (vlan)
+							idname > vlan number vlan 10
+
+				priority of reading policy is :
+					ise then ad
+
+
+				download able acl (dacl) :
+					policy > elements > result > authorization > dacl
+						write acl and save them
+
+					policy > elements > result > authorization > profile
+						each user comes to vlan 20 add acl under port
+
+				content filtering :
+					iron port > asyncos (freebsd)
+
+		>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				1 ==> join domain(external identity source)
+				2 ==> administartion >>> identityy management >>> identity source
+				3 ==> policy >>> authentication
+				4 ==> policy >>> policy elements >>> results >>> authorization >>> authorize
+				5 ==> policy >>> authorization
+	
+			mab > mac authentication bypass
+			must create vlan in local not in remote or ssh
+		
+			ise on switch :
+				vlan 100 ,200
+				username shayan sec 123
+				int gig0/0
+				no sh
+				ip add 192.168.4.150 255.255.255.0
+				aaa new-model
+				radius server ise1
+				add ipv4 192.168.4.200 auth-port 1812 acct-port 1813
+				key cisco123
+				aaa group server radius myradius 
+				server name ise1
+				aaa authentication login default group myradius local
+				aaa authentication dot1x default group myradius local
+				aaa authorization network default group myradius local
+				dot1x system-auth-control
+				
+				for detailes:
+					radius-server vsa send authentication
+					radius-server vsa send accounting
+					radius-server attr 6 on-for-login-auth
+					radius-server attr 8 include-in-access-req
+					radius-server attr 15 access-req include
+				
+					aaa server radius dynamic-author
+					client 192.168.4.200 server-key cisco123
+					ip device tracking
+				
+				host side:
+					int gig0/0
+					sw host
+					auyhenticatin port-control auto
+					dot1x pae authentication
+				
+				on other look:
+					aaa new-model 
+					radius server ise
+					add ipv4 172.16.0.100
+					key cisco123
+					ex
+					aaa authentication login default group myise local
+					aaa group server radius myise
+					server name ise
+					line vty 0 4
+					login authentication default
+					do test aaa group radius alireza P@ssw0rd! new code 
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

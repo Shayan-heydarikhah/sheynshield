@@ -1,0 +1,2018 @@
+BGP
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	common :
+		we have two mode for gateway protocols :
+			interior gateway protocols (igp)
+				distance vector
+				hybrid
+			exterior gateway protocols (egp)
+				egp
+					works on classfull mode
+					extinct (depricated)
+				bgp
+					scaleable 
+					use more technologies for connectivity
+					unlimited
+					easy administration
+					security
+					works on version 4
+		
+		NLRI(network layer reachability information)
+			informations you need to approach network
+		
+		we use path attribute (pa) in bgp
+			each router use autonomous system (as) number in bgp connectivity in pa send self router as and set wich as number requested
+			here we have as-path term means which routers should be bypassed to reach the intended destination so shorter as-path is better
+		
+		bgp update use nlri and path attributes to connect device
+	
+		topology table > all address
+		rib > winner address
+	
+		in as-path we have
+			as sequence
+			as set
+			as confederation sequence
+			as confederation set
+	
+			with as-path we can make loop-prevention beacause bgp routers see their own as-number in a bgp packets drop it this as-number check in as-sequence field 
+
+		in bgp control plane and data plane are against together
+	
+		use unicast packets (open packets) to make neighborship on ip address
+			neighborship table
+				neighborship table
+			
+			path exchange
+				bgp table
+					network 
+					mask
+					path attribute
+	
+			choose best path
+				routing table
+	
+			also use keepalive packet to maintain neighborship
+			notification packets use for problem notice and alerts
+	
+		unicast use tcp connection and safer than other mechanism
+		tcp 179 : 3way-handshake
+	
+		router bgp
+		neighbor 1.2.3.4 remote-as 65000 
+			male tcp session and synchronize with this ip + neighborship table get create also send open packets
+			if front side don't set bgp to reply this router tcp-sync say tcp-rst and reset connection and drop or block requests
+			if front side use gp reply syn-ack and make bgp connection 
+			make tcp establishment then send open packets
+			make bgp neighborship after this send keepalive packets
+	
+		sh ip bgp neighbor 1.2.3.4
+		sh ip bgp neighbor
+		sh ip bgp summary
+	
+		or btter use newest syntax :
+			sh bgp ipv4 unicast neighbor (shows destination)
+			sh bgp ipv4 unicast summary
+	
+			need iosV15 to use this new version of commands
+	
+		bgp deploye commands with some delay
+	
+		sh tcp brief
+		debug ip bgp
+			we send 
+				open send
+				open confirm
+				establish
+	
+		neighbor 1.2.3.4 shutdown
+		no neighbor 1.2.3.4 shutdown
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	keeplive :
+		each 60 second advertise in bgp
+		each 180 reset hold timer
+		in bgp we can use different keepalive timers
+		bgp use smart mechanism
+			r1 : 
+				ka-send 20
+				ka-hold 50
+
+			r2 :
+				ka-send 60
+				ka-hold 180
+
+			each hold time be fewer than other use for main hold time then make 1/3 for hello keepalive time
+			if front side keepalive use lower value for hello this mechanism make hello on 1/3 of keeplive
+
+			neighbor 1.2.3.4 timers 15 50
+
+			or in global :
+				router bgp 1 
+				bgp timers 15 50
+
+			if set value keeplive-hold on 3 seconds our hello get 1 second so thi may be attack 
+			we can set minimum value for hold times for front side requests
+
+			router bgp 1 
+			bgp timers 15 50 90
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	ebgp neighborship condition :
+		router bgp 1
+		neighbor 192.168.12.2 remote-as 2
+
+		router id :
+			manual administration
+			highest ip address of up loop interface
+			highest ip address of up non loop interface
+
+			bgp router-id 1.2.3.4
+
+			if set can't change and is not changeable transfer in open packets
+			is not competetive
+
+		authentication
+			is optional
+			use md5 
+			before authentication if had neighborship our connection didn't break so if need use authentication must clear our connection
+		
+		neighbor 1.2.3.4 password cisco123
+
+		tcp session establishment
+			if use firewall in edge of organization must permit tcp 179 on firewall role also permit isp and router ip address to negotiate
+
+		if need use 2 links for redundancy in bgp on isp and our organization must use loopback interface and set our isp block ip address on loopback
+
+		ip route 0.0.0.0 0.0.0.0 1.2.3.4 (isp public ip)
+
+		if use loop interface for bgp neighboring ttl isn't problem beacause don't care about it on transfering bgp from ethernet to loop interface
+		we have connected check state to check ip address is connected to router or not? maybe use another ip for bgp and ttl 1 is not applicated for it so i disable ttl 1 must use cisco default mechanis > ebgp-multihop
+		
+		neighbor 1.2.3.4 disable-connected-check
+
+		also recommended to use :
+			neighbor 1.2.3.4 ebgp-multihop 2
+
+		bgp use finite state machine (fsm) 
+
+		idle (this idle means have access to any ip address) > tcp (still not start) > connect > tcp start mechanism not establish > active > tcp establishment > still not send opensent
+
+		router found bgp{
+			if {
+				yes
+				3way-hand-shake peer
+				then connect
+				make 3way-handshake compelete
+					if {
+						yes 
+						send open with bgp parameters
+						then open-sent
+						if {
+							error in open-message
+								if {
+									yes
+									goes to repeat failur
+									}
+								else-if {
+										no
+										goes to keepalive
+										then open confirm
+										next keepalive\notification
+											if {
+												yes
+												make establish connection
+												}
+											else-if {
+													no
+													goes to idle
+													}
+										}
+							}
+						}
+					else-if {
+						no
+						repeat failur
+							if {
+								yes
+								goes to idle
+								}
+							else-if {
+									no
+									goes to active
+									then try 3way-handshake peer
+									}
+							}
+				}
+
+			else-if {
+					no
+					idle
+					execute router found bgp	
+				   	}
+				 }
+
+		after these steps and establish state pfx records get some values (transfer data of routes and networks)
+
+		debug ip bgp opv4 unicast
+		debug ip gp events
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	inject routes to bgp 
+		nril + path attribute + total path attribute length + withdrwan routes (use for omiting some routes) + feasible route length
+
+		sh run all | sec bgp
+
+		network 1.2.3.4 mask 255.255.255.0 (if don't set mask use class full mode)
+		network 1.2.3.4 (take class full)
+		no auto-summary (if use network command without mask and set no auto-summary our commands get classfull our network and subnetworks added to advertisement
+
+		route-map lp
+		match interface loop 0 loop 1
+		
+		router bgp 1
+		redistribute connected route-map lp
+		no auto-summary
+
+		debug bgp ipv4 unicast
+		debug ip bgp all
+		debug ip bgp updates
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bgp aggregation :
+		atomic aggregation
+		term means summary in bgp table
+
+		172.16.0.0/24
+		172.16.1.0/24
+		172.16.2.0/24
+		172.16.3.0/24
+		-------------
+		172.16.0.0/22 > summary of 4 networks
+
+		aggregate-address 172.16.0.0 255.255.252.0
+			this command advertise summary 
+			but advertise each subnetwork in seprerated packets to network 
+				172.16.0.0/22
+				172.16.0.0/24
+				172.16.1.0/24
+				172.16.2.0/24
+				172.16.3.0/24
+
+			better use :
+				aggregate-address 172.16.0.0 255.255.252.0 summary-only
+
+				this command advertise only summary > 172.16.0.0/22
+
+		sh bgp ipv4 unicast
+			have s* for this line means supress and summary
+			path attribute contain :
+				aggregator
+					define to others we have this summary
+				atomic aggregator
+					if some routers want use our summary must use wich as-number to access
+					also with this can detect with as and router aggregate routes
+
+		in advertise summary to routers some of them use our packets and replace our as-number with their own as-number then advertise it again to routers also advertise it to us 
+		we have loop prevention method if as-number in as-path field of bgp packets contain our as-number means we are in loop and routers of our organization didn't accept it
+		but in summarization and aggregator can't detect this feature must use :
+			aggregate-address 172.16.0.0 255.255.252.0 summary-only as-set
+
+				in source of aggregator set as-number of router and organization
+				with this prevent loop
+
+				sh bgp ipv4 unicast
+
+					as and origin part shows 0 4 {1,2}
+					{} > means use as set
+					now repated as-number in advertisement of each router can't make loop and use many parameters for summarization
+
+		route leaking :
+			ip prefix-list 1721610 per 172.16.1.0/24
+			route-map leakers-1721610 permit 10
+			match ip address prefix-list leakers-1721610
+
+			router bgp 1
+			neighbor 1.2.3.4 unsupress-map leakers-1721610
+
+				here advertise summary + one specific route from summarized route to make guided routing between many edge devices and routes
+
+			supress-map main task is route leaking
+				ip prefix-list 1721610 per 172.16.1.0/24
+				route-map leakers-1721610 per 10
+				match ip address prefix-list 1721610
+
+				router bgp 1
+				aggregate-address 172.16.0.0 255.255.252.0 supress-map 	leakers-1721610
+
+				with this advertise /22 and /24 in seperated packets
+
+			advertise-map use some routers attributes to advertise some routes
+				ip prefix-list 1721610 per 172.16.1.0/24
+				route-map leakers-1721610 per 10
+				match ip address prefix-list 1721610
+
+				router bgp 1
+				aggregate-address 172.16.0.0 255.255.252 summary-only advertise-map leakers-1721610 as-set
+
+					filter advertisement and set as-number of organization
+
+			attribute-map send summaries be on which subsets also use which attribute
+				route-map ItoQuestion per 10
+				set origin incomplete
+
+				router bgp 1
+				aggregate-address 172.16.0.0 255.255.252.0 summary-only attribute-map ItoQuestion
+
+					add ? instead of i in origin part
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	Default route injection and advertisement :
+		router bgp 1
+		neighbor 1.2.3.4 default-originate
+
+			don't advertise with *> (best) with this forward dtraffics but forwarding required in real internet access so :
+
+			ip prefix-list real-int-reach-pl 192.168.25.0/24 (this ip is isp edge ip)
+			route-map real-int-reach-rm per 10
+			match ip address prefix-list real-int-reach-pl
+
+			router bgp 2
+			neighbor 192.168.12.1 default-originate real-int-reach-rm
+
+				if link between isp and organization were up and find it in routing table match this condition and forward traffic
+
+				or use :
+					ip route 0.0.0.0 0.0.0.0 192.168.23.3
+
+					router bgp 2
+					network 0.0.0.0
+
+						advertise default route with this
+
+				or :
+					ip route 0.0.0.0 0.0.0.0 192.168.23.3
+
+					router bgp 2 
+					redistribute statics (if just use this command advertise static route with networks)
+					default-information originate (better way use this method to advertise default routes)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	backdoor :
+		if use bgp and ospf together and advertise same network with two routing protocols use lower metric and ad to reach network
+		ad bgp for internal as or ibgp > 200
+		external as and ebgp use ad > 20
+
+		ospf use 110 for ad
+
+		if internal ip and networks advertise with bgp make backdoor beacause ad is lower than ospf
+
+		router bgp 1
+		network 1.2.3.4 mask 255.255.255.255 backdoor
+			this command convert ad 20 to 110 
+			point to front side address
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	nexthop :
+		if use routers in edge and need to reachability some routes advertised with bgp on edge router must set nexthop self on edge oruters define another routeers i have route x and can reach this network with bgp across me
+		if use switch nd link many bgp together don't need set nexthop-self beacause reach every thing
+		but if use edge and some routers linked to you must define networks with this
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	origin code :
+		i > network define like
+			router bgp 1
+			network 192.168.1.0 mask 255.255.255.0
+			neighbor 4.5.6.7 remote-as 2
+
+			aggregation	without as-set use origin code i
+			if use as-set means you are addding subnetwork and convert i to ? if subnetworks just one of them use redistribution mode
+			if use network definition in subnetworks use origin code i
+
+		? > network injection with redistribute
+			ip prefix-list 19216810 per 192.168.1.0/24
+			route-map red-19216810 per 10
+			match ip address prefix-list 19216810
+
+			router bgp 1
+			redistribute connected route-map red-19216810
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	ibgp external :
+		in ibgp use ttl 255 for recursive lookup
+
+		sh bgp ipv4 unicast
+			use code i before define routes and networks means intenaly learn it
+
+		in ibgp we have role (ibgp spliti horizon) :
+			if use ibgp for as-number and advertise some packets to same as
+			routers in same as don't advertise packets should define by source 
+			but in ebg we don't follow role
+
+		here use ibgo mesh or route reflector
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	ibgp mesh :
+		intraanet in iran use this method
+
+		r1 :
+			router bgp 1
+			neighbor 2.2.2.2 remote-as 1
+			neighbor 2.2.2.2 update-source loop 0 (the Intermediary between a connection is loopback interface not real interface, in ibgp must set this)
+			neighbor 2.2.2.2 nexthop-self (beacuse r1 is edge router must replace nexthop to make reachability for some networks)
+
+		each router must use this command for each hop in isp so have overhead
+		use command above for each router in isp 
+
+		better use this method > peer group 
+		peer group create a tempelate from many commands
+
+		router bgp 1
+		neighbor temp1 peer-group (create peer group)
+		neighbor temp1 update-source loop 0 (define commands in peer or tempelate)
+		neighbor temp1 remote-as 1
+		neighbor temp1 nexthop-self
+
+		neighbor 2.2.2.2 peer-goup temp1 (join each router wants use our source code and source tempelate)
+		neighbor 3.3.3.3 peer-goup temp1
+		neighbor 4.4.4.4 peer-goup temp1
+		neighbor 5.5.5.5 peer-goup temp1
+
+		sh bgp ipv4 unicast neighbor
+		sh bgp ipv4 unicast peer-group
+
+		now create one config and process for one command then copy for each neighbor
+		in recent years use this mechanism either with this method or without this method
+		if need change or set specific or different attribute or method for one router must omit from these sets
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	synchronization :
+		way for mixedup internal network and eternal netwrok 
+		if learn some routes from ospf or eigrp or igp routing protocols use with ibgp 
+		if don't learn drop routes from ibgp 
+
+		by default works on version 3 of bgp beacause don't use ibgp
+		instead of ibgp say redistribute must be happen on edge routers and redistribute networks
+		in these days we don't use redistribution so isn't necessary enable synchronization
+
+		router bgp 1
+		no synchronization
+		router ospf 1
+		redist bgp 2 subnets
+
+		with this can't advertise and drop them beacuase by default we don't use redistribution
+
+		except :
+			router bgp 1
+			synchronization
+
+		now we can advertise ospf subnts to ibgp with no problem
+		better use no synchronization mechanism
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	confederation :
+		as path [as sequence , as set , as confederation sequence , as confederation set]
+			as sequence use for loop prevention 
+			as confederation sequence use loop prevention in confederation
+
+		confederation means in public as numbr we can set group of private as numbers 
+		in internal as we can us loop prevention mechanism
+		altho use same as sequence number in packets we have in as confederation sequence we have different values so loop prevention happend with unique values
+
+		In the information output, the as confederation sequence value is removed and only as will remain. More than one router should not be used in each sub as. If it is used, it means that in ibg mesh mode, we must establish the connection of these routers, and inside this sub as, a sub cannot be used. as started another
+
+		r2
+			router bgp 65000
+			bgp confederation id 2 (open packets and original as number)
+			bgp confederation peers 65001 65002 (connected to which as numbers)
+			neighbor 192.168.12.1 remote-as 1
+			neighbor 3.3.3.3 remote-as 65001
+			neighbor 3.3.3.3 ebgp-multihop 2
+			neighbor 3.3.3.3 update-source loop0
+			neighbor 3.3.3.3 nexthop-self 
+
+		r3
+			router bgp 65001
+			bgp confederation id 2
+			bgp confederation peers 65000 65002
+			neighbor 2.2.2.2 remote-as 65000
+			neighbor 2.2.2.2 ebgp-multihop 2 (inibgp don't need ad this beacuse they are in same confederation)
+			neighbor 2.2.2.2 update-source loop0
+
+			for sub as like connectivity betweenrouter 3 and router 4 are in same sub as we must use ibgp mesh for them don't need add next hop self between r3 and r4 if have injected routes in r4 must behavior like edge devices in border way and use nexthop-self to replace sources
+
+		sh bgp ipv4 unicast
+			we can see r3 use some orutes with as > 1(65000)
+			() means you are using as confederation
+
+		r5
+			router bgp 65002
+			bgp confederation id 2
+			neighbor 192.168.56.6 remote-as 3
+			neighbor 4.4.4.4 remote-as 65001
+			neighbor 4.4.4.4 update-source loop0
+			neighbor 4.4.4.4 nexthop-self
+			neighbor 4.4.4.4 ebgp-multihop 2
+
+		as confederation set, if a record is aggregated and taught to other neighbors, to avoid repeating the asset, it is specified as a sign to specify the neighbors and the type of neighbors.
+			sh bgp ipv4 unicast neighbor
+
+		if one router get trouble or neighbors get fail
+		our bgp data didn't transfer
+		better use mesh in our isp or internal network
+
+		edge routers
+			router bgp 64515
+			bgp confederation id 1
+			bgp confederation peers 64511 64512 ... 64520 (except sel like 64515 and 64514) 
+			neighbor 192.168.135.13 remote-as 2
+			neighbor 1.1.1.1 remote-as 64513
+			neighbor 1.1.1.1 update-source loop0
+			neighbor 1.1.1.1 ebgp-multihop 3
+			neighbor 1.1.1.1 nexthop-self 
+				*must make linked connection to core
+
+		core routers (r1)
+			router bgp 64513
+			bgp confederation id 1
+			bgp confederation peers 64511 64512 .. 64520 (except 64513 and 64514)
+			neighbor ibgp-confederation peer-group
+			
+			neighbor 5.5.5.5 remote-as 64515
+			neighbor 6.6.6.6 remote-as 64516
+			neighbor 7.7.7.7 remote as 64517
+
+			neighbor ebgp-confederation peer-group
+			neighbor ebgp-confederation update-source loop0
+			neighbor ebgp-confederation ebgp-multihop 5
+			neighbor 5.5.5.5 peer-goup ebgp-confederation
+			neighbor 6.6.6.6 peer-goup ebgp-confederation
+			neighbor 7.7.7.7 peer-goup ebgp-confederation
+				*for other edge core routers in isp must set these commands with another values and subnets
+			
+			neighbor ibgp-confederation peer-group
+			neighbor ibgp-confederation update-source loop0
+			neighbor ibgp-confederation remote-as 64513
+			neighbor 2.2.2.2 peer-group ibgp-confederation
+			neighbor 3.3.3.3 peer-group ibgp-confederation
+			neighbor 4.4.4.4 peer-group ibgp-confederation
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	route reflector :
+		One or more routers are introduced as reflectors and the ibgp split horizon rule is abandoned. If ibgp gives an update, it creates the ability to teach others and the possibility of repetition is eliminated due to the existence of originator id + cluster id.
+
+		When it receives the remote work number from router number 8 and AS, the oid is determined and the cluster id introduced by the network administrator is considered. If a loop occurs, according to the cid value, the advertisement will not take place, even if the router producing the bgp content receives its own packets again, due to the presence of the same cid, it will drop the packet.
+
+		on rr
+			router bgp 1
+			bgp cluster-id 100
+			neighbor 2.2.2.2 remote-as 1
+			neighbor 2.2.2.2 update-source loop0
+			neighbor 2.2.2.2 route-refelctor-client
+			neighbor 3.3.3.3 remote-as 1
+			neighbor 3.3.3.3 update-source loop0
+			neighbor 3.3.3.3 route-refelctor-client
+
+			or use peer group concept
+
+			router bgp 1
+			bgp cluster-id 100
+			neighbor rr-group peer-group
+			neighbor rr-group update-source loop0
+			neighbor rr-group remote-as 1
+			neighbor rr-group route-reflector-client
+			neighbor 2.2.2.2 peer-group rr-group
+			neighbor 3.3.3.3 peer-group rr-group
+
+			oid and cid set in rr and advertise it to clients 
+			all clients recive data and don't need config in clients
+			in other routers in core just set nexthop-self and normal neighboring
+
+			sh bgp ipv4 unicast 2.0.0.0
+				shows cid and oid
+				use cluster list indead of cluster id
+
+			sh bgp ipv4 unicast
+				show us clients of rr
+
+		in rr we can learn our routes from client to nonclient and client
+		if learn from nonclient just can advertise to client
+
+		route reflector backup :
+			r1
+				router bgp 1
+				neighbor rrc peer-group
+				neighbor rrc remote-as 1
+				neighbor rrc update-source loop0
+				neighbor rrc nexthop-self
+				neighbor 4.4.4.4 peer-group rrc
+				neighbor 10.10.10.10 peer-goup rrc
+	
+				*must define our route reflectors to eaach client
+
+			r4
+				router bgpp 1
+				bgp cluster-id 100
+				neighbor rr peer-group
+				neighbor rr remote-as 1
+				neighbor rr update-source loop0
+				neighbor rr route-reflector-client
+				neighbor 1.1.1.1 peer-group rr
+				neighbor 10.10.10.10 remote-as 1
+				neighbor 10.10.10.10 update-source
+
+		hierarchical rr :
+			each route in rr mode can't bee on 2 rolls so must add in seperated cluster-id and deploye 2 roll on them
+			r1
+				router bgp 1
+				bgp cluster-id 1
+				neighbor rrc peer-group
+				neighbor rrc remote-as 1
+				neighbor rrc update-source loop0
+				neighbor rrc route-refelctor-client
+				neighbor 2.2.2.2 peer-group rrc
+				neighbor 3.3.3.3 peer-group rrc
+				neighbor 4.4.4.4 peer-group rrc
+
+				neighbor 5.5.5.5 remote-as 1
+				neighbor 5.5.5.5 update-source loop0
+				neighbor 15.15.15.15 remote-as 1
+				neighbor 15.15.15.15 update-source loop0
+
+			on client of r1 like r2,3,4 :
+				router bgp 2 or 3 or 4
+				neighbor 1.1.1.1 remote-as 1
+				neighbor 1.1.1.1 update-source loop0
+				neighbor 1.1.1.1 nexthop-self
+
+			r15
+				router bgpp 1
+				bgp cluster-id 4
+				neighbor rrc peer-group
+				neighbor rrc remote-as 1
+				neighbor rrc update-source loop0
+				neighbor rrc route-refelctor-client
+				neighbor 1.1.1.1 peer-group rrc
+				neighbor 5.5.5.5 peer-goup rrc
+				neighbor 9.9.9.9 peer-goup rrc
+				neighbor 12.12.12.12 peer-goup rrc
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	filtering :
+		route map
+		ip prefix list
+		acl
+		as path acl
+
+		acl :
+			ip access-list standard for2
+			permit 1.1.1.1
+
+			router bgp 2
+			neighbor 192.168.12.1 remote-as 1
+			neighbor 192.168.12.1 update-source loop0
+			neighbor 192.168.12.1 nexthop-self
+			neighbor 192.168.12.1 ebgp-multihop 2
+			neighbor 192.168.12.1 distribute-list for2 out
+
+			must use clear command to deploy our policies :
+				clear ip bgp * soft
+
+			neghbring filter is smart way
+			acl use too much load of router so better use flexible tools
+
+			sh ip prefix-list
+			ip prefix-list for4 permit 1.1.1.1/32
+			ip prefix-list for4 permit 1.1.1.2/32
+
+			sh ip bgp prefix-list for4 (show the effects)
+
+
+		as path acl :
+			regex usefull
+			if need filter some patterns in nlri as-path must use as-path acl
+
+			we convert as-path to string then make filter on them (string match)
+
+			if make prepend block it > ^(0-9)+$
+			0-9 can be repeat but contan one number of as > ^([0-9]+)(_\1)*$
+
+			if need block bypass model in isp or clients :
+				sh ip bgp regexp ^$
+				
+				must use no quantity like > ^$
+				just use local as
+
+				ip as-path access-list 1 permit ^$
+				sh ip as-path-access-list
+
+				router bgp 1
+				neighbor 1.2.3.4 filter-list 1 out
+
+				if customer can't deploye these policy types we must deploye on incoming direction so must define each as-customers format ;
+					^[0-9]+$ > means each number can use but incoming contains one number also can use repeated value like 999 or 99 ...
+					access is open for 12341 or 19212
+					access is close for 123 123 123
+
+				if need inject ? mark in regex must > esc+q or ctrl+v
+
+			| means or
+			[] means in or we can use 2 phrase
+			. means single characters
+			^ means start of string
+			$ menas end of string
+			_ means each side has some values (space or tab)
+			() means smaller groups
+			\ mens last previous phrase contain operator must be used in calculation
+			* means non or many times get repeat
+			? means non or many times get repeat
+			+ means one time or many time repeat
+
+			_100_ > means must pass as-100 or start or end with 100
+			^100$ > means 
+
+			ip as-path access-list 1 permit *$
+
+			router bgp 1
+			neighbor 1.2.3.4 filter-list 1 out
+
+			sh ip as-path-access-list 1
+			sh bgp ipv4 unicast regex *1$
+			sh ip bgp filter-list 1
+
+		we can ommit some routes with advertise withdrawn roll in nlri
+
+		in soft reconfiguration we have route refresh mechanism
+		use open and route refresh together but we need activate route refresh without any overhead
+
+		ip prefix-list a permit 1.1.1.1/32
+		ip prefix-list a permit 1.1.1.2/32
+		router bgp 2
+		neighbor 192.168.12.1 soft-reconfig inbound
+		neighbor 192.168.12.1 prefix-list a in
+		
+		clear bgp ipv unicast 192.168.12.1 in (don't send route refresh beacause use soft reconfig)(if clear without soft-reconfig our router ue route refresh mechanism)
+			use clear soft means just ypu can have soft reconfig and route refresh
+
+		after route refresh we use orf in earliest version
+		orf > outbound route filter
+		route refresh transfer each route in duplicate mode so is not usefull and applicated 
+		we send our incoming filter with orf to front side and front side router decide to deploye our filter on outgoing updates
+		if be heavy can be effects on organization must checked it
+
+
+		in send or recieve packets we can deploye filtering
+			router bgp 1
+			neghbor 1.1.1.1 capability orff prefix-list both/send/recieve (just works on prefixlist)
+
+			clear ip bgp 1.1.1.1 in prefix-list
+			sh ip bgp neighbor 1.1.1.1 
+
+			ip prefix-list a permit 2.2.2.2/32
+			router bgp 2
+			neighbor 3.3.3.3 prefix-list a in
+				noww transfer prefix-list to front side and another side decide	deploye policies
+
+			sh bgp ipv4 unicast neighbor 3.3.3.3 recieved prefix-filter
+
+		router bgp4
+		neighbor 192.168.45.4 prefix-list for4 out
+		clear ip bgp * soft
+
+		sh bgp ipv4 unicast neighbors (which policy impelemts on which route)
+
+		route map :
+			ip prefix-list for7 1.1.1.2/32
+			ip prefix-list for9 1.1.1.4/32
+			
+			route-map for7 prmit 10
+			match ip address prefix-list for7
+			route-map for9 prmit 10
+			match ip address prefix-list for9
+
+			router bgp 2
+			neighbor 192.168.78.8 route-map for7 out
+			neighbor 192.168.89.9 route-map for9 out
+			clear ip bgp * soft
+
+			sh bgp ipv4 unicast route-map for7
+			sh bgp ipv4 unicast route-map for9
+
+		sh bgp ipv4 unicast  
+			the best records can show us that means these can be advertise
+
+		sh bgp ipv4 unicast neighbor 1.2.3.4 advertise-routes
+
+		sh bgp ipv4 unicast neighbor 1.2.3.4 recieve-routes
+			before filtering can see which routes come
+			here need soft reconfiguration
+
+		sh bgp ipv4 unicast neighbor 1.2.3.4 routes
+			which routes recieved and inject to rib
+
+		in the middle routers we have 3 table ;
+			adj-rib-in
+			local-rib
+			adj-rib-out
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	route refresh and soft reconfiguration :
+		route refresh is automatic mechanism 
+		it is possible to receive a series of updates and it is not known when these updates will end, the way of sending and receiving information and updates will change the entire tables and it is possible that a black hole will occur due to the non-arrival of some streams by filtering others this happens
+
+		start of rib (sor) > use for fat forwarding in what happen
+		end of rib (eor) > say we finish updated befor this bit you must see our updates
+
+		begining of route refresh
+		ending route refresh
+		normal route refresh
+
+		if lost soome packets use stale path time and set it (with this option all packets recieve get ommited also wait a seconds)
+
+			router bgp 1
+			bgp refresh stalepath-time 600-3000
+
+		we can set eor timer
+			router bgp 1
+			bgp refresh max-eor=time 600-3000 (wait to response after many eor)
+
+		router bgp 1
+		neighbor 1.2.3.4 dont-capc-negotiate enahance refresh (better don't use this option (disable enhanced route refresh))
+
+		debug bgp ipv4 unicast updates
+		debug bgp ipv4 unicast 1.2.3.4 in (sor and eor)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	best path selection :
+		weight
+			cisco porpriotary
+			if write policy for weight must use in direction
+			16 bit  > 0 65535 (default is 32768 (injected to this router) used for internal and 0 used for injected or ebgp or external values (learned from other))
+			has pre-condition like nexhop reachability
+			localy can change direction 
+			can't advertise it in as
+
+			ip prefix-list pr-6661 permit 6.6.6.2/32
+			
+			route-map test permit 10
+			match ip address prefix-list pr-6661
+			set weight 10
+
+			route-map test permit 20
+
+			router bgp 1
+			neighbor 1.2.3.4 route-map test in 
+
+			clear ip bgp 11.2.3.4 in
+
+		local preference
+			higher is better 
+			32 bit and dfault is 100
+			can advertise it on intra as and ibgp
+			inject to nlri
+			in eterior neighborship we set it automaticaly but didn't transfer it and use valu 0 for it
+
+			example 1 :
+				router bgpp 1
+				bgp default local-prefe 200
+	
+				ip prefix list pr-6661 permit 6.6.6.1/32
+				
+				route-map test permit 10
+				match ip address prefix-list pr-6661
+				set local-prefe 200
+	
+				route-map test permit 20
+	
+				router bgp 1
+				neighbor 3.3.3.3 route-map test out
+	
+				clear ip bgp * out soft
+	
+				better set a peer group of some routers and advertise it to them
+
+			example 2 :
+				ip prefix-list pr-7771 permit 7.7.7.1/32
+				ip prefix-list pr-7772 permit 7.7.7.2/32
+
+				route-map test permit 10
+				match ip address prefix-list pr-7771
+				set lcoal-pref 200
+
+				route-map test permit 20
+				match ip address prefix-list pr-7772
+				set lcoal-pref 50
+
+				router bgp 1
+				neighbor 1.2.3.4 route-map test out
+
+				clear bgp ipv4 uni * out soft
+
+			we don't have loo and use synchronization
+
+		shortest as-path
+			checks in incoming direction
+			we can use as path prepending to isp msut use 2 or 3 times prepend cuase isp edge routers memory
+
+			ip prefix-list pr-6661 pemir 6.6.6.1/32
+
+			route-map test permit 10
+			match ip address prefix-list pr-6661
+			set as-path prepend 1 1 1 
+
+			route-map test permit 20
+
+			router bgp 1
+			neighbor 4.4.4.4 route-map test out
+
+			clear ip bgp 192.16814.4 out
+
+			if need bypass as-path :
+				router bgp 1
+				bgp bestpath as-pat ignor (better don't set this)
+
+		originate
+
+		origin type
+			igp and network (i) command use for injection so is specefic than any commands use lower value and better
+			incompelet and (?) use redistribution mode so is generally set
+
+		lowest med(multi eit discriminator)
+			like metric in edge distance to determine between ebgp and lan space
+			this is fixed parameter to advertise like (aspath origin code and nexthop)
+			we can send med to one next as
+			we can set incoming direction policy
+
+			ip prefix-list m permit 30.30.30.0/24
+			ip prefix-list m permit 31.31.31.0/24
+
+			route-map w permit 10
+			match ip address prefix-list m
+			set metric 1
+			route-map w permit 20
+
+			router bgp 1
+			neighbor 1.2.3.4 route-map w out (now set med on edge and deploye our policy)
+
+			effects on isp links
+			if need works on 2 links to 2 different isp also use  dynamic routing protocol
+				router bgp 1
+				bgp always compare med
+
+			if we recieve an update and don't have med means you must use 0 on router
+			so get the best value on med comparision
+			in other vendors we have infinit value for this situation but get trouble with cisco so must use :
+				bgp best-path med missing-as-worst
+				bgp best-path med confed missing-as-worst
+
+			this means set infinit (the worst) for routes
+			if use cisco for bgp don't need use these commands
+
+			convert to 32 bit
+
+			in bgp when learn newest item sort them by newest
+			compare paths between end and oldest path n list with newest path so must use deterministic med to set time comparision
+			better turn on this feature
+			symmetric events do not change based on time and are fixed
+
+		shortest igp metric to nexthop
+			router bgp 2
+			bgp best-path igp-metric ignor
+
+			if be same on many condition use multipath (in default is disable)
+
+		oldest ebg path (age)
+		
+		rid
+			lowest is winner
+			
+			router bgp 1
+			no bgp best-pat compare-router-id (better don't use)
+
+		minimum cluster list length
+
+		neighbor ip address
+			lowest is better
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bgp multipath loadbalancing :
+		if we have similar condition til step 8 
+		we can use loadbalancing
+		we have equal and unequal loadbalancing
+
+		equal cost load balancing
+			ebgp 1-32
+			ibg 1-32
+
+			router bgp 1
+			maximum-path ibgp 4
+			maximum-path 4
+
+			sh bgp ipv4 unicast 8.8.8.8
+
+			sh ip protocols
+
+			after thee commands we can see term m in routing table means multipathing
+			in advertise  we can find the best path but in usauge we have 4 links
+
+			if need use many as connection and multipathing must set relax mode for ebgp
+				router bgp 1
+				bgp best-path as-path multipath-relax
+
+			* better don't use this metod because we haven't best design in networks
+
+		unequal cost load balancing
+			can add many links with many metrics (depends what?)
+			if use many metric can't set lb
+			so with dmz link bw can use link attributes
+
+			on p or core isp routers :
+				router bgp 1
+				maximum-path ibgp 4
+				maximum-path 4
+				bgp dmz-link-bw
+
+			an area connected to isp from edge means dmz
+			define link capacity to internal routers
+			use community extended to advertise bandwidth
+
+			on edge pe routers must set :
+				router bgp 2 or 3 or 4
+				bgp dmzlink-bw
+				neighbor 1.2.3.4 dmzlink-bw (ip isp)
+				neighbor 12.3.4 send-community extended
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	community :
+		a label with 32 or 64 bit of values define some attributes with nlri to other routers
+		if see a code from community part execute some tasks
+		in 64 mode we have transitive and optional
+
+		old format send one number to execute some tasks could have trouble and duplicate
+		in new format
+			32 bit 
+				16 bit > 0- 65535 > as number od organization
+				16 bit > 0- 65535 > custom
+
+		r1
+			ip bpg community newformat
+
+			router bgp 64500
+			network 1.1.1.0 mask 255.255.255.255
+			network 2.2.2.0 mask 255.255.255.255
+			............			
+			network 9.9.9.0 mask 255.255.255.255
+
+			ip prefix-list pr-1110 permit 1.1.1.0/32
+
+			route-map r1-community permit 10
+			match ip address prefix-list pr-1110
+			set community 64500:0 64500:1 64500:2 ....
+
+			route-map r1-community permit 20
+
+			router bgp 64500
+			neighbor 192.168.14.4 route-map r1-community out
+			neighbor 192.168.14.4 send-community extended or standard or both (by default don't send)
+
+			clear ip bgp 192.168.14.4 out
+
+			on some routers if get show without (ip bgp community newformat) show us old format with 32 bit in aggregate mode
+
+		wellknown communities :
+			no expot
+				just deploy on self router
+				and implemet on front side as
+
+			no avertise
+				don't advertise no one even inter as
+				ffff:ff02
+				65535:65282
+
+			internet
+				advertise to all nodes 
+				default is this
+
+			none
+
+			local as (no eport sub confederation)
+				like no export but have restriction 
+				can't use in externall confederation
+
+				ffff:ff03
+				65535:65283
+
+		need change some community on another routers
+			ip prefix-list pr-1116 permit 1.1.1.6/32
+			ip prefix-list pr-1117 permit 1.1.1.7/32
+
+			route-map tor5 permit 10
+			match ip address prefix-list pr-1116
+			set community 64502:6 (in this mode we use replacement mechanism)
+			
+			route-map tor5 permit 20
+			match ip address prefix-list pr-1117
+			set community 64502:7additive (like prepend)
+
+			route-map tor5 permit 30
+			set community none (ommit tags)
+
+			router bgp 64501
+			neighbor 192.168145.5 route-map tor5
+
+		community-acl
+			standard use normar numbers but in extended we have regex
+			standard > 1-99
+			extended > 100-199
+
+			standard mode :
+				ip community-list 1 permit 64501:0 (if contain ths do something)
+				sh ip community-list 1
+	
+				route-map tor7 permit 10
+				match community 1 or match community 1 exact-match (exact-match means just contain this number not more)
+				set community 64503:1
+
+				route-map tor7 permit 20
+
+				router bgp 2
+				neighbor 192.16847.7 route-map tor7 out
+
+			extended mode :
+				ip community-list 100 premit 64501:[6-7]
+
+				route-map tor7 permit 10
+				match community 100
+				set community non
+
+				router bgp 1
+				neighbor 192.168.12.2 route-map tor7 out
+
+			if need delete community
+				ip community-list 10 permit 64501:9
+				route-map tor6 permit 30
+				match community 10
+				set community-list 10 delete (delete each 64501:9 from community-list)
+
+		cost for community
+			extended (use in mpls)
+				1byte poi (point of insetion)
+				1byte id > each cost has identity
+				4byte value or cost > which interface has more priority
+					lower cost is better
+
+			we have type and structure
+
+			cost community is non-transiive and optionl
+			can advertise on ibg or confederation
+			if be same condition in step 8 we can use anoher option instead of multipathing
+			in multipathing we can set wich path is better
+			lowest igp metric to nextop > 129
+			i use this parameter when my items we same then could use this
+			instead of poi use igp 
+			igp = 129
+
+			must enable transffer extended community
+
+			router bgp 2 (must set on pe and each pe connected to another as with this learn link parameters and advertise to r1)
+			neighbor 1.2.3.4 send-community extended
+			neighbor 1.2.3.4 route-map cost out
+
+			ip prefix-list pr-8888 permit 8.8.8.8/32
+			
+			route-map cost permit 10
+			match ip address prefix-list pr-8888
+			set community cost igp 1 100 (igp here mean 129 or poi)
+
+			better use this development on many links usauge without multipathing and same condition till level 8
+
+			if use same community id set values
+			if use different community id set lowest community id
+
+			if one link doesn't have cost set > 2^32 / 2
+
+			poi 
+				128 (pre best path before weight applicated in mpls)
+				129 (checks here)
+
+			poi 128 :
+				if have mesh in physical and logical bgp
+				dual link to another as
+
+				ip prefix list pr-1111 permit 1.1.1.1/32
+
+				route-map cost permit 10 
+				match ip address prefix-list pr-1111
+				set excommunity cost pre-best-path 1 100 (1 > cost , 100 > value)
+
+				route-map cost permit 10 
+
+				now use another way to reply packets 
+
+			router bgp 1
+			bgp best-path cost-community ignor (disable cost community)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	private as :
+		sh bgp ipv4 unicast neigh
+			show us capability of four octed as-number
+
+		private as-numbers get ommit from packets in nat
+
+		neighbor 1.2.3.4 remove-privateas all-replace (instead of ommit private as replace with public as like them count) (add to tci link from isp)(just add on ebgp)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	dynamic bgp peer group :
+		route reflector
+
+		router bgp 1
+		bgp listen limit 10 (how many connect to)
+		bgp listen range 192.168.0.0 255.255.0.0 peer-group a
+		neighbor a peer-group
+		neighbor a remote-as 1
+		neighbor a route-refelctor-client
+
+		*each client wants join us must be on 192.168.0.0/16
+
+		rr listen on passive mode 
+		if enable on 2 router in same time can't be neighbor
+
+		in bgp states we have tcp in initial mode to make negotiation faster than before
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	ebgp dynamic peer :
+		router bgp 1
+		bgp listen limit 10 (how many connect to)
+		bgp listen range 192.168.0.0 255.255.0.0 peer-group a
+		neighbor a peer-group
+		neighbor a remote-as 1
+		neighbor a route-refelctor-client
+
+		neighbor a remote-as 2 alternative-as 2 3 4 5 6 
+
+		* accept which as requests
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bgp max prefix :
+		a security module for bgp is count of recieved routes to defnse on attacks
+
+		router bgp 1
+		neighbor 1.2.3.4 max-prefix 5 50 warning-only
+
+		neighbor 1.2.3.4 max-prefix 5 50 restart 1 (means aafter 1 minutes waiting if see same condition reet connection)(do this till corect and good information provides)
+
+		on 75 percent send logs
+
+		sh bgp ipv4 unicast neighbr 
+
+		if recieved more than normal reset connection
+		till we restart that
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bgp max as :
+		router bgp 1
+		bgp maas-limit 1-254
+		sh bgp ipv4 unicast
+
+		here if prepend as deploye can ommit them and in bgp must use multisession  capability
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	multisession capability :
+		use dual stack deployment in network like ipv4 and ipv6
+		address damilies type
+		vpnv4
+		vpnv6
+		l2tp vpn
+
+		in bgp sessions we can send many address families and clear process didn't effects on each seperated families
+		must set in 2 side of configuration 
+		after 2016 we use this feature
+
+		router bgp 1
+		neighbor 1.2.3.4 transport multisession
+		neighbor 1.2.3.4 transport singlesession
+
+		router bgp 1
+		address family ipv4
+		neighbor 1.2.3.4 activate		
+		neighbor 1.2.3.4 remote-as 2
+
+		address family ipv6
+		neighbor 1.2.3.4 activate
+		network 2001:db8::1/64
+
+		sh bgp ipv4 unicast summary
+		sh bgp ipv6 unicast summary
+
+		even if it has a tcp connection it comes and disconnects all sessions
+		inside the tcp connection use multi channel connection
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	multi protocol :
+		in nlri we can send ipv 4 and ipv6 together
+
+		ipv6 unicast routing
+		router bgp 1
+		neighbor 1.2.3.4 remote-as 1 (for ipv4 activate command get automatic inject)
+
+		address family ipv6 unicast
+		neighbor 1.2.3.4 activate
+		network 2001:db8:12::\64
+
+		here we have session in single mode and send v4 and v6 together on it
+
+		sh bgp ipv6 unicast
+			in ipv6 we have nexthop on mapped ipv6 and not so applicated
+
+		route-map nh permit 10
+		set ipv6 nexthop 2001:db8:1:12::1
+
+		router bgp 1
+		neighbor 192.168.1.2 route-map nh out
+
+		here we convert our nexthop ipv6 mapped mode to dedicated interface ipv6
+
+		here we have one session in ipv4 mode and transfer ipv4 + ipv6
+
+		in nlri on ipv6 mode :
+			mp reach nlri (open)
+			mp unreach nlri (withdrawn)
+
+		we have better soloution to deploye
+			router bgp 2
+			neighbor 1.2.3.4 remote-as 1
+			neighbor 2001:db8:1:12::1 remote-as 1
+
+			address-family ipv6
+			neighbor 2001:db8:1:12::1 activate
+
+			address-family ipv4 	
+			neighbor 1.2.3.4 activate
+
+			here we have 2 seperated session on bgp connection
+
+		we can use link local ipv6 address to make connection
+			router bgp 1
+			
+			neighbor 1.2.3.4 remote-as 2
+			address-family ipv4
+			network 5.6.7.8 mask 255.255.255.0
+
+			neighbor fe80::2%fast0/0 remote-as 2 (must use ip + egress port format)
+			address-family ipv6
+			neighbor fe80::2%fas0/0 activate
+			network 2001:db8:1:1::/64
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	route dampening :
+		each change in bgp effects on world routers with bgp connection
+		reflect on internet
+		route dampening is defnsive way 
+		if we recieve many changes with shot interval updates means we are on attack
+		when enabe this feature start counting changes
+		for each address do this
+		use penallty term to negative scoring on damping
+		each change increase 1k score
+		penallty is not changeable
+
+		withdrawn use for bgp ommiting records on table 
+		withdrawn shows in ri with term h meeans history
+		for penallty use 1k value and this is ok , we can use supress time (is changeable) in default is 2000 if reach thiis should ommit it
+
+		each seconds decrease penallty value
+		after decreasing we can ommit history mode nd reuse it
+		if didn't reach to 0 must be on history type 
+		under 2k is ok above this value must supress
+		h > dampening (d)
+
+		reuse limit > a range for stable penallty usage
+
+		if our routes get flapping or down or u in short interval get ommit
+
+		half life > how long does it take to get half normally in 15 minutes penallty get half value (changeable)
+
+		max suppress time > maximum time a record could be down (default is 1 hour) if a record get down increase penallty value after stability in maximum time like 1 hour get damp net get free and be useable
+			router bgp 1
+			bgp dampening
+
+			sh bgp ipv4 unicast dampening
+			sh bgp ipv4 unicast dampening  + dampened-paths / flap-statistics / parameters
+
+			sh bgp iipv4 unicast (show history)
+
+			debug ip bgp dampening
+
+			bgp dampening 10 1000 2000 30
+				10 > halflife
+				1000 > reuse
+				2000 > suppress
+				30 > max suppress
+
+			must use lowest values for dns servers > supress 3000 + max suppress 30 min + halflife 10 + reuse 3000
+
+			ip prefix-list pr-5556 permit 5.5.5.6/32
+
+			route-map damp permit 10
+			match ip address prefix-list pr-5556
+			set dampening 5 1000 2000 20
+
+			router bgp 1
+			bgp damp route-map damp
+
+			clear ip bgp flaping-statictists
+			clear bgp ipv4 dampening
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	dynamic peer group update :
+		for each update make a one package then transfer it to other
+		with this method use lower load than ago
+		make one peer and copy our settigns to transmissions
+
+		router bgp 1
+		neighbor test peer-group
+		neighbor test remote-as 1
+		neighbor 1.2.3.4 peer-group test
+		neighbor 5.6.7.8 peer-group test
+
+		sh bgp ipv4 unicast (advertise update group)
+
+		sh ip bgp update-group summary / 1.2.3.4 /index
+
+		sh ip bgp replication index / 1.2.3.4
+
+		clear ip bgp update-group 1.2.3.4 / index
+
+		ebgp use 30 seconds for peer groups
+
+		in dynamc peer grup we can use newest mechanism in inteligent mode detect same policy and contents so make them in group then deploye them
+
+		classify configs > peer groups > update group > compy to many
+
+		peer group doesn't applicate for cpu just for config is powerfull
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	dynamic update group cache size :
+		cisze
+		1- one sesion between bgp and routers make update transfering
+		2- we advertise network in import scanner or network commands
+		3- change prefixes
+		4- soft reconfiguration
+		5- clear ip bgp * soft (or use route reflectoor to recieve latest changes)
+		6- same config or policy (first make for leaders then advertise to others)
+
+		each 60 seconds
+
+		sh ip bgp update-group
+		sh ip bgp replicate
+
+		if need to create values for leaders update inject them in cache size memory
+		impelements in cache size memory then advertise it
+		innormal mode we use 1000 value in csize if get full don't send any thing
+		if need more csize must inject high capacity flash memory
+
+		other name of size is queue depth
+
+		better use csize for route reflector with higher flash memory
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bgp table version :
+		32 bit
+		used for conovergence
+
+		bgp version :
+			bgp table (itself table)
+			rib (itsefl table)
+			peer
+			prefix
+
+		sh bgp ipv4 unicasat summary
+			each network or prefix injection change version table number or value
+			each 30 seconds bgp vesrion table get update
+			if neighbors get shutdwn version table goes to value 1
+			then get runing tur 1 to u term
+
+		sh ip bgp 1.1.1.1 
+			show version in prefix means which version has which effects 
+			peer version means accept which of them
+
+			scan time interval means  nexthop changes must checked in 60 seconds interval
+				whole bgp table get check in this timing with dampening ,.....
+
+				router bgp 1
+				bgp scan-time 30
+				sh ip bgp summary
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	improve convergence :
+		correct updates and transfers with ack will be done
+
+		sh ip bgp summary 
+			part in or out queue must use value 0 to show us our topology is correct
+
+		path mtu discover (pmtu)
+			ip tcp path-mtu-discovery
+			int fas 0/0
+			mtu 1500
+
+			ip header nd tcp header  > 20 + 20 > 40 
+			1500-40 > 1460
+
+			bgp update packet size > 1460
+			in old version don't use maximum packet size and use > 536+40> 576 byte 
+			in new ios use 1500 or 1460 buyte
+
+			bgp update > tcp > segment > maximum segment size(data)
+
+			with path mtu discovery we can use correct mtu to detect the all path mtu for bgp
+			with pmtu test many mtu values to detect best mtu size 
+			use defragment attribute in tcp till fragmentation effects gett rellax (tcp tools)
+
+			ip tcp path-mtu agetime 2  (check each 2 minutes)
+			ip tcp path-mtu agetime infinit
+
+			if use ios above 15 this feature is enable by default
+
+			sh ip bgp neighbor | include max data
+
+			bgp transport path-mtu-discovery
+
+		each packet in bgp use acknowledge if didn't recieve th ack send agian
+		each interface has queue
+		process in order
+		use 75 packets in queue if get full ack reply didn't happen and get in trouble
+		better set higher capacity of queue
+
+		interface serial 0/0/0
+		hold-queue 1000 in
+		hold-queue 1000 out
+		clock-rate 64000
+		load-interval 30 (sec)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bgp advertise time :
+		in some intervals we have update transferring
+
+		router bgp 1
+		neighbor 11.2.3.4 advertise-interval 40 
+			internal routers were use 5 seconds delay to send but now immediate action happen
+
+		sh ip bgp neighbors
+		sh proces cpu
+
+		process :
+			open
+				tcp session > bgp get start
+
+			i\o
+				queue and process of open packet and update also keep alive 
+
+			scanner
+				bgp table + nexthop reachability + conditional advertise
+
+			router
+				best path selection each 1 second
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	dynamic refresh update group :
+		a newest feature to use peers table version for high performance and convergence
+		transfering some parameters in peer group may get trouble our topologies
+		revision checks in some order
+			lowest numbers take a group number ten sync with highest revision numbers
+			then all routers get sync agian
+
+			if in this process some routers send route refresh and use revision with version 0 what should we do ?
+				with dynamic refresh set this router out of the group then inject it to dynamic refresh group with another process id
+				sync the last group then process this version 0 
+				inject newest or converted group to others
+
+				60 seconds set waiting for route refresh and verwion 0
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bpg slow peers :
+		if use lower cpu capacity for router 
+		must set window sizing in lower than others on tcp session
+			recieve window = recieve buffer (last byte recieve - last byte read)
+
+		if need separate processing these type routers :
+			static mode
+				router bg 1
+				neighbor 1.2.3.4 slow-peer split-update-group static
+
+			dynamic mode (by default is enable)(turn back to others fter problem solving)
+				bgp slow-peer split-update-group dynamic
+				bgp slow-peer detection threshold 300 (default)
+
+			protection mode (don't turn back to others must get clear)
+				bgp slow-peer split-update-group dynamic permanent
+				clear ip bgp update-group summary slow
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	hide local as-number :
+		use hidden as or use another as nuber to internet
+		this feature used for isp aggregation
+
+		router bgp 1
+		neighbor 1.2.3.4 remote-as 5
+		neighbor 1.2.3.4 local-as 65004 noprepend / replace-as / dual-as
+
+		better use image
+
+		r1 and r3 (customer side)
+			router bgp 65000
+			network 180.0.1.0 mask 255.255.255.0
+			neighbor 180.0.15.5 remote-as 65004 (ols isp as-number)
+
+		r7
+			router bgp 65005
+			neighbor 6.6.6.6 remote-as 65004
+			neighbor 6.6.6.6 update-source loop0
+			neighbor 6.6.6.6 ebgp-multihop 2
+
+		r9 is route reflector (connect old and newest isp together)
+
+		r2
+			router bgp 65001
+			network 180.0.2.0 mask 255.255.255.0
+			neighbor 180.0.25.5 remote-a 65005 (new isp as-number)
+
+		r5 (use for r6) (run igp between r6 and r5 with  ospf) (r5 and r6 are pe (provider edge))
+			router bgp 65004
+			neighbor 180.0.15.1 remote-as 65000
+			neighbor 180.0.25.2 remote-as 65001
+
+			neighbor 6.6.6.6 remote-as 65004
+			neighbor 6.6.6.6 update-source loop0
+			neighbor 6.6.6.6 nexthop-self
+
+			neighbor 8.8.8.8 remote-as 65005
+			neighbor 8.8.8.8 update-source loop0
+			neighbor 8.8.8.8 ebgp-multihop 2
+
+		between old isp and newest isp must run igp with same are or redistribute on bgp some routes
+
+			neighbor 180.0.15.1 local-as 65005 (change as number in open packets)
+
+			sh bgp ip v4 unicast (say add prepended as on packets)
+
+		customes can use new isp as-number ?
+			cause we have 2 as number in isp and r5 say 
+				65001 65005 65004
+				here use 65005 and newest isp is on 65005 
+				our packets get drop
+				we can say r5 don't prepend
+
+			r5
+				router bgp 65004
+				neighbor 180.0.25.2 local-as 65005 noprepend
+
+					no can inject routes to igp and ibgp we can set replace mode to applicate in some were
+
+				neighbor 180.0.25.2 local-as 65005 noprepend replace-as
+					replace with r5 as-number
+					inject to igp and ibgp
+					works on updates 
+
+			r5		
+				router bgp 65004
+				neighbor 180.0.25.1 loacl-as 65005 noprepend replace-as dual-as
+					means work on 65005 and 65004
+					migrate all users to 65005
+					then ommit 65004 from other pe 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	single homed :
+		one link on isp
+
+		r3 is customer and use no bgp + use pat
+			ip route 0.0.0.0 0.0.0.0 192.168.113.1 (isp edge ip)
+			
+			int fas 0/0
+			nat inside
+			int fas 0/1
+			nat outside
+
+			access-list 3 permit 192.168.3.0 0.0.0.255 any
+
+			ip nat pool cu1 1.1.1.0 1.1.1.3 mask 255.255.255.252
+
+			ip nat inside source list 3 pool cu1 overload
+		----------------------------------------------------------------
+		r4 (use pat + private ip and private bgp as numbers)
+			int fas 0/0
+			nat inside
+			int fas 0/1
+			nat outside
+			
+			access-list 4 permit 192.168.4.0 0.0.0.255 any
+
+			ip nat pool cu2 1.1.1.4 1.1.1.8 mask 255.255.255.252
+				
+			ip nat inside source list 4 pool cu2 overload	
+
+			router bgp 64512
+			network 1.1.1.4 mask 255.255.255.252
+			neighbor 192.168.14.1 remote-as 1
+
+			ip route 1.1.1.4 255.255.255.252 null 0 (if write this our isp doesn't need write default route)
+		----------------------------------------------------------------
+		r5 (use private as and public ip)
+			router ngp 64513
+			neighbor 192.168.15.1 remote-as 1
+			network 2.0.0.0 mask 255.0.0.0
+		----------------------------------------------------------------
+		r1 (isp pe)
+			part cu1 :
+				ip route 1.1.1.0 255.255.255.252 192.168.13.3
+	
+				ip route 1.1.1.0 255.255.255.0 nul 0 (isp aggregation for customers ip range)
+	
+				router bgp 1
+				network 1.1.1.0 mask 255.255.255.0
+				neighbor 192.168.12.2 remote-as 2
+				neighbor 192.168.12.2 remove-privateas 
+					*now advertise all rnge 1.1.1.0/24 to isp number 2
+
+			part cu2 :
+				router bgp 1
+				neighbor 192.168.14.4 remote-as 64512
+				neighbor 192.168.14.4 default-originate route-map rm-default
+
+				ip prefix-list pr-default permit 192.168.12.0/24
+
+				route-map rm-default permit 10
+				match ip address prefix-list pr-default
+					*till have link connectivity to isp 2 or ict advertise default route
+
+			if use ip from isp means we are provide assign (provide use aggregation or summary for them)
+			if use owned ip address means provider independent (provider just use specific subnetmask)
+
+			part cu3 :
+				router bgp 1
+				neighbor 19216815.5 remote-as 64513
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	static route propagation :
+							provider assign 			provider independent
+						-----------------------		--------------------------	
+		advertise 									+					+				
+
+		qos				gold 			normal 		gold 			normaml
+		
+		tag 			200 			100 		201 			101
+		
+		community 		1:2 			1:1 		1:4 			1:2
+
+		1:1 & 1:2 is noexport mode
+
+		p router (r1) > route reflector isp as-1
+		pe roouters (r2-5) isp as-1
+		customer routers (r6-11) as is same router id
+
+		on pe routers :
+			r2 > ip route 1.1.1.0 255.255.255.252 192.168.26.6 tag 100
+			r3 > ip route 1.1.1.4 255.255.255.252 192.168.37.7 tag 200
+			r4 > ip route 1.1.1.8 255.255.255.252 192.168.48.8 tag 101
+			r5 > ip route 1.1.1.12 255.255.255.252 192.168.59.9 tag 201
+
+			r2 :
+				route-map a permit 10 (better don't write line 20)
+				match tag 100
+				set community 1:1 noexport (advertise in as not more)
+
+				router bgp 1
+				neighbor 1.1.1.1 route-map a out (rid p router of isp 1.1.1.1)
+					or
+				redistribute static route-map a
+				neighbor 1.1.1.1 send-community
+				network 1.1.1.0 mask 255.255.255.252
+
+				ip route 1.1.1.0 255.255.255.252 nul 0 (get advertise cause no tag detection)
+
+				*do for another pe with different tag values
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	floating static route :
+		from one isp we have 2 link use for backup eachother
+		use static route between isp and customer
+		we can use ad like 250 for static route when igp in customer lan is deployed
+		ospf use for client side igp
+
+		r4 and r5 are clients router side in edge of organizaton
+			r4 
+				ip route 0.0.0.0 0.0.0.0 192.168.14.1
+
+			r5 
+				ip route 0.0.0.0 0.0.0.0 192.168.25.2 250
+
+			r6 use r4 to reach any where
+
+		router ospf 2
+		default-information originate
+
+		r3 is p router in as 1 or isp and use ibgp inside the area
+		r2 and r1 are pe routers
+			r1
+				ip route 6.6.6.6 255.255.255.255 192.168.14.4 tag 100
+
+			r2
+				ip route 6.6.6.6 255.255.255.255 192.168.25.5 tag 100 250 (ad is 250)
+
+		router bgp 1
+		redistribute statics
+
+		if r1 get trouble r2 take traffic controll and forward it but in r1 backing to circute get non preemtive action
+		cause in bgp a path use weight 0 is higher priority and trouble is here
+
+		best practice is :
+			r2
+				route-map change-weight permit 10 
+				match tag 100
+				set weight 0
+				set lcoal-pref 50
+
+				router bgp 1
+				redist static route-map change-weight
+
+				ip route 0.0.0.0 0.0.0.0 192.168.25.5 tag 100
+
+			here afte r1 backing to circute checks weights if be same lcoal-pref get check and use r1 again
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bgp peer template :
+		we have inheritance and objective mode for policy and sessions
+
+		session
+			router bgp 2
+			template peer-session gt
+			timers 50 150
+			paswword cisco123
+
+			template peer-session dt
+			description direct
+			inherit peer-session gt
+
+			template peer-session it
+			ebgp-multihop 2
+			update-source loop0
+			inherit peer-session gt
+
+			sh ip bgp template peer-session
+
+			router bgp 2
+			neighbor 192.168.12.2 inherit peer-session it
+			neighbor 192.168.12.2 inherit peer-session dt
+
+		policy
+			router bgp 2
+			template peer-policy a
+			default-originate
+			neighbor 1.2.3.4 inherit peer-policy a
+
+			ip prefix-list deny-a deny 0.0.0.0/0 le32
+			
+			template peer-policy a1
+			inherit peer-policy a 10 (sequnce number)
+			prefix-list deny-a out
+
+			sh ip bgp template peer-policy
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	route reflector + full mesh rr client
+		used for ibgp
+		if one router in as with route reflector use full mesh with another routers 
+		is not necessary to inform routes with rr better use that router created full mesh connectivity
+		so better disable client to client reflection with rr
+		r1(rr)
+			router bgp 1
+			no bgp client-to-client reflection
+
+			here rr give access to fullly mesh topology on bgp to inform each other
+			rr inform in specific times but here just clients have roll
+
+			here non clients can use rr but rr between clients don't do any thing
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	multi cluster id :
+		mcid
+
+		in topology we have rr like r1 an d use bgp connection with all nodes except r6 that is nonclient
+		all nodes are in same cluster id
+
+		in some topologies we have 2 time and  repeated informs
+		better ay to manage informing data between rr and clients when spliti horizen is disable in bgp 
+			sh ip bgp cluster-id
+				mode 1 :
+					bgp client-to-client reflection
+
+						BGP client-to-client reflection:         Configured    Used
+  						all (inter-cluster and intra-cluster): ENABLED
+ 						intra-cluster:                         ENABLED       DISABLED
+
+ 						**send to all nodes
+
+ 				---------------------------------------------------------------------------------
+				mode 2 :
+  					no bgp client-to-client reflection
+
+						BGP client-to-client reflection:         Configured    Used
+  						all (inter-cluster and intra-cluster): DISABLED
+ 						intra-cluster:                         ENABLED       DISABLED
+
+ 						**r1 is rr  for nonclients send update other routers send to each other but on intra cluster r5 can't see r2 and r3 aslo r3 can't see r4+r5
+ 							r7 doesn't have any routes
+ 							r6 have all routes
+ 							if r4+r5 be on cid x and r2+r3 be on another cid could see eachother
+
+ 		cid is like peer group ;
+ 			r1
+ 				neighbor 192.168.12.2 cluster-id 23
+ 				neighbor 192.168.13.3 cluster-id 23
+
+ 				neighbor 192.168.14.4 cluster-id 45
+ 				neighbor 192.168.15.5 cluster-id 45
+
+ 				no bgp client-to-client reflection any 				
+ 					or
+ 				no bgp client-to-client reflection cluster-id 23
+
+ 				bgp client-to-client reflection
+
+ 				sh ip bgp cluster-id
+ 					mode 3 :
+ 						BGP client-to-client reflection:         Configured    Used
+  						all (inter-cluster and intra-cluster): ENABLED
+ 						intra-cluster:                         DISABLED      DISABLED
+
+ 					r7 + r6 is full and don't use rr mechanism in cid 23 and 45
+
+ 			now our updates get change cause use cid for internal updates and use them for drop repeated packets
+ 			if pass between clusters should use their cids but nonclients or no cluster clients must use global cid
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bgp selective route downloadable :
+		usefull in rr
+		is not in traffic flow pathjust define nexthops
+		off path rr
+		dedicated rr
+		out of bound rr*
+
+		works better on this
+		with rr we can set which routes comes into thebgp table like filtering
+		we can use forwarding capability
+
+		in route map define needed routes and deny rest of them
+
+		route-map deny-filter deny 10
+		router bgp 1
+		address-family ipv4 
+		table-map deny-fiter filter
+
+		base on this route map inject routes to rib
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bgp diverse path + shadow rr :
+		rr use best path between all recieved routes and paths
+		maybe use not suit way so better change it
+		maybe need multipathing in bgp in rr just set one way to forward
+
+		shadow rr use routers update to define path but every rr use best path so we have same problem !
+		must se second or x path to reach destination or route
+		additional path (access us use multipathing)
+
+		on shadow rr
+			router bgp 1
+			bgp additional-path select backup (select)
+			neighbor 3.3.3.3 advertise diverse-path backup (send)
+
+			sh ip bgp
+				see b term means backup with shadow rr
+
+		maybe we have many best path
+		on shadow rr
+			router bgp 1
+			bgp best-path igp-metric ignor
+
+			in some scenarios we have noncolocated mode and igp-metric is effectve on this type so must use this command to enable multipathing and features
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bgp shadow session :
+		for each rr we should use bacup or shadow rr in real world means use real router with high spec
+		shadow session means use one router with shadow rr mechanism works on route reflector device
+		we should use loop back interfaces to make connection with them
+		config shadow rr on loop interface on rr device
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	bgp route server (ixp) :
+		internet exchange point
+
+		a place that many isp connect to each other
+		like rr but have diffrences
+		must use ios above 15.2
+
+		on server
+			neighbor 1.2.3.4 route-server-client
+		
+		on client
+			router bgp 1
+			no bgp enforce-first-as (don't set the first as number in packets to solve problem)
+
+				if don't use this recieve notofocations
+				works on transparent model like
+				diffrences between ebgp and this > server as number get hide and didn't inject
+				like rr
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	route server context :
+		define some filter and context on isp and ixp
+
+		router bgp 1
+		route-server-context a-context
+		address-family ipv4 unicast
+		import-map as65000
+
+		route-server-context b-context
+		address-family ipv4 unicast
+		import-map as65001
+
+		ip as-path access-list 1 permit _65000_
+		ip as-path access-list 2 permit _65001_
+
+		route-map as65000 eprmit 10 
+		match as-path 1
+
+		route-map as65001 eprmit 10 
+		match as-path 2
+
+		sh  ip bgp route-server context a-context (virtual bgp table)
+
+		router bgp 1
+		neighbor 1.2.3.4 route-server-client context a-contex
+
+		debug bgp ipv4 unicast route-server client/context/event/import/policy deals
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	allow as :
+		ignor bgp protection on mpls 
+		ignor bgp loop prevention 
+		if we have 2 branch in 2 different place and use another as between them if see repeated and same as number access it
+
+		router bgp 1
+		neighbor 192.168.23.2 allow as-in 1-10(count of repeats)
+
+		if ict bee on 2 branch connectivity , ict forward our as number to branch and branch drop our repeated as so with this we can get relaz
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

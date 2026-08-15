@@ -1,0 +1,1325 @@
+ccnp route :
+Common :
+	in detection of next hop must set ip address beacuse some times in some networks arp proxy doesn't work.
+	so with interface we have problem on next hop detection (also in point to multipoint networks)
+
+	what is asn :
+		the scope of management in isp
+		in isp use isis routing protocols for handling more routers and use many bgp
+
+	it's better write our acls  in distribute layer
+	backbone layer is routing layer
+	edge layer if be inside our organizatioin must run routing protocols
+		we can se default route or bgp on edge
+
+	the reasons of choosing a routing protocol :
+		1 - scalability (it's better use ospf)
+		2 - vendor (eigrp works better on cisco)
+		3 - employee knowledge
+		4 - speed of conergence (eigrp is fastest)
+		5 - summarlization
+		6 - inside or outside of organization
+		7 - options of drp (dynamic routing protocol)
+
+	anycast :
+		in ipv6 we can set same ip in many places and don't have broadcast , have multicast
+		224.0.0.2 > all routers
+
+	nbma :
+		none broadcast multiaccess
+		has 2 proble:
+			first : split horizon
+				on nbma networks we have point to multipoint topology
+				on one interface we must learn and advertise networks
+				in split horizon law if learn some network on same interface cannot advertise it to another device on that interface
+				for solve proble must set this command on shared interface :
+					ip splite-horizon eigrp 100
+
+			second : designated router in ospf game
+				in ospf we use dr and bdr 
+				these options doesn't work on serial or nbma networks beacuse has lowes priority (0)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Routing protocols :
+	in windows we can set routes
+		route print 0.0.0.0 0.0.0.0 192.168.2.1
+
+	the priority of device connection (interfaces / ip / ...) is higher than others
+
+	what is ad?
+		administrative distance
+
+	default value of ad in cisco for local connections are number 1
+	if change this value device see static route then shows it in routing table
+	what is default route ?
+		ip route 0.0.0.0 0.0.0.0 192.168.1.1
+		this line means if users (here users meanns their traffics and packets) in stub area needs to go every whre with every mask goes to 192.168.1.1
+		shows witch * and the gateway of last resort
+
+	what is the longest prefix match ?
+		 refers to an algorithem used by routers in Internet Protocol (IP) networking to select an entry from a routing table.Because each entry in a forwarding table may specify a sub-network, one destination address may match more than one forwarding table entry. The most specific of the matching table entries — the one with the longest subnet mask — is called the longest prefix match. It is called this because it is also the entry where the largest number of leading address bits of the destination address match those in the table entry.
+
+	static route is fast and light weight way to have routing in our router but non-usefull in definantion too many networks
+	used in stub area , if you are in enterprise place must run dynamic routing protocols
+
+	dynamic routing protocols :
+		in dynamic routing protocols we use wilde card mask for subneting
+		igp (interior gateway protocols) :
+			distance vectors (stupid and slow - hop count) :
+				rip :
+					has 2 version (1 - 2)
+					next generation (ng) use for version ipv6
+				
+				igrp :
+					cisco exclusive
+
+			link-state (smarter):
+				ospf
+				isis
+
+			hybrid :
+				eigrp :
+					define in 2013 by cisco
+					2016 get standard
+					devices used eigrp must be cisco
+					this protocol is advance
+
+		egp (exterior gateway protocols) :
+			path vector :
+				bgp
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+RIP :
+		router rip
+		network 192.168.1.1
+		network 10.10.10.0
+
+		microsoft also publish a version of this
+		each 30 seconds sends to eachother fully update
+		works on port udp 520 
+		network command in rip just add class full subnets not in classless and our opinion
+		after 180 seconds clear from routing table then after 240 seconds clear from cache if don't recieve updates from specific route
+
+		show ip protocol 
+
+		for solving network and subnets problem must set these :
+			router rip
+			version 2
+			no auto-summary
+
+		broadcast mac converted to multicast mac :
+			ip : 224.0.0.9
+			mac : 0100.5e00.0009
+
+			version 1 is broadcast
+			verion 2 is multicast
+
+			ad number in rip is 120
+			for redundancy and static route must set ad 121 in routing tables , if rip interface and networks get down our static route can be enable.
+
+		15 hop in rip is maximum number of hubs can be handle if get 16 means our connection get break.
+
+		some times we need disable advertisement to some interfaces :
+			router rip
+			passive interface gig0/0
+
+		we can handle passive interface like this :
+			router rip
+			passive interface default
+			no passive interface serial 0/0/0
+
+		for advertise default gateway in networks :
+			default information originate
+
+		splite horizon role can help us to solve some problems like:
+			repeated advertisements on same interface
+
+		rip use too many bandwidth
+
+		RIPNG :
+			in this verson we can set name 
+
+			ipv6 router rip myrip
+			interface gig0/0
+			ipv6 rip myrip enable
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+EIGRP :
+		has 5 keys :
+			delay 
+			bandwidth
+			load
+			reliablity
+			mtu
+
+			the delay and bandwidth is important fo best path selection
+			eigrp works on port 88 and ip 224.0.0.10 multicast
+
+			in some media (medai means interface) :
+				5 , 15 seconds hello and dead time are used in 1.5 mbps and higher
+				60 , 180 seconds hello and dead time are used in 1.5 mbps and lower
+
+		has formula :
+			256*((10 pow 7 / minimum bandwidth in kbps) + (total delays / 10))
+
+		router eigrp 10
+		network 10.10.10.0 0.0.0.255
+
+		number 10 in router eigrp 10 is process id 
+		if in network definantion we insert class fully , in running config we cann't find the wild card mask
+		in routing table we can find it with D word 
+		d in routing table stands for doal
+		doal means diffused update algorithm 
+
+		ad number in eigrp is 90 and 170 
+		90 > inside route
+		170 > outside routes injected to device
+
+		if we want see the delay of bandwidth must goes to :
+			show interface g0/0
+
+		in cisco each value take for delay get multiple with 10.
+		loopback :
+			bandwidth 8000000 
+			delay 5000
+
+		show ip eigrp neighbor
+		show ip eigrp topology
+		show ip eigrp topology all links
+
+		RD & FD in eigrp :
+			if found p word in eigrp means passive and a means active
+			active is unstable state for device 
+
+			fd stands for fesable distance
+				the distance between us and a source  
+				calculate like the eigrp formula
+
+			reported distance
+
+		in eigrp we don't have algorithem instead of algorithem we have backup links
+		in this formula a router has a distance to destination and knows the distance
+		transfer this number and value to next router then add a another value to past value
+		next hop tp destination
+
+		fd > rd :
+			this formula give us non loop way
+
+		in eigrp we have unequal load balancing (unrole load balance)
+
+		variance :
+			for unequal load-balance must set fd in x1 or x2 value to play other interfaces in eigrp game.
+				router eigrp 
+				variance 2
+
+			in this state variance add backup-links to eigrp game and other links get hide
+
+		if all links get down with query and replay in eigrp we find new way to our destination routes (state of eigrp goes to active from passive)
+		in 180 seconds must give answer altho didn't find a way must say no way in this router...
+
+		in priviledge mode :
+			debug eigrp packets
+
+		percent of using bandwidth in eigrp :
+			int serail 1/0
+			ip bandwidth-percent eigrp 100 20
+	
+		key chain :
+			en
+			conf t
+			hostname r2
+			key chain test
+			key 1
+			key-string cisco 
+			exi
+			int gig0/0
+			no sh
+			ip hello-inter eigrp 100 3
+			ip hold-time eigrp 100 9 (for dead time in eigrp we use 3x timing)(times changing make effects on front side point)
+			ip authenti mode eigrp 100 md5
+			ip authenti key-chain eigrp 100 test
+			ip add 100.100.100.2 255.255.255.0
+			router eigrp 100
+			no auto
+			network 100.100.100.2 0.0.0.255
+			network 192.168.1.0 0.0.0.255
+			exi
+
+		after set key chain and authentication must set these commands to reload eigrp neighborship :
+			priviledge mode :
+			clear ip eigrp 
+
+		sla and track :
+			sla is service level aggriment 
+			this feature ping a destination and detect bad points then can switch in pbr or track option between isp
+
+			ip sla 1
+			icmp-echo 100.100.100.2 source interface gig0/0
+			frequency 5
+			exi
+			ip sla schedule 1 start-time now life forever (start from no to infinit time)
+			track 1 ip sla 1 (for sla usage mus set track)
+			exi
+			do sh ip sla statics
+			do sh track
+				we can use track and static route together :
+				ip rouet 0.0.0.0 0.0.0.0 100.100.100.2 track 1
+
+		offset list : 
+			offsetlist is soloution of stuck in active (sia)
+				use for large scale network
+				we have unequal load balance with varinace parameter
+			en
+			conf t
+			hostname r1
+			int loop 5
+			ip add 192.168.5.1 255.255.255.0
+			int loop 6
+			ip add 192.168.6.1 255.255.255.0
+			int gig0/2
+			no sh
+			ip add 192.168.13.2 255.255.255.0
+			exi
+			int gig0/1
+			no sh
+			ip add 192.168.23.2 255.255.255.0
+			exi
+			router eigrp 100
+			network 0.0.0.0 
+			exi
+			access-list 1 permit 192.168.5.0 0.0.0.252
+			router eigrp 100
+			offset-list 1 in 10 gig 0/2 (direction can be in or out , after this parameter we have value like 10 , 10 add to fesiable distance) 
+			varianc 2
+		
+		in eigrp we have query and replay in ios 12 wait for 3 min and in 12 upper wait for 90 seconds we can use backups :
+			offsetlist
+			stub routers in eigrp or end devices 
+			summarization
+		
+			in eigrp connected networks and summarized networks are in head but we can add others like stub
+
+		route filtering :
+			some times we don't like learn some netwoks wecan use this but route map has another special task 
+				directions :
+					in > don't learn it or don't accept it
+					out > don't advertise it
+			
+					we can set it in interface or set in global
+	
+				route filtering (access-list):
+				access-list 2 deny 192.168.0.0 0.0.3.255 
+				access-list 2 permit any
+				router eigrp 100
+				distribute-lis 1 out gig0/2 (if crop our command on out set our policy on entire interfaces if get continue and set interface aplied on that ) 
+				
+				route filtering (prefix-list): 
+					it's better than acl
+				ip prefix-list blk2627 deny 192.168.1.0/24 ge 26 le 27 (greater than less than subnets)
+				ip prefix -list blk2627 permit 0.0.0.0/0 les 32
+				router eigrp 100
+				distribute-list prefix blk2627 out 
+				
+				route filtering (route-map):
+				access-list 1 permit 192.168.1.0 /24
+				route-map blk2 deny 10
+				match ip add 1
+				exi
+				route map blk2 permit 20
+				exit
+				router eigrp 100
+				distribute-list route-map blk2 out gig0/0
+	 	
+			discard routes :
+				this is not best practice to add summary in entire of router for solve problem must add on interface so use command at above but we have problem in routes ,the 		192.168.1.0/24 is not exist in routing table , must send it to null 0 then can use it and see it in routing table		
+			one of the other reasons for null 0 and discard routes is :		
+				in eigrp we can't detect loop back status (up / down) a		nd see each loop backs in seperated lines so must make it sensitive		
+					int gig0/0		
+					ip summary-a	dd eigrp 100 192.168.1.0 /24		
+		
+				after these we see routes on null 0
+		
+		frame-relay :
+		for behave like vlan use dlci tagging
+		it's better use 7200 series routers
+		use frame relay switches
+		
+		for disable inverse arp: 
+		int ser 1/0
+		no frame-relay inverse arp
+			invers arp is like arp in ethernet but advertise dlci tags between routers in nbma
+		
+		on this topology we can see router r2 an r3 from r1 but r2 and r3 can' see eachother , soloution:
+		
+		without splite-horizon :
+		int ser 1/0
+		no sh
+		encapsulation fame-relay (hdlc is encapsulation must get change to another capsulation)
+		no ip splite-horizon eigrp 100
+		
+		with splite-horizon and eigrp roles :
+		int ser1/0.1 multipoint (must set on sub interface to use spilite-horizen role)
+		ip add 100.100.100.1 255.255.255.0
+		exi
+		router eigrp 100
+		neighbor 100.100.100.2 serial1/0.1
+		
+		no auto recognization dlci :
+		int seria1/0.1
+		frame-relay map ip add 100.100.100.2 102
+		exi
+		
+		show frame-relay map
+		 
+		wide metric eigrp :
+		we can set name for eigrp in this version but asn is important
+		this is newest version of eigrp
+		old formula :
+					256*((10 pow 7 / minimum bandwidth in kbps) + (total delays / 10))
+						at this version how many our bandwidth and technology get improve the result of formula stuck n 256 
+		
+		new formula :
+					65535*((10 pow 7 / minimum bandwidth in kbps) + (total delays (pico)/ 10))		
+		
+		for convert old eigrp to new eigrp :
+		eigrp upgrade-cli
+		
+		for using wide metric eigrp:
+		router eigrp test
+		address-family ipv4 autonamous-system 100
+		network 100.100.100.0 0.0.0.255
+		
+		we have numbers in routing table , results are devided by 128 and shows to you:
+			sh ip protocol
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ospf :
+		neighborship is first phase to have relation and data transfering
+		in ospf each router has all network map
+		resource intensive
+		need to reload all algorithem if some links get down
+		in ospf we don't have loop cause have spilite-horizen
+		use lsdb (linklstate data base)
+		use lsu (link state update)
+		use lsa (link state advertisement)
+
+		rip > slow
+		ospf > fast
+		isis > fast (used in networks that contains more than 500 hop)
+		eigrp > very fast
+
+		bgp is scaleablity and need many connections to advertise the routes
+		but igp protocols need speed and convergency
+
+		before neighborshiping must send together hello packets
+		if just get connection this means 2way 
+
+		by default ospf send each 10 seconds hello packets if 4*10 seconds didn't recieve hello packets the connectivity get lost
+		these conditions are available in broadcast or p2p networks
+
+		hello packets are small packets not like rip fully update
+
+		in nbma network we send each 30 seconds and wait for 180 seconds for the answers
+
+		it's better set hello in 3 seconds or less and x4 for dead time.
+
+		in hello packets what can find ?
+			router id *
+			network mask * 
+			area id *
+			hello and dead times *
+			authentication *
+			router priority
+			dr/bdr ip address
+			neighbors
+
+			* are conditions that must be provide to make neighborship
+
+		ospf authentication types :
+			none
+			clear text (in organization between their own devices)
+			hash md5
+
+			clear text :
+			(area position) : area 1 authenticate 
+			(interface position) : ip ospf authenticate 
+			(define password) : ip ospf authentication key cisco
+
+			md5:
+			(area position) : area 1 authenticate  message-digest
+			(interface position) : ip ospf authenticate message-digest
+			(define password) : ip ospf message-diest-key 50 key cisco
+
+		if we want to have fully neighborship must et priority and router id
+
+		the algorithem in ospf named dijkstara
+
+		router ospf 1 (1 here is process id we can use many process id in one device)
+		router-id 1.1.1.1
+		network 192.168.1.1 0.0.0.255  area 0 (used wild card mask and areas to devorse our process and networks) 
+		network 8.8.8.8 0.0.0.0 area 0
+
+		ways of ospf config :
+		cisco recommended (subnets):
+		router ospf 1
+		netwrok 10.10.10.0 0.0.0.3 area 0
+
+		shirazi :
+		router ospf 1
+		netwrok 0.0.0.0 255.255.255.255 area 0		
+
+		valizade recommended :
+		interface gig 0/0
+		ip ospf 1 area 0
+
+		one by one bring to router :
+		router ospf 1
+		network 10.10.10.0 area 0
+
+		if define /32 network in ospf we get in truble ??? must set it in point-topoint mode
+			interface loopback 1
+			ip address 8.8.8.8 255.255.255.255
+			ip ospf network point-topoint
+
+		some times in ospf we need restart :
+			in priviledge mode :
+				clear ip ospf process
+
+		if we want to make our router id pingable must set loop back interface same our router id.
+
+		show ip ospf neighbor
+		show ip ospf database
+
+		in serial ports and nbma networks we have 0 priority
+
+		cost in ospf (refrence bandwidth (100mbps) / interface bandwidth)
+
+		cost for fast and gig interfaces are same > 100 means have load-balance
+		loopback cost is 1
+
+		we can change refrence bandwidth :
+			router ospf 1
+			auto-cost refers-bandwith 10000
+
+		we can change loopback cost :
+			ip ospf cost 100
+
+		ip > 224.0.0.6 give update
+			 224.0.0.5 send update to other
+
+		what is the area 0?
+			backbone area 
+
+		dr > designated router 
+		bdr > backup dr
+
+		dr is router with high priority
+
+		if have same priority goes to route-id  and make decision that wich one be dr
+
+		can change priority :
+			interface gig0/0
+			ip ospf	priority 3
+			exit
+			clear ip ospf process
+
+		if use 0 priority we can't set dr and bdr
+		dr and bdr works in broadcast and ethernet
+
+		asbr (autonomous system boundray router) :
+			the router that has one hand inside ospf backbone and one hand in other routing protocol.
+
+		abr (autonomous boundray router) :
+			the router that has one hand in ospf backbone and one hand in another ospf area number
+
+		it's better purchase cisco.
+
+		in ospf like rip we can advertise default gateway:
+			default information originate  
+			default information originate always (if don't have gateway send traffics to this router in any conditions)
+
+		we must summary routes in some routers advertisement :
+			in abr :
+				area 10 range 192.168.1.0 255.255.255.0 
+
+				*stub term means end device if one device in area get stub other devices in same area must get stub to make neighborship.
+		LSA types :
+			lsa type 1 : router ids (the names of all routers in same area)
+
+			lsa type 2 : dr and bdr ids and adresses
+			
+			lsa type 3 : oia on abr router (the name of networks learned from abr (summary))
+				lsa 3 filter (in abr routers - works just on cisco devices) :
+					router ospf 1
+					area 10 stub no-summary
+						after summary lsa 5 we have default route in this lsa
+
+				in abr for networks advertise :
+					router ospf 1
+					redistribute statics subnets (advertise classfully)
+
+			lsa type 4 : asbr ids summary learn how go to asbr
+				for solve metric in lsa 4 must change metric type 2 > metric type 1
+					redistribute static subnets metric-type 1 
+			
+						ospf redistribute asbr or default gate way routes :
+							modes :
+								e1 
+								e2 (ad 110/20)
+							metrics are 20
+							
+							for redistribute foreign network in our network and use short way (o e1):
+								redistribute static subnets metric-type 1
+		
+							for redistribute foreign network in our network(o e2):
+								redistribute static subnets metric 25
+		
+							redistribute static subnets (add subnets without cost)
+							redistribute static metric-type 1 (add subnets by metric 20 and e1)
+							redistribute static metric 30 metric-type 1 subnets (add subnets by metric 30 and e1)
+		
+							e1 and e2 is not important for one gateway because metrics has no effective 
+							in multi-gatways we can see effects of e2
+		
+							e1 calculate each hop and trace or make decision wich way or path is faster and better 
+				
+			lsa type 5 : foreign routes (stub are)
+				lsa 5 filter (in area routers) :
+					router ospf 1
+					area 10 stub
+						must make stub other routers in same area
+						after this we have default route in lsdb with oe2
+
+			lsa type 6 : multicast (expire)
+			
+			lsa type 7 : nssa (not so stubby area)(here we have n1 and n2 like e1 and e2 concept works with wroted commands)
+				some times maybe we have another asbr that hasn't a hand in backbone area like las 7
+				this lsa is sub and is not a sub 
+					lsa 7 filter(use other abr and convert it to lsa 5,3 for our network):
+					on asbr that isn't in back bone :
+						router ospf 1
+						area 20 nssa
+							this command convert lsa type 7 to 5
+					
+					in abr:
+						area 20 nssa no -summary
+							convert lsa 5 to 3
+				
+		virtual-link (just on abr and no stub routers works correctly) :
+		r4 :area 1 virtual-link 5.5.5.5
+		r5 :area 1 virtual-link 4.4.4.4
+
+		after virtual-link we have dna links (do not age)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+injection of eigrp and ospf together :
+	eigrp to ospf :
+		router ospf 1
+		redistributee eigrp 100 subnets 
+		exi
+	
+	ospf to eigrp :
+		router eigrp 100
+		defualt-metric 1000000 1 1 1 1500 (with this we set for all ospf process ids default values)
+		redistribute ospf 1 metric 1000000 1 1 1 1500 (bw, delay, reliabilty, dead, mtu)
+	
+	ospf to ospf : with this we have ad = 1 
+		router ospf 1
+		redistribute  ospf 2 subnets
+		exit
+		router ospf 2
+		redistribute ospf 1 subnets
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+advertisment redistribution (use only loopbacks no dedicated interfaces):
+	some times we get worry beacuase have 2 asbr router that connected to our router directly, it's possible to reach our near and directed loopbacks  from long way and Inappropriate links so must behave like this 
+	at eigrp and ospf we have suboptional routing and loopfree method but in rip still has problem
+	direct interfaces and networks has more priority than other networks so problem get handle
+	in ospf we have tagging
+	in this senario we filter our interfaces ip addess just advertise the loopbacks
+
+	eigrp side :
+		on abr router (r2):
+		access-list 1 permit  192.168.0.0 /24 (time-range could add)(extended acl for some ports)(its better write ip-prefix list)
+		route-map eigrp2ospf permit 10
+		match  ip add 1
+		set tag 10
+		exit
+	
+	on abr router (r4):
+		access-list 2 permit  192.168.3.0 /24 (time-range could add)(extended acl for some ports)(its better write ip-prefix list)
+		route-map eigrp2ospf permit 20
+		match  ip add 2
+		set tag 20
+		exit
+	
+	inject eigrp to ospf (in abr routers)
+		router ospf 1
+		redistribute eigrp 100 route-map eigrp2ospf subnets (here we can set tag)
+		exit
+	
+	ospf side :
+		on abr router (r2):
+		access-list 3 permit  172.16.0.0 /24 (time-range could add)(extended acl for some ports)(its better write ip-prefix list)
+		route-map ospf2eigrp permit 10
+		match  ip add 3
+		set tag 30
+		exit
+	
+	on abr router (r4):
+		access-list 4 permit  172.16.0.0 /24 (time-range could add)(extended acl for some ports)(its better write ip-prefix list)
+		route-map ospf2eigrp permit 10
+		match  ip add 4
+		set tag 40
+		exit
+	
+	inject ospf in eigrp (in abr routers)
+		router eigrp 100
+		default-metric 1000000 1 1 1 1500
+		redistribute ospf 1 route-map ospf2eigrp subnets
+		exit
+	
+	if we add new router and we don't need to define some network to itself in new router :
+		route-map blk deny 10
+		match tag 10
+		exit
+		route-map blk permit 20
+		exit
+		router ospf 1
+		destibute-list route-map blk in
+		exit
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+policy base routing (pbr) :
+	some times we need to consider source our time of usage so use pbr or have quality of service (qos) in organization voip system, must use a high quality link for qos
+
+	(without track) :
+		ip route 0.0.0.0 0.0.0.0 100.100.100.2
+		ip route 0.0.0.0 0.0.0.0 200.200.200.2
+
+		access-list 1 permit host 192.168.1.10 (time-range could add)(extended acl for some ports)
+		access-list 2 permit host 192.168.1.11 (time-range could add)(extended acl for some ports)
+
+		route-map mypolicy permit 10
+		match ip add 1
+		set ip next-hop 100.100.100.2 (we can use (set default ip next-hop ... ) this command, first check route table if has the speciic route match with that if not exist match with parameter)
+		exi
+		route-map mypolicy permit 20
+		match ip add 2
+		set ip next-hop 200.200.200.2
+		exi
+
+		(for time-range acl and route-map):
+			for this type we must set nex hop instansly and don't add match parameter.
+
+			route-map mypolicy permit 30
+			set ip next-hop 50.50.50.2
+			exi
+	
+			interface gig0/0
+			ip policy route-map mypolicy
+			exi
+
+	show route-map
+	
+	(with track) :
+		ip route 0.0.0.0 0.0.0.0 100.100.100.2
+		ip route 0.0.0.0 0.0.0.0 200.200.200.2
+
+		acess-list 1 permit host 192.168.1.10 (time-range could add)(extended acl for some ports)
+		access-list 2 permit host 192.168.1.11 (time-range could add)(extended acl for some ports)
+		exi
+
+		ip sla 10
+		icmp-echo 8.8.8.8 source-ip 100.100.100.1
+		frequen 5 (interval ping mechanism in second)
+		threshold 2 (after 2 timeout swtch network)
+		timeout 1000 (time out interval miliseconds)
+		exi
+		ip sla 20
+		icmp-echo 8.8.8.8 source-ip 200.200.200.1
+		frequen 5
+		exi
+
+		ip sla schedule 10 start now life forever
+		ip sla schedule 20 start now life forever
+		track 100 ip sla 10
+		track 200 ip sla 20
+
+		route-map mypolicy permit 100
+		match ip add 1
+		set ip next-hop verify-ava 100.100.100.2 5 track 100 (verify-ava means if our nexhop was reachable set this hop and interface as default gateway)(5 here is line sequence and we can add many tracks on this sequence)
+		set ip next-hop 200.200.200.2 (if nex hop at above line was not available set this next hop as default gateway)
+
+		route-map mypolicy permit 200
+		match ip add 2
+		set ip next-hop verify-ava 200.200.200.2 5 track 200
+		set ip next-hop 100.100.100.2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+DMVPN :
+	eigrp and ospf are multicast mode and Inappropriatefor tuunles except when we change values
+	gre tunnle is manual and must run for each branch or link connected to hq so we need a automatic mechanism to launch vpn with others
+	gre is cisco exclusive
+	each company msut have a default-route to near isp
+	tehran is server for tunnels
+	dynamic vpn, tell each clients this is ip pubic and this is range of tunnels ip address make your connection
+
+	on nhrp server (tehran router): nhrp (next hop resoloution protocol)
+		int tunnel 1
+		no sh
+		tunnel mode gre multipoint (our gre is not point to point)
+		tunnel source  gig0/0 (way of outgoing interface)
+		ip add 172.16.0.1 /24 (ip of tunnel body)
+
+		ip mtu 1400 (layer 3 maximum size each value must set -40 at next line)
+		ip tcp adjust-mss 1360 (maximum packet size in layer 4 that don't trash it)
+
+		with these parameters we allowed our trusted links to make connection with us (can be sniff) :
+			ip nhrp authenric cisco123
+			ip nhrp network-id 1000
+			tunnel key 500
+		
+		dmvpn need a database to save  mapping data :
+			ip nhrp map multicast dynamic
+		
+		after db making with wich ip address advertise it :
+			ip nhrp map multicast 50.50.50.1
+		
+		after connection making we can advertise our private netwoks with these commands :
+			no ip splite-hori eigrp 10
+			no ip nex-hop-self eigrp 10 (this command say client on tunnel don't send request to tehran and disable hubandspoke mode just for first time for making tunnle can access to tehran)
+			
+		with this command we can decrease procees of server :		
+			ip redirect 
+			ip nhrp shortcut 
+	
+	on nhrp clients :
+		int tunnel 1
+		no sh
+		tunnel mode gre multipoint
+		tunnel source  gig0/0
+		ip add 172.16.0.x /24
+		ip mtu 1400
+		ip tcp adjust-mss 1360
+		ip nhrp authenric cisco123
+		ip nhrp network-id 1000
+		tunnel key 500
+
+		ip nhrp map multicast dynamic
+		ip nhrp map multicast 50.50.50.1 (mapping server ip address)
+		p nhrp map 172.16.0.1 50.50.50.1 (after mapping must make our tunnle on what range or what address)
+		ip nhrp nhs 172.16.0.1 (nhrp server ip address inside mapping)
+	
+	we can run eigrp on tunnel :
+		router eigrp 10
+		network 192.168.1.0 0.0.0.255
+		network 172.16.0.0 0.0.255.255
+	
+	also can run ospf on routers but we get in truble, ospf is point to point type of connection so our connection in dmvpn is point to multipoint must change it :
+		router ospf 1
+		network 172.16.0.0 0.0.255.255 area 0
+		network 192.168.0.0 0.0.255.255 area 0
+	
+		but now we get in truble we should say :
+			int tunnel 1
+			ip ospf network point-to-multipoint
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ip unnumbered :
+	(it does not work with vrf,hsrp ,vrrp ,dynamic routing protocols ,static arp)
+	this option didn't give ip address from user, pickup from loopback interface automatic
+	 just use for point to point connection
+	 and just works on 7200 router serries
+
+	on server router :
+		int loop 1
+		ip add 10.10.10.1 /24
+		
+		int range gig0/0-2
+		no sh
+		ip unnumbered loop 1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+VRF (virtual routing and forward) : it's vlan game but we say in routing part
+
+	on server router :
+		must define our tags or customers
+
+		ip vrf customer1
+		exit
+		ip vrf customer2
+		exit
+
+		int gig0/0
+		no sh
+		ip vrf forwarding customer1
+		ip add 10.10.10.1 /24 (if has ip address in past get release and empty)
+		exit
+
+		int gig0/1
+		no sh
+		ip vrf forwarding customer2
+		ip add 10.10.10.1 /24
+		exit
+	
+	in show ip route we can't see configs and ip address beacuse each customer has own routing table
+
+	on customer1 :
+		int gig0/0
+		no sh
+		ip add 10.10.10.2 /24
+		exit
+	
+	on customer2 :
+		int gig0/0
+		no sh
+		ip add 10.10.10.2 /24
+		exit
+	
+	do sh ip route vrf customer1
+	do sh ip route vrf customer2
+	
+	for running eigrp :
+		on server router:
+		router eigrp 100
+		address-family ipv4 vrf customer1 autonam-sys 10
+		network  10.10.10.0 0.0.0.255
+	
+	on customer1 eigrp :
+		router eigrp 10
+		network 192.168.0.0 0.0.255.255
+		netwrok 10.10.10.0 0.0.0.255 
+	
+	for running ospf :
+		on server router:
+		router ospf 1 vrf customer2
+		network 10.10.10.0 0.0.0.255 area 0
+	
+	on customer2 :
+		router ospf 1
+		network 10.10.10.0 0.0.0.255 area 0
+		network 192.168.0.0. 0.0.255.255 area 0
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+EVN (easy virtual network) :
+	from vrf concept we make evn
+	evn allows us use one router more than one in virtual mode like vrf we have tagging
+	asr router serries, 4500 and 6500 switch serries
+
+	make our switches to access mode then :
+
+	vlan 100 > yellow 
+	vlan 101 > green 
+
+	on all routers we should define our tagging method :
+		vrf defin yellow
+		vnet tag 1000
+		address-family ipv4
+		exit-address-famil
+		exi
+		vrf defin green
+		vnet tag 1001
+		address-family ipv4
+		exit-address-famil
+		exit
+	
+	define subinterfaces :
+		int gig0/0
+		no sh
+		int gig0/0.1000
+		encap dot 1000
+		vrf forwarding yellow
+		ip add 192.168.1.1 255.255.255.0
+		exit
+
+		int gig0/0.1001
+		encap dot 1001
+		vrf forwarding green
+		ip add 192.168.1.1 255.255.255.0
+		exit
+	
+	set trunk ports between routers :
+		int range gig0/0-2
+		vnet trunk 
+	
+	for yellow tags run eigrp to each router :
+		router eigrp 100 
+		address-famil  ipv4 vrf yellow auto 10
+		network 192.168.0.0 0.0.255.255
+		network 10.10.20.0 0.0.0.255
+		exit
+
+		address-famil  ipv4 vrf green auto 20
+		network 192.168.0.0 0.0.255.255
+		network 10.10.20.0 0.0.0.255
+		exit
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+BGP :
+	egp use for automatic scalable network
+	in bgp we have as-number
+	each company or oragnization can have one as-number
+	per device we can just set one as number
+	bgp is application 
+	works on port 179 tcp and layer 5
+	we can run bgp on some routing protocols (rip - ospf - eigrp)
+	here we learn version 4
+	bgp use for fast advertise in internet and used for service providers not for general and common usage for generic mode must set default-route to isp
+	in bgp we don't havve load-balance or automatic neighboring
+
+	0 reserved
+	1-64495 public as
+	64494-64511 reserved to documentation
+	64512-65534 private as
+	65535 reserved
+
+	router bgp 6500 
+	network 50.50.50.0 mask 255.255.255.0
+	neighbor 100.100.100.2 remote-as 6600
+
+	show tcp brief
+	show tcp brief all
+	show ip bgp
+	show ip bgp summary
+
+	has 2 ad value :
+		200 internal
+		20 external
+
+	in state/pfxrcd if we see eery thing except numbers, have problem  on that section
+
+	with loopback source we can make redundancy beacuse in loopback we don't have down state :
+	add some same network domain to bgp :
+		ip route 100.0.0.0 255.0.0.0 null 0
+
+	after make null 0 must have reachable ping in each side, beacuse we can use it in bgp or any routing protocols
+
+	on r2 :
+		ip route 1.1.1.1 255.255.255.255 100.100.100.2
+		ip route 1.1.1.1 255.255.255.255 200.200.200.2
+		router bgp 6600
+		neighbor 1.1.1.1 remote-as 6500
+
+		in this sections on state/pfxrcd we have idle mode beacuse :
+			1 > by default in bgp we have ttl = 1 and loopback interface is behinde of real interface so our ttl lost after one hop must change ttl size
+			2 > front side router expect loopback ip address request for neighborship but Intermediary between a connection is dedicated interface
+		for solve problem at above we must :
+
+		neighbor 1.1.1.1 ebgp-multihop 2 (ttl change, its better use 2 or 3)
+		neighbor 1.1.1.1 update-source loop 0 (the Intermediary between a connection is loopback interface not real interface, in ibgp must set this)
+		network 1.1.1.1 mask 255.255.255.255
+		network 50.50.50.0 mask 255.255.255.0
+		network 100.0.0.0 mask 255.0.0.0
+
+	this summarization has cost
+	conneccted interfaces has more priority than others, if our network be in null 0, didn't ommit it so transfer it to connectors
+		
+	bgp with ospf :
+		on r1 when we define our ip interfaces and ping them :
+		ip route 2.2.2.2 255.255.255.255 50.50.50.1
+		router bgp 6500
+		neighbor 2.2.2.2 remote-as 6600
+		neighbor 2.2.2.2 ebgp-multihop 2
+		neighbor 2.2.2.2 update-source loop 0
+		network 1.1.1.1 mask 255.255.255.255
+		network 50.50.50.0 mask 255.255.255.0
+	
+	on r2 we want run ospf in ibgp and run ebgp with r1 :
+		int loop 0
+		ip add 2.2.2.2 255.255.255.255
+		ip ospf 1 area 0
+		int gig 0/1
+		no sh
+		ip add 100.100.100.1 255.255.255.0
+		ip ospf 1 area 0
+		exit
+		ip route 1.1.1.1 255.255.255.255 50.50.50.2
+		router bgp 6600
+		neighbor 1.1.1.1 remote-as 6500
+		neighbor 1.1.1.1 ebgp-multihop 2
+		neighbor 1.1.1.1 update-source loop 0
+		neighbor 3.3.3.3 remote-as 6600
+		neighbor 3.3.3.3 next-hop-self 
+			(if get routes on another routing protocols instead of use the original source place itself on source r1 learn netwirk 200 from r2 but can't replay to r3 so must use this command)
+		neighbor 3.3.3.3 update-source loop 0
+		network 2.2.2.2 mask 255.255.255.255
+		network 50.50.50.0 mask 255.255.255.0
+		network 100.100.100.0 mask 255.255.255.0
+	
+	on r3 we want run ospf in ibgp and run ebgp with r4 :
+		int loop 0
+		ip add 3.3.3.3 255.255.255.255
+		ip ospf 1 area 0
+		int gig 0/1
+		no sh
+		ip add 100.100.100.2 255.255.255.0
+		int gig 0/2
+		no sh
+		ip add 200.200.200.2 255.255.255.0 (don't add this to ospf)
+		ip ospf 1 area 0
+		exit
+		ip route 4.4.4.4 255.255.255.255 200.200.200.1
+		router bgp 6600
+		neighbor 4.4.4.4 remote-as 6700
+		neighbor 4.4.4.4 ebgp-multihop 2
+		neighbor 4.4.4.4 update-source loop 0
+		neighbor 2.2.2.2 remote-as 6600
+		neighbor 2.2.2.2 next-hop-self
+		neighbor 2.2.2.2 update-source loop 0
+		network 3.3.3.3 mask 255.255.255.255
+		network 100.100.100.0 mask 255.255.255.0
+		network 200.200.200.0 mask 255.255.255.0
+	
+	on r4 when we define our ip interfaces and ping them :
+		unt loop 0
+		no sh
+		ip add 4.4.4.4 255.255.255.255
+		int gig 0/2
+		no sh
+		ip add 200.200.200.1 255.255.255.0
+		ip route 3.3.3.3 255.255.255.255 200.200.200.1
+		router bgp 6700
+		neighbor 3.3.3.3 remote-as 6600
+		neighbor 3.3.3.3 ebgp-multihop 2
+		neighbor 3.3.3.3 update-source loop 0
+		network 4.4.4.4 mask 255.255.255.255
+		network 200.200.200.0 mask 255.255.255.0
+
+	here we don't want have r1 loopbacks in r4 routing table or else
+	in ibgp is not necessary to set ttl
+
+	its better use asr or nexus switches in bgp game
+
+	in bgp we don't worry about loop
+
+	bgp types :
+		single homed : one link to one isp
+		dual homed : on or more link to one isp
+		single multi-homed : one link to many isp
+		dual multi-homed : one or more link to many isp
+
+	sh ip bgp (show best and win paths)
+	
+	now we must have ping in dedicate interfaces.
+	in situation that we have some network like
+	70.70.70.0/24  and  70.70.71.0/24
+
+	we can use null 0 to add this in routing tabel 
+	ip route 70.0.0.0 255.0.0.0 null 0
+	
+	then add it to bgp networks and use it also use 
+	can redistribute networks with their static routes:
+	reistribute static
+	
+	if in routing table and bgp section we saw 0.0.0.0 thats mean i learn it by my self
+	*> is sign of best path or win path
+	if in path section we see number, learn from another as
+	if we didn't see any numbers means learn from inside
+	between term (i and ?) the i has more priority
+	the time of neighborshiping is important in bgp
+	some time count of hops for networks reachability is important for example we have 2 way way one use one as number way 2 use three as numbers to reach networks
+	in (sho ip bgp) we just see winner paths and we didn't see losers 
+
+	in bgp we should ignore transite area on as area router edge transite area limit our bandwidth and our resources must negotiate with organizatioins
+	isps must not get transite or filter must advertise routes in world, enterprise and govermental locations must get filter
+	we need advertise just some specific routes and networks :
+		ip prefix-list only70 permit 70.0.0.0/8
+		router bgp 6500
+		neighbor 4.4.4.4 prefix-list only70 in
+		neighbor 5.5.5.5 prefix-list only70 in
+		do clear ip bgp * (if do this get dismissal)
+	
+	for resatrt and learn bgp databases we have some methods :
+		in soft mode we send and recieve update or routes but in direction get updates in force mode  from across hops and out send updates to neighbors
+			1. clear ip bgp * 					(hard-all-both)
+			2. clear ip bgp 4.4.4.4 			(hard-one-both)
+			3. clear ip bgp 4.4.4.4 out 		(soft-one-out)
+			4. clear ip bgp 4.4.4.4 soft out 	(soft-one-out)
+			5. clear ip bgp 4.4.4.4 in 			(soft-one-in)--> router refresh (cisco in both side)
+			6. clear ip bgp 4.4.4.4 soft in 	(soft-one-in)--> need some pre-commands * (for other devices)
+			7. clear ip bgp 4.4.4.4 * soft 		(soft-all-both)
+			8. clear ip bgp 4.4.4.4 soft 		(soft-one-both)
+	
+	* we should write this to enabel soft bgp negotiation and use for bgp clear process between another vendors:
+	it's better use this in each bgp confguration
+
+		router bgp 6500
+		neighbor 4.4.4.4 soft-reconfig in
+		do clear ip bgp 4.4.4.4 soft in
+	
+	the parameters with value order bgp path attributes:
+		1. next-hop:
+			first law is reachability with ping
+
+		2. weight:
+			cisco exclusive and works just on local device
+				for ibgp > 32768
+				for ebgp > 0
+					bigger is better
+					change weight of bgp just in router adjustments :
+						in case we change all networks incoming :
+							router bgp 6500
+							neighor 4.4.4.4 weight 50
+							do clear ip bgp * soft
+						
+						in other case we define range of ip :
+							ip prefix-list w40 permit 40.40.40.0/24
+							route-map w40s permit 10
+							match ip add prefix-list w40
+							set weight 40
+							exit
+							route-map w40s permit 20
+							exit
+							router bgp 6500
+							neighbor 5.5.5.5 route-map w40s in (just changes inbound direction packets)
+							do clear ip bgp * soft
+						
+		3. local preference
+			if learn from ibgp set value 100 just advertise in same as number not another as
+				bigger is better
+				change local preferences of bgp just in same as-number area adjustments :
+					bgp default localprefe .....(default 100)
+				
+				for advertise locprf in as area between routers :
+					ip prefix-list l40 permit 40.40.40.0/24
+					route-map l40s permit 10
+					match ip add prefix-list l40
+					set local-prefer 200
+					exit
+					route-map l40s permit 20
+					exit
+					router bgp 6500
+					neighbor 6.6.6.6 route-map l40s in
+					do clear ip bgp * soft
+	
+		4. injected routes
+		5. as-path
+			change direction of packets with as-path numbers (may make loop in way, it's better use another method) :
+			(last as number except loops):
+				ip prefix-list delshad permit 70.0.0.0/8
+				route-map delshad70 permit 10
+				match ip add prefix-list delshad 
+				set as-path preepend 6500 6500 6500 6500
+				exit
+				route-map delshad70 permit 20
+				exit
+				router bgp 6700
+				neighbor 2.2.2.2 route-map delshad70 in
+				do clear ip bgp * soft
+
+	till here we use methods that changes just attributes and value on local paths and device but we need change in across view values
+
+		6. origin
+		7. med	
+			yet we learn our routes from inbound source some times we need to force some isp follow our policies (med) :
+			(this method can advertise our policy in same as area not more and case of use in dual-homed way
+			default is 0 and lower number is better) :
+				ip prefix-list med permit 70.0.0.0/8
+				route-map med20 permit 10
+				match ip add prefix-list med
+				set metric 20
+				exit
+				(here we must block networks beacuase it makes transite area and we don't want this)
+				route-map med30 permit 10
+				match ip add prefix-list med
+				set metric 30
+				exit
+				(here we must block networks beacuase it makes transite area and we don't want this)
+				router bgp 6500
+				neighbor 4.4.4.4 route-map med20 out
+				neighbor 5.5.5.5 route-map med30 out
+				do clear ip bgp * soft
+			(now see result in opposite side)
+
+		8. neighbors type (*ebgp(has priority)-ibgp)
+		9. lowest ospf cost
+		10. lower eigrp router's id
+		11. lower bgp routers'id
+		12. lowest neighbor ip add
+	
+	when we need to see our routes before and after our filters just for soft clearing just show us  winner paths *:
+		show ip bgp neighbor 4.4.4.4 recived-routes
+		show ip bgp neighbor 4.4.4.4 advertise-routes
+	
+	URPF (unicast reverse path forward)(prevent ip snooping) :
+		some times we have another priority in inside of packets (source - destination) and must check destination of packets
+	strike mode :
+	use in isp for general purpose like client side vpns.
+		int gig0/0
+		ip verify unicast source reachable-via rx
+	
+	loose mode :
+		int gig0/0
+		ip verify unicast source reachable-via any
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ipv6 :
+	in ipv6 we don't have broadcast, use multicast
+	if run dhcp server we can set it statefull and process all 128 bit of address or set stateless and process half(64bit) of address then make else with client side values
+	for ipv6 activation in cisco routers :
+	ipv6 unicast-routing
+	
+	we can set ipv6 and ipv4 together on a device
+	when takes it on automaticaly make linklocal address and we can use just link local(eui64) :
+	int gig0/0
+	ipv6 enable
+	
+	int gig0/0
+	no sh
+	ipv6 add 2001:a:b:12::1\64 
+	or
+	ipv6 add 2001:a:b:12::\64(it make ip add by linklocal and their own methods)
+	
+	we can set link local :
+	int gig0/0
+	ipv6 add fe80::1 linklocal
+	
+	addresses in ipv6 :
+	loopback 			::1/128		(127.0.0.1)
+	unspecific 			::/128		(default route 0.0.0.0)
+	global unicast 		2000::/3	(use 2 or 3 and 001(fix)0(can change))		
+	unique local 		fd00::8
+	link local 			fe80::10
+	multicast 			ff0x::
+	site local 			fec0\10 	(hidden tasks)
+	
+	static or default routes in ipv6 :
+	ipv6 route ::/0 2001:a:b:12::1/64
+	
+	(its better use next-hop for using we should have link local as you know linklocal address and maybe will be set
+	to same interfaces and its better use interface together) :
+	ipv6 route ::/0 2001:a:b:12::1/64 interface gig0/0
+	
+	ripng in ipv6 :
+	ipv6 router rip myvp
+	exit
+	int gig0/0
+	ipv6 rip myv6 enable
+	
+	ospf in ipv6 (we must set rid) :
+	ipv6 router ospf 1
+	router-id 1.1.1.1
+	int gig0/0
+	ipv6 ospf 1 area 0
+	
+	eigrp in ipv6 (we must set rid and write no shut in eigrp v6) :
+	ipv6 router eigrp 10
+	no shutdown
+	eigrp router-id 1.1.1.1
+	exit
+	int gig0/0
+	ipv6 eigrp 10
+	
+	for use same ipv6 in world on some devices and get no confilict :
+	ipv6 add 2001:a:b:12::1/64 anycast
+	
+	for redistribute eigrp and ospf together in ipv6 :
+	on abr router :
+	ospf to eigrp :
+	ipv6 router eigrp 10
+	redistribute ospf 1 include-connect metric 1000000 1 1 1 1500
+	eigrp to ospf :
+	ipv6 router ospf 1
+	redistribute eigrp 10 include-connect 
+	
+	logs in cisco and their levels :
+	alerts			1
+	critical 		2
+	debugging		7
+	emergency		0
+	errors			3
+	information 	6
+	notification	5
+	warnnings		4
+	
+	snmp v3 in cisco :
+	snmp-server host 192.168.124.1 vers 3 prive cisco123
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

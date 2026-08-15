@@ -1,0 +1,5224 @@
+ENCOR
+******************************
+osi and tcpi
+	osi has more dependencies to another applications
+
+	osi						tcpi (traditional)	  	data
+	applications			applications 			data
+	presentation 									
+	session
+	transport 				transport 				segment
+	network 				internet 				packet
+	datalink				linklayer	 			frame
+	physical										bit
+******************************
+layer2 forwarding
+	mac (media access control)
+
+	organization unique identifier + vendor assigned address
+	doted triple notation
+
+	each switch physical port has own collision domain
+	this is virtual and deicated between 2 port not more
+
+	forwarding on mac address table has known address for negotiation
+	if unknown can unicast (known broadcast) or flood (unknown broadcast)
+
+	vlan help us to learn and advertise on switch (macro segmentation)
+
+		0 is reserved
+		2 - 1002 is standard
+		1002 - 1005 is fddi
+		1006 - 4094 is extended (must use vtp on transparent in this range)
+		4095 is reserved and used for trunk concept
+
+	show mac addres-table
+	show mac addres-table vlan 1
+
+	vlan 0 is 802.1p (used for priority)
+	vlan 1 is native and unchangeable (no nameable)
+
+	*our vlan names are case sensetive must be different
+
+	newest ios vlan naming
+		sitchport access vlan test-vlan 10
+
+	show vlan id 10 
+	#enet means ethernet
+
+	show vlan name shayan
+	show vlan summary
+	
+	*vtp version 3 advertise extended vlans but on vtp versions 1 and 2 just advertise standards
+
+	tpid > tag protocol identifier > 0x8100
+	tci > tag control information
+		16 bit
+			priority code point 3bit (voice)
+			drop eligible indicator / comunical frame indicator	1bit
+			vlan id 12bit
+
+	our native vlan manage and handle vtp, cdp or management traffics on device
+	better change our native vlans (security issues)
+
+	show mac addres-table dynamic 
+	#means learn macs
+
+	clear mac addres-table dynamic
+
+	mac address-table static mac-pc-1 vlan 1 drop
+	#drop traffic for this pc
+
+	mac address-table static mac-pc-1 vlan 1 int fast 0
+	#apply this mac on interface and vlan
+
+	cam table (view mac ports)
+	contet addressable memory (hardware memory table)
+
+	mac address table (view vlans, macs, type, ports)
+
+	show interface g0/0 switchport 
+	#same with > show interface status
+
+	show ip arp
+
+	forward architected
+		process switching
+		software switching (slow path)
+		cpu (general usuage)
+
+	on old architect if send more and transfer less saw that queue generated
+	so use new method
+		fast switching
+			our first packets transfer like old method but make cache
+			if second packet were same use cache if not process again old way
+
+	traffic flow
+		source (ip and port)
+		destination (ip and port)
+		protocol
+
+	if interupt our connection and flow must process switch
+	all traffics are on-demand 
+******************************
+cisco express forward (cef)
+	use asic (application specific integrated circuite)
+	on old models we use software base routing and concepts (useful information were added on data plane)
+	new generations we have hardware base routing
+		cpu (general)(control plane) + asic and npu (data plane)
+
+		like tcam use asic and npu, on voltage base convert and forward (equal routing table)
+		tcam has sorted values
+			tcam attribute 	> values (routes)
+			checking values > mask (subnet mask)
+			results 		> action (egress port)
+
+			vmr > value, mask, result
+
+			our checking state entries named entity that will be fast cehck with other (compare)
+
+		*tcam use acl and qos
+******************************
+rewrite engine
+	use arp table values
+	detect next hop mac address
+	set destination values
+	these values also use adjancency table
+	copy them to arp table without interface but has pointer on binary value
+
+	pointer 1 [0x0800][mac1][mac]
+
+	after this must check fcs (frame check sequence)
+	some frames doesn't cef switch so must be general switch then process switch
+
+	usually has cef switch 
+	if not we have cef punt means forward them to general switch 
+
+	self generated packets on router name general switch and each packet get forward from switch (relay them) means cef switching must react them 
+	our first packets are glean and use general switch
+
+	general switch
+		complex
+		ip option
+		nat
+		.....
+
+	routing table download > fib (forward infromation base)
+	arp table download > adjancency table (adjancency information base (aib))
+
+	cam table (mac address table information)
+		mac
+		port
+		vlan
+		type
+
+	tcam table (routing table information)
+		mac
+		port
+		vlan
+
+	distributed cef
+		on outers we have another process engine instead of cam and tcam tables
+		named router processor engine (rpe)
+		also has network process unit (npu)
+
+		used for control plane
+		usually we saw cef activities but sometimes se rpe activity
+
+	centralize cef
+		software cef
+		process or fast switching
+******************************
+sdm templates
+	switch database manager
+	convert layer2 to layer3
+	modify our hardware
+	on mls we have some tcam and cam table
+	when we have layer2 or layer3 usage on devices can see this space
+	switch between one of them (layer2 or layer3 space)
+	transfer the desired volume to layer2 or layer3
+
+	sdm prefer vlan (means use  for layer2)
+	sdm prefer advance (means use for layer3)
+******************************
+statefull switch over (sso)
+	if rr get interupt total fib and rib get loss
+	1 to 2 seconds is duration of start time our engines in non-stop forwarding or routing(nsf)
+
+	when receive route must use route process (rpe)
+	then send to rib and create routing table 
+	after this send to fib (forwardinig information base) to forward traffics
+	chicking point merge and sync our informations
+
+	nsf is enable (each supervisor (sup) must sync data to make fast converjence)) (Even if the information is wrong)  
+******************************
+spanning tree
+	what happen if omit stp?
+		broadcast strom
+		frame duplication
+		mac instability
+
+	stp use bpdu packets (bridge protocol data unit)
+
+	versions
+		d
+			pervlan stp (loadbalancing)(common stp)(just works on isl and trunk isl (inter switch link))
+			pervlan stp+ (loadbalancing)(common stp)(works on isl and dot1q)
+
+			*ciscc doesn't support this and pervlan model on common mode
+
+		w
+			rapid stp
+			rapid pervlan stp (cisco proprietary)
+
+		s
+
+		*distributed known as mstp and rapid known as rstp+
+
+	on old switch we have lowest priority and mac level if add them to our tolpologies might get trouble
+
+	spanning-tree vlan 2 priority 100
+	spanning-tree vlan 2 root primary
+	spanning-tree vlan 2 root secondary
+
+	superior bpdu (root bridge id)
+	inferior bpdu (other brifge id)
+
+	link speeds and short\long mode stp cost
+	10 mbps			100 	2mil
+	100 mbps 		19 		200k
+	1 gig 			4 		20k
+	10 gig 			2 		2k
+	20 gig 			1 		1k
+	100 gig 		1 		200
+	1 tb 			1 		20
+	10 tb 			1 		2
+
+	short means traditional	networks
+
+	spanning-tree path-cost method long
+	spanning-tree path-cost method short
+
+	show spanning-tree root
+	show spanning-tree vlan 1 detail
+	show spanning-tree bridge
+	show spanning-tree interface gig0/0
+	show spanning-tree interface gig0/0 detail
+
+		interface priority between 0-255
+		default is 128
+
+		
+		port type
+			share
+				when connect to hub
+				
+			p2p
+				can be like edge must enable portfast
+
+		bpdu
+			config
+				just root bridge send this
+				on designated ports
+
+			tcn
+				each node connect or disconnect to spanning tree network send notification
+				tca +  tcb (bit)
+
+				our mac address agetime convert to 15 second (forward delay time)
+
+	rstp > use tcn for changes on bring up interface state not down state
+
+	interface states
+		disable
+		blocking
+		listening
+		learning
+		forward
+		broken
+			like block but use stp inteligent and prevent loops
+
+	loop gaurd udld
+
+	stp version w
+		has role and state
+		rstp use synchronization process in it
+
+		we have a little delay between change block state to active state or opposite 
+
+		root ports > listen + learn time > 30 second
+		designated port > listen + learn time > 30 second
+		alternative block (blk) > 0 second
+		backup block (blk) > 0 second
+
+	configuration bpdu packet
+		proposal
+			wanna bring up and on
+			transmit on bpdu
+
+		agreement
+			compromise on receive proposal and xecute block
+
+		tc flag
+
+		after receive proposal block all another edge ports with temporal state for all switches
+		this is loop protection mechanism on root and client side protection
+		then send agreement and change state to up and active from block
+		has no delay or spend time so do it fast till end of network
+		here we get synchronize with all fabric switches
+		just happen on rapid stp
+
+		spanning-tree mode rapid-pvst
+
+		if on client didn't set portfast command must wait  30 seconds  (listen and learn)
+		working on another modes except full duplex means fallback happend so works traditional model and halfduplex
+
+		more layers on switch like 4 layer means 4*2 > 8 seconds must wait to get synchronize
+
+		spanning-tree vlan 2 root primary diameter 4
+		#define depth switch layers
+		#chaneg this means our max-age-time and forwarding-delay-time get change
+		#faster synch even on traditional mdoel (be careful about loop)
+
+		*better use root gaurd and priority concepts on vlans and stp for better managing
+
+	path cost
+		numbers on each switch on ingress and egress
+		compare them on bpdu
+		this camparison help decide egress port and path
+		doesn't add numbers on egress
+		if receive bpdu on ingress port, consider a number based on their type
+		on switch doesn't consider number unless
+			spanning-tree vlan 1 cost 10
+
+			*better use bandwidth parameter
+
+		change priority
+			interface gig0/0
+			spanning-tree vlan 1 priority 10
+
+	portfast
+		apply on global and effect all interfaces 
+
+		spanning-tree portfast default
+		
+		interface gig 0/0 
+		spanning-tree portfast disable
+
+		till doesn't receive bpdu packets on portfast interface active the interface
+		if see bpdu packets on it block interfaces
+		must restart port with shut and no shut
+		also can reset counters on intervals
+
+		errordisable recovery cause bpdugaurd
+		errordisable recovery interval 30
+		#default is 5 minutes
+
+		show errordisable recovery
+
+		show spanning-tree vlan 10
+
+		spanning-tree bpdugaurd default
+
+	rootgaurd
+		if set root gaurd and our main links on switch send bpdu saw our device were on root-inconsistent (is lower than errordisable) and isolate them
+
+		spanning-tree link-type point-to-point
+		#if saw port got shut
+		#rapid doesn't work with this
+
+		broken state used on rootgaurd concept 
+
+		rootgaurd  > suprior bpdu get block > broken state > root-inconsistent error
+		bpdugaurd > block all ports that transfer bpdu packets
+
+		if set bpdugaurd on global just work on portfast
+		on portfast we send bpdu
+
+	bpdufilter
+		can make loop (port root port, port designated port)
+		filter bpdus
+		no protection
+
+		useful in isp not lan of organization unit
+
+		spanning-tree bpdu-filter enable
+		spanning-tree portfast bpdu-filter default
+		spanning-tree portfast edge bpdu-filter default
+		#add on global
+		#add edge command on newest ios versions
+		#better apply on portfast interfaces 
+		#send 11 bpdu packets to portfast adn client just receive them doesn't reply, detect this port is switch or not
+
+	loopgaurd
+		loop protection and prevention on stp
+		if loss 2 packet bpdu on flat design or indirect changes or cable error ... what happen?
+			will be on broken(port is up and bpdu is down)
+
+			int gig0/0
+			spanning-tree gaurd loop
+
+			*change root port and designated port or alternative to protect from loop
+				root port and alternative ports receive bpdu packets (these are not designated port)
+				designated port send bpdu packets
+
+			spanning-tree loopgaurd default 
+			#enable global mode and active this feature on non designated ports
+
+	*enable root gaurd on all interfaces except client side
+	*enable loopgaurd on root port and alternative
+	*enable bpdugaurd on access layer and client side
+
+	show process cpu
+
+	udld
+		unidirectional link derection
+		used for one directional links like fiber optics
+		loopgaurd doesn't check directional
+
+		show udld neighbor
+
+		conf t
+		udld enable aggresive
+		#just active on fiberoptics
+
+			aggresive means enable errordisable if get unidirectional
+			normal mode means just log them
+
+			*send some packets on intervals, just check path is unidirectional not more, each switch send this for fiber links
+
+		interface gig0/0
+		udld port aggresive
+		#interface mode activation
+
+		udld port disable
+		#disable on interface side
+
+		*won't be activated until it gets the udld packets so that it doesn't go into the errordisable mode
+		15 second send
+		45 second wait
+		8 * 1 seconds send again packets after wait time if did not receive anything means get unidirectional
+
+		udld reset 
+		udld recovery interval 30
+		#if get errordisable set this command
+
+	mst(multiple spanning tree)
+		made on pvst+ base
+		on pvst+ create a spanning tree per vlan this is not suitable
+		create instances with loadsharing target
+		use some root bridges on spanning tree
+		distribute vlans on instances
+		our spanning tree get agile
+		just sent 1 bpdu 
+		all vlans are on ist0 (instance 0)
+		for loop free target use ist 
+		m record contain multiple ist and bpdu
+		all ist transmit
+
+		mst region
+			activity domain for mst and switches 
+
+			region
+				revision name
+				revision number
+				vlan to instance mapping
+
+			spanning-tree mode mst
+			spanning-tree mst config
+			name mst-test
+			revision 1 
+			#set numbers
+
+			instance 1 vlan 1-10
+			exit
+
+			show pending
+
+			spanning-tree mst 1  priority 10
+			#1 is instance number
+
+			spanning-tree mst 1 root primary
+			#set many mst and root ... on each switches
+			#each mst and switch has number on spanning tree > bridge id 32768 + instance
+
+			show spanning-tree mst config
+			show spanning-tree
+			show spanning-tree mst interface gig0/0
+
+			interface gig0/0
+			spanning-tree mst 1 cost 1000000
+			#use long cost
+
+			*use region for large scale
+			all interfaces and bpdu are on mst instance 0
+
+			*better bypass msti0 and don't set allowed vlan on trunk interface (don't limit them)
+			if set one vlan on 2 instance cause block traffic
+
+			trunk link processing
+				if prune one vlan from ist0 or instance what happen?
+				nothing continue working 
+				if remove all vlan from instance get trouble
+
+			mst region boundary
+				connect to evething else except normal region must get convert so use tag on each vlan with pvst negotiation target 
+				on pvst we have seperated stp for each vlan so need converting
+				with this tool can simulate pvs mechanism
+
+				*if one switche send on pvst with superior bridge id on stp must block and set errordisable cause get confilict
+				set root-inconsistent on pvs simulate mechanism
+******************************
+vtp & ether cahnnel
+	better make vlans on vtp v3
+	vtp modes
+		transparent
+		client
+		server
+			primary
+				security issues force make vlan on this mode
+
+			secondary (if has primary server works like client)
+
+	can create vlans on switch before vtp creation then set vtp
+	if ommit switch vlans saw inactive or drop packets
+
+	vtp primary
+	vtp password xyz
+	#couldn't create vlans after this command
+	#must set this password for other switches get sync
+
+	vtp messages
+		summary > 300 seconds
+		subset  > server to client
+		client request (advertisement) > client to server  after summary time
+
+		each changes on vlan topology get notify and trigger update
+
+		each 300 secondsadvertise summary contain 
+			domain
+			revision number
+			password
+
+			after 300 seconds request for advertisement and give update packets on subset 
+
+	show vtp counters
+		better check new switch revision number cause higher get confilict on topology
+		*delete domain and change domain to rach revision 0 or make it transparent mode vtp 
+
+	vtp version 1 and 2 support standard vlans
+	vtp version 3 has support standard and extended + mst + other database propagation
+
+	dynamic trunking protocol (dtp)
+		mode 					admin mode 			operational mode
+		access					access 				access				
+		dynamic-auto			dynamic-auto 		access/trunk (try be trunk, if not exist get access)(passive mode)
+		dynamic-desirable		dynamic-desirable 	access/ trunk (wanna trunk if not exist get access)(active mode)
+		trunk 					trunk 				trunk 
+
+		show interface gig0/0 switchport |i trunk
+		show run int g0/0
+******************************
+etherchannel
+	link aggregation 802.1ad
+
+	modes
+		static
+			manual
+				if get loss or ommit one link on aggregate could not redirect traffic on another interafce
+
+		dynamic
+			pagp
+				mac > 0100.0ccc.cccc 
+				protocol > 0x0004
+
+				auto with auto > no negotiation
+				auto desirable with desireable or auto > can negotiate
+
+			lacp
+				mac > 0180.c200.0002
+
+				passive with passive > no negotiation
+				active or passive with active or passive > can negotiate
+
+	show ether-channel
+	show ether-channel summary
+	clear cdp table
+	#renew them
+
+	*on dynamic mode showing I means standalone and one side get config
+	 count before show us number and codes define standalone and after aggregation
+
+	 show interface portchannel
+	 show ether-channel port
+	 #perspective view of etherchannel
+
+	 on lacp we have priority number like 32768 used for hotstandby when has 16 links must use 8 links (which 8 links)
+	 show lacp neighbor
+	 show pagp neighbor
+	 #say which device get connect 
+
+	 show lacp counters 
+	 show pagp counters
+
+	 lacp fast
+	 	each 30 seconds send to each other
+	 	check mode and link health 
+	 	3*30 second wait if doesn't response means get ommit
+	 	if chnage hello and dead on 1 and 3 means lacp fast
+
+	 	lacp rate fast
+	 	show lacp intervals
+	 	#set both side
+
+	 lacp system priority
+	 	used for failover and reserved bandwidth and stable bandwidth
+
+	 16 links are in lacp but 8 is active and 8 is passive
+	 active links must be defined by master switches
+	 system priority
+	 	(0-65535)(default is 32768) + mac
+	 	above method is lacp system id which define master switches
+
+	 	port priority is 32768 in rnage 0-65535
+
+	 	show lacp sys-id
+	 	lacp system-priority  100 
+
+	 	interafce port-channel 
+	 	lacp max-bundle 16
+
+	 	interface port-channel 1
+	 	lacp minimum-links 16
+
+	 	load-interval 30
+	 	#effect on qos and interface
+
+	 	*type ether channel = type member
+
+	 must be same if need aggregation
+	 	port types
+	 	port modes
+	 		access or trunk (encapsulations)
+
+	 	native vlans
+	 	allowed vlans
+	 	speed
+	 	duplex
+	 	mtu
+	 	load intervals
+******************************
+ip routing
+	isis (intermediate system - intermediate system)
+		use lsp (link state packet)
+
+
+	rip v2 (routing infromation protocol)
+	eigrp (enhanced interior gateway protocol)
+		base on igrp
+		maximum delay on replace links 200 msec
+		use eigrp topology table
+		eigrp summary route use ad(administrative distance) 5
+			
+	as > routing domain
+	med (multi exit discriminator)
+	as path > loop free
+	path selection
+		prefix length + ad + metric
+		longest prefix match
+
+	show ip cef
+	show ip route 10.11.12.13 255.255.255.0
+
+	floaing static route means you add backup links with manual static route
+
+	base on lower metric create routing table
+
+	eigrp use 255 hop on as
+	use 224.0.0.10 address
+	eigrp packet
+	reliablity function
+	update package has acknowledge
+	reliablity > healthy packet received
+		1/255 is not healthy
+		255/255 means are healthy
+
+	eigrp use maximum bandwidth
+	wide metric eigrp used for named eigrp
+	feasible distance means calculated distance
+
+	router eigrp 1
+	network 1.2.3.4 0.0.0.0
+
+	show ip protocol
+	show ip eigrp interface
+	show ip route eigrp
+	show ip eigrp topology all links
+	show ip eigrp neighbor
+
+	r1--------------r2---------------r3
+	* 				*
+		* 		*
+			*r4
+
+	in this topology if r4 need to connect r3 and path between r2 and r3 get trouble 
+		r2 advertise to r4 and r1 has no access to r3
+		r4 advertise this later
+		but here r1 advertise to r2 and r4 has access the r3 (make loop here)
+
+		what should we do
+			feasible key condition is soloution
+			if target were accessible and fd is not smaller than rd or fd is grater than rd use variance
+			feasible successor
+			these fd and rd based on metric
+
+			if get trouble on execute this must check query and reply mechanism
+
+			in eigrp use infinit delay time for unrachable target and path
+			put infinit delay on query and reply
+
+			if path get cut offbefore response use query
+
+	eigrp max path default is 4 
+
+	interface g0/0
+	ip summary-address eigrp 1 172.16.0.0/12
+******************************
+ospf
+	ospf versions
+		2 > ipv4
+		3 > ipv4/6
+			ipv4 in version 3 will be ipv6 base
+			couldn't use without ipv6
+
+	show ip ospf neighbor
+
+	interface gig0/0
+	router ospf 1 area 5
+	router-id 1.2.3.4
+	#if forget set rid used largest ip, has order first check loopback interface then other interfaces
+
+	we don't have preemt option here except use
+		clear ip ospf
+
+	show ip ospf int brief
+	show ip int serial 0/0/0
+
+	packet types
+		hello
+		database description (dbd)	
+			hex 0x8....
+			send sequences on it
+			send version contain lsa and lsdb
+
+		link state request (lsr)
+			after receive dbd to clients 
+			send this to request files and packets (approve)
+
+		link state update  (lsu)
+			receive packets and check lsa
+
+		link state acknowledge (lsa)
+			after receive packets send acknowledge
+			after receive dbd and lsr send acknowledge
+			hello doesn't have acknowledge
+
+	when send dbd and lsr
+		when check sequence number and detect is not sync
+
+	each 30 minutes update whole topology for ospf and link states
+
+	finit state machine (fsm)
+		which state has problem on ospf if has problem what should we do
+
+	hello packets
+		active neighbor filed sent with blank values
+		our ospf state goes to init from down state
+		then put rid on hello packets to detect each neighbor and set active neighbors
+		till here we are on 2way handshake
+		repeate to detect other side and accept neighborship
+
+	exchange state
+		biggest rid get master and others will be slave
+
+		master is dr and other is bdr
+
+		mtu check prove stable connection cause different mtu drop neighborshiping
+
+		send states with dbd packets and sequence number will be synch
+
+	loading
+		base dbd information on each side (full neighbor state)
+			establish
+				down
+				attempt (nbma)
+				init
+				2way
+
+			synchronize dbd
+				exstart
+				exchange
+				loading
+
+	attempt
+		in nbma works like unicast to make static neighborship
+		if run ospf and didn't receive answers we goes to attempt state on nbma
+
+	pseudonode
+		like dr job in ospf
+		224.0.0.6 > dr and bdr
+
+		224.0.0.5 > ospf listening
+
+		on nbma we have 40 seconds waiting time
+
+		this waiting is a chance to adjust
+
+	dr and bdr
+		bigger option election
+			interface priority
+			router-id priority
+				highest loopback ip 
+				bigger interface ip 
+
+	*on nbma and serial ports we just have 224.0.0.5
+
+	exchange data
+		dr and bdr negotiate with dr other to make full adjancency
+		dr other are 2way neighbor
+
+	best way to change dr and bdr is manualy cahnge priority
+	then
+		clear ip ospf
+
+	*these manual settings are temporary if get reboot or changes on topology must config again
+	best decision is set priority 0 for lan side and omit dr and bdr election
+
+	show ip ospf int gig0/0
+		attach via interface enable
+		attach via network enable
+		#how add ospf
+
+	network types
+		ip ospf network ....
+
+		broadcast (default)
+			has dr and bdr
+			hello 10 and dead 40 seconds
+			dynamic neighborship
+			ethernet
+
+		point to point
+			has no dr and bdr
+			hello 10 and dead 40 seconds
+			dynamic neighborship
+			serial ports - hdlc - ppp
+
+		non broadcast
+			has dr and bdr
+			hello 30 and dead 120 seconda
+			static neighborship
+			framerelay
+
+		loopback
+			nothing here
+
+		point to multipoint
+			has no dr and bdr
+			hello 30 and dead 120 seconda
+			dynamic neighborship
+
+	show ip ospf int brief
+		number f/c
+		f > fully adjancency
+		c > neighbor count
+
+		*for dr other we saw different values
+
+	on ethernet interface better set point to point mode
+
+	cost
+		show ip ospf
+		best soloution is setting highest value on bandwidth
+		instead 10pow8 set 10pow9
+
+		auto
+			router ospf 1
+			auto-cost ref-band
+
+		manual
+			int gig0/0
+			ip ospf cost 32768
+			#0 to 65535
+
+	*each interface placed one area and each router placed on many areas
+	manage better our ls
+	modificate our system with partial update
+	are id is 32 bit
+	all areas must connected to area0
+	2 level architect
+	with abr can summarize the routes
+
+	lsa (link state advertisement)
+		type1
+			routers
+			on area router-id
+
+			show ip ospf database
+			#show us connected to which networks, mask, cost, which interface, whick neghbor router-id
+
+			show ip ospf database router
+			#type1 will be shown
+
+			show ip ospf database router 1.1.1.1
+
+			we saw sequence number, all revision and checking happend with this
+			32 bit value
+			each change and update increase
+
+			age is growthing since lsa generated
+			each 1800 seconds get refresh and advertise with dbd, here we add our newest sequence number
+			if reached 3600 seconds and didn't receive new packet must omit from database
+
+			link count describe each lsa contain how many values
+
+			this type1 didn't advertise to another areas
+
+			ospf on hub&spoke topology and multiaccess links that contains dr and bdr set transite value inside database
+			interface ip + cost + dr ip 
+
+			on ospf database must see point to point value links 
+			couldn't use multiaccess and hub&spoke model so use pseudonode
+			pseudonode tune the ospf map and database
+			create virtual router with interface cost 0 
+			here we generate dr and name pseudonode
+
+			dr router generate lsa type 2 for pseudonode
+
+		type2
+			show ip ospf database network 1.2.3.4
+			#who advertise thi?
+
+			pseudonode and network
+			dr just sent this
+			as much as we have multi access, the same number have dr
+			works inside the area not more
+			use same ip range for pseudonode
+			which networks connected to transite + subnet masks
+
+		type3
+			show ip ospf database summary
+			show ip ospf database summary 1.2.3.4
+
+			area border router
+			summary lsa
+			each network are on one hand advertise to another hand
+
+			abr router-id + netmask + cost
+
+		type4 (redistibute)
+			asbr summary
+
+			asbr router-id
+
+		type5 (redistibute)
+			external
+			asbr generated routes
+			network
+
+		type7 (redistibute)
+			nssa external 
+			asbr generated
+			network
+
+		type9 and type10 (opaque lsa)
+		type10 (mpls)
+
+	discontiguous network
+		from non-backbone couldn't inject routes to routers
+		if need inject type1 to backbone area 
+		get convert type1 to type3
+
+		for area0 must use redundant interfaces 
+
+		better use gre and virtuallink
+
+		tunnel 0
+		tunnel source gig0/0
+		tunnel destination 10.0.0.2
+		ip address 12.12.12.1 255.255.255.252
+		ip ospf 1 area 0
+
+	path selection
+		o is greater than oia
+
+		abr router advertise best path to other
+
+		ospf can use 4 path on ecmp to destination
+		if set ecmp on 1 means don't use them
+
+	summerize
+		inside the area couldn't be filter and summary need knwo places
+		outside area must summary and advertise them to make agile database
+		on summarization must advertise on lowest metric
+
+		change cost (on abr)
+			router ospf 1
+			area 1 range 10.0.0.0/8 cost 100
+			area 1 range 10.0.0.0/8 cost 100 advertise
+			area 1 range 10.0.0.0/8 cost 100 not-advertise
+			#means route filter
+
+	acl on ospf focus on users data
+	sourc and destination ip address and port also protocol
+	better filter routing protocols data with prefix list (network and masks are target)
+
+	lists
+		entry - condition - action
+			acl
+				condition (netmwork)
+				#our first line on acl is 10 and count 10
+
+			prefix list
+				condition (network and netmask)
+				#our first line in prefix list is number 5 and coun 5
+
+				ip prefix-list x sequence 4 permit ....
+
+			route map
+				we don't have sequence number here 
+				must add match command if were not consider all traffics
+
+				show route-map x
+******************************
+ospfv3
+	inside area couldn't filter routes
+	just on abr
+
+	abr
+		router ospf 1
+		area 12 range 172.16.0.0 255.255.0.0 not-advertise
+
+	if need use or add range to area0 from another area like 1
+	between these 2 areas have another area like 3
+	must use filter list (best an powerful)
+		router ospf 1
+		area 1 filter-list prefix list-x in
+		area 1 filter-list prefix list-x out
+
+	acl 
+		access-list 1 deny 10.10.10.0 255.255.255.0
+		router ospf 1
+		distribute-list 1 in 
+		#just apply on inbound direction
+
+		set this on ospf database and advertise it but doesn't have on ip routing table
+
+	prefix
+		ip prefix-list a deny 10.10.10.0 /24
+		router ospf 1
+		distribute-list prefix a in
+
+	route map
+		ip prefix-list b permit 10.10.10.0 /24
+		route-map bb deny 10
+		match ip address prefix-list b
+		route-map bb permit 20
+		#here permit all traffics
+
+		router ospf 1
+		distribute-list route-map bb in
+
+	*local ospf filtering
+	*first advertise all attributes then filter them
+
+	lsa type1 > abr > generate lsa type3 > then filter them > regenerate our lsa type3 (this last step needed if wanna go another abr)
+
+	don't filter cause just have much load on devices
+
+	ospfv3 is dualstack means support ipv4 and ipv6
+	is not compatiable with version 2
+	used address family
+	if wanna use this must enable unicast routing
+
+	ipv6 unicast-routing
+	router ospv3 1
+	address-family ipv4 unicast
+	#if set ippv6 couldn't select router-id
+		has procedure like before
+			32 bit
+			manaual
+			bigest loopback
+			bigest non loopback interface
+
+			*better use manual if select ipv6
+
+	router-id 1.2.3.4
+	#if set on address-family detect these on limited scope but here is global mode rid setting
+
+	ospfv3 1 ipv4 area 5
+	ospfv3 1 ipv6 area 5
+
+	show ospfv3 ipv6 ...
+	#use same commands were on ipv4
+
+	show ospfv3 neighbor
+	#has interface id (learned in ipv6) replaced with ip address on database and showing
+	#used in lsa type1
+	#prevent spf algorithem
+
+	*in ipv6 use oi instead of o ia in ipv4 (inter area)
+
+	src 			destination 				type
+	link-local 		nexthop > ff02::5 			dynamic neighborship
+	link-local 		nexthop > link-local 		static neighborship
+	link-local 		all another states use link-local for destination and request / ack / dbd  	
+
+	*ff02::5 > 224.0.0.5 and ff02::6 > 224.0.0.6
+
+	interface range g0/0-1
+	ipv6 address fe80::2 link-local
+	#get summary on routing table
+
+	instance id
+		added on v3 if used lan and connect the routers on 4 links from this lan 
+		all routers got neighbor 
+		*could be neighbor cause use link-local
+		so if wanna isolate them what should we do ?
+			interface g0/0
+			ospfv3 1 ipv6 area 3 instance 1
+
+	show ipv6 int gig0/0
+
+	*ff02::2 > all ipv6 routers and ff02::1 means interfaces and loopbacks
+
+	on version 3 our packet field get agile and smaller
+	on version 3 we have ip (ipsec added can authenticate) and transport also use application
+		ipsec
+			ah or authentication header (just have authentication)
+			esp or encapsulation security payload (use authentication and encryption)
+
+	in version 2 couldn't detect topology change and subnet change
+	run spf for each changes
+	in version 3 just run spf if see changes on topology not more
+	each typ1 lsa has neighbor and topology changes not addresses
+	here use lsa type9
+	type9
+		advertise addressing informations and update them cause this is not topology change so doesn't run the spf algorithem
+		so 
+		also doesn't advertise lsa type1
+
+
+	type1 is topology 
+	type9 is subnet (intra area prefix)
+
+	on ospf version 2 use lsa type3 for summary 
+	on version 3 used for inter area prefix
+
+	show ospfv3 database router ad-route 1.1.1.1
+	#advertise and show 1.1.1.1
+
+	show ospfv3 database prefix ad-route 1.1.1.1
+	#lsa type9
+
+			|ospfv2 					|ospfv3
+	type4 	|asbr-summary	 			|inter area routers
+	------------------------------------------------------
+	type5 	|use external 				|use external
+	------------------------------------------------------
+	type6 	|group memebership 			| group memebership
+	------------------------------------------------------
+	type7 	|nssa-external 				|type7
+	------------------------------------------------------
+	type8 	|opaque 					|link
+
+	*lsa type hex
+		1 > 0x2001
+		2 > 0x2002
+		3 > 0x2003
+		4 > 0x2004
+		5 > 0x2005
+		6 > 0x2006
+		7 > 0x2007
+		8 > 0x2008
+		9 > 0x2009
+
+	show ospfv3 database link 1.1.1.1
+	#how advertise ip 1.1.1.1 behind ipv6
+	#like type3 advertise it just on link-local
+
+	were ip information on ospf header couldn't trnsport but in address family put on content and transport
+	*maximum one link get advertise in las type8
+
+	router ospv3 1
+	address-family ipv6 unicast
+	area 0 range fe80::2/126
+
+	*in ipv6 use another values for best path selection
+	we can use ipv4 with ipv6
+
+	interface gig0/0
+	ospfv3 1 ipv4 area 0
+******************************
+bgp
+	border gateway protocol
+
+	internet assigned number authority (iana)
+
+	sell public as number and organization unit must have 2 link and isp spaces (ip public)
+	deploye route policy on isp, main link is isp1 and backup link is isp2
+	firs version were 16 bit (as-number)
+	0-65535
+
+	convert 32 bit > 4300000000 as number
+
+	scalable
+	flexible
+	stability
+	path vector > inter organization
+
+	layer2 vpn
+	layer3 vpn
+
+	ipv4
+	ipv6
+
+	nlri (network layer reachability information)
+		which address wanna advertise 
+		advertise with path attribute
+
+	neighbor table (neighborship)
+	bgp table (advertisement)
+		all path are on database (successor and unsuccessor)
+
+	routing table (selectioin on attribute)
+
+	path attribute
+		as-path
+			how many as-number must reached to access the specific as-number
+			if see same as-number block that
+			with checking as-number for loop prevention
+
+	bgp path attribute
+		well known
+			discretionary
+				ibgp
+
+			mandatory bgp
+				(force)
+				next hop
+					as-path
+					origin code
+
+				local preference
+				atom aggregate
+
+		optional
+			transitive
+				community (send to others)
+				aggregator
+
+			non transitive
+				med
+
+	is an application works on tcp 179
+
+	3way handshake
+		tcp synchronize on 179
+		establish 
+			syn
+			syn-ack
+			ack
+
+	peer session establish (not neighbor)
+		open message (hello)
+		keepalive
+		update
+		notification
+
+	routing database synchronize
+		update 
+		notification
+
+	after sending one open message (hello) negotiate and create neighborship then use keepalive packets to check system liveness
+	use notification for drop neighborshiping and error
+
+	has batch timing(cause bgp work slowly)
+
+	bgp connection state
+		idle
+			first time bgp config
+			try tcp connection 
+
+		connect
+		active
+			60 seconds wait
+			if were not able to connect goes again to idle state
+			each ime get unsuccessful wait 60 seconds
+			if saw tcp failed works like above
+
+			depub ip bpg events
+
+		opensent
+			sent open (hello)
+				version bgp  (must be same)
+				sam eip request and interface on as-number
+				send my as-number
+				unique router-id
+				security authentication (password and ttl)
+
+			*trouble on this state hold connections for 4 minutes
+
+			*sent keepalive values in this state
+				select lowest value for hold then hold/3 get for hello
+				this is automated
+				if set keepalive 0  means drop connection
+
+			*also sent capability has dependency on as,like our as support 2 octed or 4 
+				show bgp ipv4 unicast neighbor
+
+		open config
+		establish
+			after this state we sent keepalive (send 60 seconds and hold 180 seconds)
+
+	*if set acl might filter and drop our tcp connections
+
+	show ip bgp neighbor 
+	#full status
+
+	show ip bgp summary
+	show bgp ipv4 unicast neighbor
+	show bgp ipv4 multicast neighbor
+	#get establish and show values
+
+	show tcp brief
+
+	show bgp ipv6 unicast summary
+
+	*see table version like revision number 
+	out queue like bandwidth used on sending attributes
+	state\prfx 
+		can be idle or show us number 
+		if were everything else except establish means didn't connect to each other
+
+	router bgp 1
+	neighbor 10.10.10.2 shutdown
+	#make a neighbor idle
+
+	bgp router id is same with ospf concept
+		manaual
+		bigest loopback ip
+		bigest physical interface ip
+
+	by default sent ipv4 if need add some thing can check and append it
+	name multi protocol bgp or mpbgp or bgpv4.5
+
+	router bgp 1
+	address-family ipv6
+	neighbor 10.10.10.1 active
+	#drop neighborshiping and negotiate again
+
+	no bgp default ipv4-unicast
+	#some times you just have load and no usage from version 4 so better disable it 
+	#after this our bgp get restart and neighbors negotiate again then works on ipv6
+
+	better disable ipv4 globaly then active on single request
+
+	on bgp we have no dynamic neighborship
+	use unicast packet
+	also has tcp fragmentation
+
+	tcp sequence number and reliablity (acknowledge)
+	df-flag in ip (don't fragment)
+
+	path mtu discovery
+		 a tool used for discover whole path mtu
+
+		 data segment 
+		 	tcp[20byte] + ip[20byte]
+		 	1500-40=1460byte mtu size
+
+	prefix advertise
+		show bgp ipv4 unicast neighbor
+		show bgp ipv4 unicast
+		#bgp table
+
+		show ip route
+		show ip route bgp
+		#routing table
+
+	on neighborship route definition will be on injection route and advertise to other menas network or redistibute
+	network advertisement
+		router bgp 1
+		address-family ipv4 unicast
+		network 10.10.10.0 mask 255.255.255.0
+
+		*if add a subnet with network model see in shows our origin is term (i)
+
+	redistibute advertisement
+		ip prefix-list lp permit 1.2.3.4 /32
+		route-map loop permit 10
+		match ip address prefix-list lp
+	
+		router bgp 1
+		address-family ipv4 unicast
+		redistibute connected route-map loop
+
+		*if add a subnet with redistibute model see in shows our origin is term (?)(incomplete)
+
+	bgp table
+		adjancency rib in (filter some routes then add to next)
+			show bgp ipv4 unicast neighbor 1.1.1.1 receive-routes
+
+		local bgp rib (filter some routes then add to next)
+			show bgp ipv4 unicast
+
+		adjancency rib out (has best routes)
+			show bgp ipv4 unicast neighbor 1.1.1.1 advertise-routes
+
+	neighbor 1.1.1.1 soft-reconfiguration inbound
+	#each received routes store on router (temporal store)
+
+	route aggregation (summary)
+		like ospf and eigrp and vlsm 
+		save resources and work faster
+		has no route flaping
+
+		static 
+			if has no traffic on aggregated range advertise them to other
+			better use dynamic model
+
+			ip route 1.2.3.4 255.255.255.255 null 0
+			router bgp 1
+			address-family ipv4 unicast
+			network 1.2.3.4 mask 255.255.255.255
+
+		dynamic
+			has conditional state, set which of them get advertise
+
+			router bgp 1
+			address-family ipv4 unicast
+			aggregate-address 1.2.3.4 255.255.255.255
+
+			*on igp sent summaries not subnets or subsets
+			*on egp sent summaries and subsets and subnets
+				if set summary only just sent summaries
+				generate rrecords on bgp tables
+
+				aggregate-address 1.2.3.4 255.255.255.255 summaary-only
+				#more memory usage 
+
+	supress 
+		show bgp ipv4 unicast summary
+
+		shows with s* menas don't advertise
+		less memory usage
+
+		add a route with null0 on source
+		set administrative distance on 200
+		if set large ip range on this method might get loop 
+
+	as-path  values can help us prevent loop and supress the routes
+		as-sequence
+			repeated number on same as-number
+
+		as-set
+			our routes exist on which sub-as
+			tell me this update used which summary 
+			tell us summaries
+
+			aggregate-address 1.2.3.4 255.255.255.255 summaary-only as-set
+			#advertise the range to others and say received from which as-number also befor the local as-number used which as-numbers
+			*if see same as-number detect loop and didn't receive them and didn't advertise again
+
+	atomic aggregation
+		advertise to other and notify them this route is not new and got summary on another router also got modified
+		each router did aggregate do this
+		put router-id and owned as-number on it
+
+		show bgp ipv4 unicast 1.2.3.4
+
+	mp reach nlri in ipv6
+		same ipv4 nlri and contain
+			nexthop
+			as-path
+			mask
+			...
+
+		withdrawn (mp reach nlri)
+			no ip address ...
+				a table with no values
+
+			*better use global cause in ipv6 we have interface-id based on mac address
+
+		with combine taget for address-family interface (afi), sub-address-family interafce (safi), suggest seperated tables on bgp
+		if get dublicate on bgp,do shut then no shut
+
+		show bgp ipv6 unicast neighbor
+		show bgp ipv6 unicast 1.2.3.4
+
+	bgp if created and make neighborship on back to back model named multihop and sessions will be same
+
+	bpg split horizon
+		in ibgp if sent update didn't advertise to another ibgp and just advertise ebgp values
+
+		when need advertise ibgp ?
+			organization unit need transfer data on own routers not isp
+			cause we cann't redistibute to isp so more cpu usage happen on routers
+
+			*bgp use path attribute
+				it's easy to change path and directions on bgp 
+
+			*igp (ospf,eigrp ...) use metric and lowest cost
+
+		best soloution is ibgp mesh
+
+		ibgp mesh
+			if need load share and load balance or fault telorance must use bgp multi-homing
+			challenges are internet transite routing
+			also see sub-optimal routing (bad path)
+			must run ibgp
+
+			*in ibgp our nexthops get unchanged, must use next-hop-self in bgp commands
+
+			*if set next-hop-self make our systems and network like transite area for isp users
+			must filter them and just use owned ip ranges
+
+			access-list 1 permit 1.2.3.4 255.255.255.255
+			router bgp 1
+			address-family ipv4 unicast
+			neighbor 10.10.10.2 distributed-list 1 out
+			#don't advertise network to internet and prevent transite area
+
+			*permit ip 1.2.3.4 255.255.255.255 0.0.0.0
+						------- ----------- 	-------
+						ip 		network mask 		our subnet mask must be this not more or less
+
+	conditional matching
+		ip access-list standard a
+		permit any
+
+		router bgp 1
+		address-family ipv4 unicast
+		neighbor 10.10.10.2 distributed-list a out
+		#mask is not important
+
+		clear ip bgp * soft
+
+		default mask on standard access-list is /32 or host
+			permit ip host 10.0.0.0 host  255.255.128.0
+			#means 10.0.0.0/17
+
+		acls 				| control or handle
+		------------------------------------------
+		standard 			| network
+		extended 			| network + netmask
+		ip prefix-list 		| network + netmask + nlri
+		route-map 			| set condition
+		---------------------------------------
+		ip prefix-list a sequence 5 permit 10.0.0.0/17 ge 18
+		ip prefix-list a sequence 5 permit 10.0.0.0/17 les 32
+		#offer last model
+
+		router bgp 1
+		address-family ipv4 unicast
+		neighbor 1.2.3.4 prefix-list a out
+
+		prefix-list
+			network
+				high order bit pattern
+
+			netmask
+				high order bit count
+
+		ip prefix-list a permit 0.0.0.0/0 ge 32
+		#each network with /32 get check and drop connection on them
+
+		ip prefix-list a permit 192.168.0.0/13 ge 32
+		#means just receive this 
+		#/13 to /16 has 3 bit > 000 to 111 > 0 to 7
+		#192.168.x.x/13 to 192.175.x.x/13
+		*single ip
+
+		ge 32 means /32 and single ip get detect
+		le 32 means 192.168.0.0/24 > 32-24 = 8 from /24 to /32 can manage subnets
+
+		*if forget add line number on route-map first rule, get override
+		better set action
+		*route-map last line has explicit deny
+			route-map x permit 10
+			match ip address 1
+			#access-list
+
+			match ip address prefix-list 1
+
+			route-map x deny 20
+			show route-map a
+		---------------------------------------
+		ip access-list standard a
+		permit 192.168.0.0 255.255.255.0
+
+		ip access-list standard b
+		permit 172.16.0.0 255.255.255.0
+
+		route-map x permit 10
+		match ip address a b
+		#apply a or b
+
+		match metric 50+10
+		match metric 50-10
+		set as-path prepend
+		#which as-number placed and how many times get repeated
+
+		set ip next-hop self
+		set ip next-hop 5.6.7.8
+		#peer ip
+
+		set ip next-hop 1.2.3.4
+		#our ip
+
+		set origin incomplete 
+		#ibgp
+
+		set tag
+		---------------------------------------
+		ip access-list standard acl-one
+		deny 172.16.1.0 255.255.255.0
+		permit 172.16.0.0 255.255.0.0
+
+		route-map example permit 10
+		match ip address acl-one
+		route-map example deny 20
+		match ip address acl-one
+		route-map example permit 30
+		set metric 20
+
+		*if receive 172.16.1.0/24 matched with example-30 and reached networks on metric 20, our example-10 said access them but on acl set deny value for range (means don't check 172.16.1.0/24)(permit means check the subnet mask and ip address range)(example-30 get match cause doesn't have a acl condition just said if you are not inspected on 10 or 20 can bypass on me)
+
+		*if  comes with 172.16.0.0/24 access the other without changes on metric or acls
+
+		*acl just filter receiving values and said can i manage them or not?
+		---------------------------------------
+		checking order
+			sequence
+			condition match critria
+			processing action
+			optional action
+		---------------------------------------
+		continue term on acls
+			like jump action in mikrotik filter rule
+			change the checking flow
+
+			ip access-list standard acl-one
+			deny 172.16.1.0 255.255.255.0
+			permit 172.16.0.0 255.255.0.0
+
+			route-map example permit 40
+			match ip address acl-one
+			set next-hop 1.2.3.4
+			continue
+			#has more load on device
+			#chek next rule then close the route-map and make decision
+
+			route-map example permit 50
+			match ip address acl-one
+			set metric 50
+			set as-path prepend 1 1
+			#add duple as-number 1 at the end of bgp values
+		---------------------------------------
+
+	as-path list
+		ip as-path access-list 1to500 permit ^2
+		#between 1 to 500
+		#at the end has regex
+		#regex ^2 means everything starts whit number 2 > 2 or 200 or 231 ....
+
+		router bgp 1
+		neighbor 1.1.1.1 filter-list 1to500
+
+		ip as-path access-list 1to500 permit ^2_
+		#at the end of line say add space or underline
+		#just has 2 not more
+		#2 , 22 , 222 ....
+
+		ip as-path access-list 1to500 permit 1#
+		#finished with number 1		
+		#31, 21 , 1111 ....
+
+		ip as-path access-list 1to500 permit _1$
+		#same above but better
+
+		show ip as-path
+
+		^[123]_ 
+		#means start or ends with one of these numbers
+
+		2|22
+		#means 2 or 22
+
+		*on route-map must write 
+			match as-path 1to500
+
+	cleaning
+		hard reset
+			reset all live bgp process and drop neighborshiping then start
+
+		soft reset (has direction like in\out)
+			in 
+				clear ip bgp soft in 
+				clear ip bgp in
+
+				route refresh is the important feature must use that
+				in newest updates didn't advertise old routes
+				with this force routers advertise old routes
+
+			out
+				clear ip bgp soft out 
+				clear ip bgp out
+				
+				we have withdrawn roles here
+
+		bgp update packet
+			nlri
+				network and masks
+
+			attributes
+				as-path
+				origin
+				nexthop
+
+			withdrawn routes
+				on sending update advertise which routes must be delete
+
+				clear ip bgp * soft
+				#used for in and out with all features
+
+	community
+		is a tag value
+		path attribute and optional transitive
+		32 bit (standard)
+		64 bit (extended or expanded)(large scale like mpls)
+
+		modifiable
+
+		section 1 (16 bit) + section 2 (16 bit)
+		0-65535				+	0-65535
+		better et this
+		like organization
+		unit
+
+		if put same community make override
+
+		ip prefix-list pfx1111 permit 1.1.1.1/32
+		ip prefix-list pfx1112 permit 1.1.1.2/32
+
+		route-map a permit 10
+		match ip address prefix-list pfx1111
+		set community 1:1
+		#tip1
+
+		route-map a permit 20
+		match ip address prefix-list pfx1112
+		set community 1:2 1:3
+		#put many tags
+
+		router bgp 1
+		address-family ipv4 unicast
+		neighbor 192.168.12.2 route-map a out
+		neighbor 192.168.12.2 set-community
+		#by default don't sen tags with this force  send standard tags
+
+		show bgp ipv4 unicast
+		#community 65537
+			65536 + 1 or
+				0000000000000001:0000000000000001
+				----------------:----------------
+				1 				: 1
+				if ommit : our number will be like 10000000000000001 > 65537
+				if set 1:1 means > 65537
+				#tip1
+		
+		ip bgp community new-format
+		#set globaly
+
+		*must enable community on both side to realize
+
+		route-map b permit 10
+		set community 1:4 additive
+		#advertise multiple
+
+		wellknown communities
+			no-export
+				just inside the as-number network
+
+				route-map a permit 10
+				set community 1:1 no-export	
+				#65535:65281
+
+			internet
+				advertise all networks 
+				manage which routes get advertise
+				if contain specific number do something
+
+			no-advertise
+				no one receive
+
+				65535:65282
+
+			ip community-list 1to500 permit 1:1
+			ip community-list 1to500 deny 1:1
+			#between 1 to 500
+
+			ip community-list standard x permit 1:1
+
+			route-map c permit 20
+			match community 2
+			match community x
+			set weight 30
+
+			show bgp ipv4 unicast community-list 2
+
+	multi homing
+		bettre use multiple isp links for redundancy
+		must advertise summaries and classfull together
+
+		local preference
+			32 bit
+			standard 
+			default is 100
+			advertisable
+
+			we have external neighbors and they didn't receive these just works inter as-number
+
+			used for egress path  not more, see inside updates
+
+			direction is out 
+			weight direction is in
+
+		accumulated interior gateway protocol (aigp)(ios xe)
+			like cars company has many branches and many as-number
+			if all users used one routing protocols and set same metrics were easy
+
+			optional 
+			non transitive
+
+			router bgp 1
+			neighbor 1.1.1.1 aigp
+			set origin igp/incomplete
+
+	med
+		multi exit discriminator
+
+		32 bit
+
+	in ibgp we use route reflector like dr in ospf make full mesh connection also has mechanism for loop prevention
+	all routers negotiate with route reflector
+
+	cluster list 
+		non transitive
+		optional
+
+		is amller and has priority
+
+	router bgp 1
+	neighbor 1.2.3.4 route-reflector-client
+******************************
+multicast
+	broadcast 255.255.255.255
+	direct broadcast 192.168.2.255
+
+	int gig 0/0
+	ip address 192.168.2.1 255.255.255.0
+	ip direct broadst
+	#get ddos 
+
+	multicast distribution tree (mdt)
+		on network some systems need data
+		192.168.1.1 > 226.1.1.1
+		group address > multicast class d
+
+	clients join to multicast and routers also send multicast (igmp)
+
+	realtime video - iptv - game- stock.....
+
+	protocol independet multicast (pim)
+		active on router 
+
+	real time protocol (rtp)
+
+	layer 2 client request
+	switch use igmp snooping (which one need receive traffics)
+	pim activated on router then run multicast to router (layer3)(igmp querier)
+	send and receive stream
+
+	multicast
+		(224 to 239).x.x.x
+		class d
+			1110 0000 > 224
+			to
+			1110 1111 > 239
+
+	multicast addressing
+		local network controll 			224.0.0.0 - 224.0.0.255
+			
+			224.0.0.0/24
+
+			like eigrp ospf ...
+			all devices in network 224.0.0.1
+			eigrp 224.0.0.10
+			ospf 224.0.0.5 and 224.0.0.6
+			pim 224.0.0.13
+			ripv2 224.0.0.9
+
+			like a network segment 
+			not routeable	
+		--------------------------------------------------------
+		internet network controll 		224.0.1.0 - 224.0.1.255
+
+			224.0.1.0/24
+
+			more than a segment
+			routeable
+
+			ntp 224.0.1.1
+
+			cisco rp announce 	224.0.1.39
+			cisco rp discovery 	224.0.1.40
+
+			226 to 229 can be used
+		--------------------------------------------------------
+		adhoc 1 						224.0.2.0 - 224.0.2.255
+		--------------------------------------------------------
+		reserved 						224.1.0.0 - 224.1.255.255
+		--------------------------------------------------------
+		sdp/sup 						224.2.0.0 - 224.2.255.255
+		--------------------------------------------------------
+		adhoc 2 						224.3.0.0 - 224.4.255.255
+		--------------------------------------------------------
+		reserved 						224.5.0.0 - 224.231.255.255
+		--------------------------------------------------------
+		source specific multicast 		232.0.0.0 - 232.255.255.255
+
+			any source multicast (asm)
+				igmp v2
+				our source is not important
+
+			source specific multicast (ssm)
+				igmp v3
+				must check source
+				also our apps must support this versions
+
+			232.0.0.0/8
+
+			has extention on pim
+		--------------------------------------------------------
+		glop 							233.0.0.0 - 233.251.255.255
+
+			base on organization unit as-number, advertise a multicast ip 
+
+			233.x.y.0/24
+
+			x.y is 16 bits
+
+			00000000 . 000000000 > 16 bit
+			organization unit as-number > 145 > 00000000.10010010
+
+			233.0.145.0/24
+
+			if our as-number were 32 bit must change our address range
+			use adhoc 3 (support ipv6)
+
+			routeable and advertise on internet
+		--------------------------------------------------------
+		adhoc 3 						233.252.0.0 - 233.255.255.255
+		--------------------------------------------------------
+		reserved 						234.0.0.0 - 238.255.255.255
+		--------------------------------------------------------
+		admin scope 					239.0.0.0 - 239.255.255.255
+
+			239.0.0.0/8
+
+			used for private communication
+
+			layer2 multicast
+
+			unicast mac > hardware and unique
+			multicast mac > software mac
+
+			also we have virtual mac
+			activate automatically with opening the ports on hardware
+			select mac address and generate them base on our multicast ip address
+				0100.5e7f.0101
+					organization unique id > 0100.5e (individual group bit)(low order bit of the first byte is 01)
+
+					0100.5e > 0000 0001 0000 0000 0101 1110 (24 bit)(use 25th bit for multicast software generated mac)
+							  
+							  0000 0001 0000 0000 0101 1110 0
+
+					7f.0101 > 111 1111 0000 0001 0000 0001 (23 bit)(one bit seperated above)
+
+				239.255.1.1
+					binary > 11101111.1 1111111.00000001.00000001
+									    -------------------------
+									    use last 23 bit from ip
+
+				our last 23 bits from ip and mac must be same
+					 1111111.00000001.00000001
+					 111 1111 0000 0001 0000 0001
+
+					 if our mac and ip were same get confilict 
+					 can manage with switch and snooping but has more load
+		--------------------------------------------------------
+
+	igmp versions
+		1
+		-------------
+		2
+			almost all devices works on it
+			asm
+		------------
+		3
+			ssm
+
+		int gig0/0
+		ip igmp version 1
+		ip igmp join-group 239.1.1.1
+		#request sent to this ip
+
+		*ipv4 unicast routing is enable, also disable our ipv4 multicast routing
+
+		ttl = 1
+		igmp protocol number is 2
+		has alert option, send more details on cpu deep analyze 
+
+		membership report > type2 > 0x12 and multicast ip
+		general query > type1 > 0x11
+
+		igmp version 1
+			0x12
+			or 12
+
+			1 is version and 2 is type
+
+			show ip igmp groups
+			show ip igmp int gig0/0
+
+			ip multicast-routing
+			#global mode enable it
+
+			int gig0/0
+			ip pim sparse-mode
+			ip pim dense-mode
+
+			ip igmp version 1
+
+			show ip igmp groups 
+			#each 60 seconds check who want traffic
+
+			*general query send packet to 224.0.0.1 all multicast receivers receive this packet
+			with 0x11 called all users and clients and ask them wanna join the multicast flow
+
+			wait 3 * 60 for response if sent general query then leave the group
+			igmp version 1 doesn't have leave option and message
+			delay on recognize leave event
+			silent leave
+			on igmp version 2 implement leave featrue and notifed all clients and nodes
+
+			*for multicast traffic sent multicast ping
+
+		igmp v2 
+			ip pim rp-address 192.168.2.1
+			#our middle router is bridge between our multicast clients and server
+	
+			on version 2 we have membership report, general query ... also has backward compatiablity
+
+			group address (32bit)
+				type (8bit)(version and type)
+				unused bits (maximum response time)
+				checksum (16 bit)
+
+			general query > 60 seconds
+				0x11 and 224.0.0.1
+
+			memebership report
+				contain v1 multicast ip + v2 maximum response time
+				0x16 
+
+			leave message
+				0x17
+				notify packets 
+				224.0.0.2  
+
+			maximum response time
+				0 to 255 
+				main reason, not responding to all nodes
+				in memebership set 0.1 second
+
+				example after 10 seconds test connectivities
+				random counter 0-10 get set and each one get finish faster said need traffic
+				and wanna join
+				another systems get report suppression and didn't send request again
+				for leave message didn't do this wait a second
+
+				group specific query contain multicast address
+
+				igmp query
+					election
+						instead of one router have many routers
+						smaller ip can be querier
+						if 120 seconds didn't reply must change 
+						each 60 sconds check requests
+
+		igmp version 3
+			we can et source here like version 2
+			has ssm
+			backward compatiablity
+
+			memebership query
+				include
+				exclude
+
+			ip igmp join-group 239.1.1.1 source 192.168.1.1
+
+			igmp snooping
+				on switch
+				in normal condition we drop traffic from other interfaces which sent multicast traffic (point ingress port access the multicast source)
+				with this method teach the switch which interfaces wanna multicast traffic
+
+			igmp join
+				with this can manage ip and mac generation will be on which interfaces
+				224.0.0.0/24
+				don't learn in igmp snooping (use flood)
+
+	pim (protocolo independet multicast)
+		each router transfer routing protocol information on unicast ip addresses
+		but transmission request is not same with receive request so use push mechanism on fetching data in network
+		destination ip point to receiver ip address, without account just forward the traffic
+
+		video source ---- net-a ----r1 ------- net-b ------ r2-------pc2
+									*
+									 *
+									  *
+									  net-c
+									    *
+									     *
+									      *r3-----------pc3
+
+ 		video stream source > 239.1.1.1
+ 		some clients wanna receive data 
+ 		so use igmp multicast
+ 		send join message
+ 		on r1 see the clients request point to video stream source other word point to multicast source
+ 		r1 run pim and pull mechanism get start
+
+ 		*pull mechanism point to request or fetching data from multicast group address not destination ip address
+
+ 		multicast distribute tree (mdt)
+ 			source tree
+ 				source, multicast traffic transmission point used shortest path
+
+ 				shortest path tree (spt)
+ 					*target is pim pruning
+
+ 				if had many source (sender) on network what should we do for systems?
+ 					each system use seperated system and request for seperated state
+
+ 				notation 
+ 					s,g
+ 					s> source
+ 					g > group
+
+ 				show ip mroute
+
+ 			shared tree (common use)
+ 				pim dense mode
+ 					short path tree
+ 					suitable for small office
+
+ 				pim sparse mode 
+ 					first state is shared then convert to spt (shortest path tree)
+ 					99% used this
+ 					used rendezvous point
+ 						inside network had shared point, users can join this point adn receive data
+
+ 				first hop router > rendezvous point > lhr
+ 				*our shared tree source is on rendezvous point
+
+ 				rendezvous point tree (rpt)
+
+ 		pim terminology
+ 			pim sparse-dense
+ 			pim source specific multicast
+ 			pim bidirectional mode
+
+ 		each connectivity between routers on multicast has some prerequisites
+ 			pim neighbor
+ 				ip pim dense-mode
+
+ 			flood multicast traffic on all device interfaces which run pim neighbor
+ 			so some clients receive traffic that didn't fetch or requested
+ 			here need pruning
+
+ 			pim pruning
+ 				at the first steps and start flooding create large tree then start modification 
+
+ 				reverse path forwarding check (rpf)
+ 					base on pim-dense-mode traffics get flood
+ 					might see broadcast storm
+ 					with htis feature we create a unicast routing table
+ 					insert ranges and ip addresses with thier interfaces
+ 					before flood check the shortest path for multicast sources then prune other paths
+ 					trees get correct
+ 					omit our non rpf interfaces
+
+ 					rpf interface is winner which name upstream access (access to multicast source ip) and downstream access (client or receivers)
+ 					on downstream we sa rpf interfaces
+ 					upstream contain winner ip address (router ip)(rpf neighbor)
+
+ 				incoming interface > like rpf interfaces
+ 				outgoing interface 
+
+ 				outgoing interface list
+ 					each 3 minutes or 180 seconds create tree with flooding and prune them, not optimal
+ 					not suitable for streaming
+
+ 					if used for large scale network get trouble on prune and flood (too much load)
+
+ 					on non rpf interfaces we had prune execution
+
+ 					show ip mroute
+ 						#multicast rib + multicast fib
+ 						#on asic we have useful parts from (s,g)
+
+ 			pim dense mode works on push model also has unicast routing
+ 			pim sparse mode has special method that receive multicast packets then sent join message 
+ 				ip pim sparse-mode
+ 				#must execute this command on all interfaces
+
+ 				ip multicast-routing
+
+ 				this method has rendezvous point receive flooded traffic from multicast source
+ 				then join clients wanna receive data 
+ 				one of the routers inside organization can be rendezvous point
+
+ 				ip pim rp-address 1.2.3.4
+
+ 				multicast source in internet send traffic to edge or gateway1 then transmit to rendezvous point
+ 				create spt (shortest path tree)
+
+ 				on igmp sent request to join
+ 				if couldn't find the  first hop router, redirect or transmit to rendezvous point then create rpt shared tree
+
+ 				pim join were used inside the sparce mode and last hop router (nearest router to client) sent requests to rendezvous point
+
+ 				shortest path tree (spt) + rendezvous point tree (rpt) > multicast distribute tree (mdt)
+
+ 			on topologies our gateways (first hop router) forward traffics to rendezvous point without request or ...
+ 				in sparse mode until see request for traffic didn't give access rendezvous point start working also didn't give permisssions for spt and rpt
+ 				after receive igmp join on 239.1.1.1
+ 				send request to lhr (last hop router is nearest router to client)
+ 				so lhr forward them to rendezvous point
+ 				after forwarding and receive request on 239.1.1.1 open path and spt+ rpt to clients
+
+ 				now rendezvous point doesn't know which router wanna transfer traffic from multicast source
+ 				here our fhr(first hop router like organization edge gateway) and rendezvous point doesn't know eachother 
+ 				must use mechanism for it
+ 				if send packet on 239.1.1.1 from rendezvous point to fhr get trouble on sparse mode
+ 				so generate a tunnel like pim register tunnel
+
+ 			pim register tunnel
+ 				our traffic get forward on fhr (organization edge router or gateway) to rendezvous point
+ 				gateway said this is yours 239.1.1.1
+ 				i am this range address for multicast
+
+ 				spt (shortest path tree) use the tunnel betwen rendezvous point and gateway
+ 				rpt (rendezvous point tree) has no tunnel betwen clients and rendezvous point
+
+ 				rendezvous point send pim join message to fhr or edge gateway (simulate it is receiver)
+ 				(s,g)
+ 				then get fully connect to eachother 
+
+ 			pim register stop
+ 				after full connection drop the tunnel
+ 				receive traffic like normal user and normal multicast traffic
+
+ 				*tunel will be on just they don't transfer data on it
+ 				each 1 minutes or 60 seconds try on it
+
+ 				some times we had no best path for multicast transmission
+ 				maybe forward rendezvous point traffic from nooptimal path
+ 				these reasons force to use tunnel and create a new path with another router
+
+ 			pim join
+ 				our edge gateway send pim join message then advertise it to rendezvous point adn put shortest path
+ 				said i am the shortest path
+ 				better i forward traffics to another routers
+
+ 				(s,g)
+ 				s > source
+ 				g > multicast group
+
+ 				our pcs in lan see this path
+ 					gateway 2 (lhr) >>>>> rendezvous point >>>>> gateway 1 (fhr) >>>>> multicast source
+ 					*this path is longer
+
+
+ 					gateway 2 (lhr) >>>>> gateway 1 (fhr) >>>>> multicast source 
+ 					*this path i shorter
+
+ 				with pim pruning omit longer path 
+ 				pim spt switchover
+ 					with first packet, change topology
+
+ 			designated router
+ 				querier 
+ 				lowest and smallest ip address
+ 				if one user send igmp memebership message and 2 routers reply on it what happen ?
+ 					priority like ospf (high ip address priority)
+
+ 				each 60 seconds sent them
+ 				has time out and 2x of front router if get failed got replace
+
+ 				pim hello 30 second
+ 				pim hold 105 second
+
+ 			rpf
+ 				loop preventionand deploye spt (shortest path tree)
+ 				if some routers receive on interface which is the multicast source ip might be best path 
+
+ 				in multicast we checked source ip with unicast routing table so we have rpf and rpf check
+ 				check destination ip with multicast routing table which has (s,g)
+ 				after this used outgoing interface list (oil) and distribute them
+
+ 				if saw packets on non rpf interface discard them
+
+ 			*if create shortest path tree and (s,g) on pim route table has values
+ 			check rpf on source ip base
+ 			but rendezvous point  tree works on rendezvous point and checks interface instead of source ip
+
+ 			multicast source
+ 				transmit data to all routers and designated router react to this
+ 				then have pim join to rendezvous point acts like a receiver
+
+ 				clients send igmp join to lhr (nearest router to client) with receiver multicast title
+ 				lhr send request on pim jon to rendezvous point and wanna fetch data
+ 				rendezvous point sent register stop to designated router
+ 				before this stop and tunnel pend state sent pim register with recieve normal data out of tunnel
+
+ 				here we didn't see register message from lhr to rendezvous point, lhr sent requests to designated router
+ 				we have switch over here
+ 				create shortest path tree
+
+ 			pim founder / assert
+ 				usually used pim dense mode with flood and prune mechanism
+ 				if need set shortest path tree must use assert pim feature
+ 				distance between user client to multicast source addres is metric + administrative distance
+ 				if were same we use bigest ip address
+
+ 				pim sparse mode include these assert features
+
+ 				if had eigrp and ospf in topology cause eigrp had lower metric could be winner on sparse mode
+ 				pim forward just use assert
+
+ 			how can simple router recognize rendezvous point router without implement pim sparse-mode?
+ 				all routers must use rendezvous point if wanna forward multicast ip
+
+ 				static
+ 					manual and command base
+
+ 					ip pim rp-address 1.2.3.4
+
+ 					*if set on router that is the rendezvous point can detect what happend
+ 					*better set on ip loop back
+
+ 				dynamic
+ 					learn by bootstrap (bsr)
+ 						like auto rp
+ 						mechanism is same with group to mapping
+ 						has no rp announce and use pim bsr for it
+ 						use ma and replace bootstrap router with c-rp
+
+ 						pim v2 > bsr packet > 224.0.0.13
+
+ 						bsr sent all attributes to all deviceshas no order on selection
+ 						bigest ip manage all things
+ 						each ip wanna advertise on c-rp or ma can be advertise 
+ 						has some reserved ip could be transmit
+
+ 						has no select and force
+ 						pim and bsr is standard
+
+ 						c-rp at the first steps works with unicast to negotiate with bsr
+
+ 						bsr packets contain
+ 							sm \ bidirectional flags
+ 							hash masked length
+ 							rp address
+ 							rp priority
+ 							multicast group range
+
+ 						if advertise rp address why sent bsr ?
+ 							cause hash mask length recommend how use the rp (loadshare or load balance)
+
+ 						we can set many bsr for fault telorance
+ 						also can set c-bsr
+ 						bsr priority with higher value and bigger ip address can be leader
+
+ 						candidate rp advertise interval > 60 seconds
+
+ 						use ttl=1 and each router receive and regenerate the packets (works hop by hop)
+
+
+ 					learn automatic rendezvous point
+ 						cisco proprietary
+
+ 						2 element
+ 							candidate rp (c-rp)
+ 								on config time we advertise some packets like cisco rp announce
+
+ 								60 seconds advertise interval
+ 								180 seconds hold interval
+
+ 							mapping agent (ma)
+ 								on config time join to advertised address like 224.0.1.39
+ 								group to rp maping and auto rp distribute them
+ 								can set many rp for group source multicast and loadbalance them
+
+ 								60 seconds advertise interval
+ 								180 seconds hold interval
+
+ 								*advertise everything, ma with rp discovery 
+
+ 								rp-discovery
+ 									use 224.0.1.40 can be cross the routers
+
+ 							*every c-rp with bigest ip can manage the addresses
+ 							can use many ma in network without orders, if set many address could be advertise at the same time
+
+ 		pim sparse-dense-mode
+ 			before learn rendezvous point works like dense-mode
+ 			after learning works like sparse-mode
+
+ 			pim ssm
+ 				igmp version 3
+ 				in this model we know multicast source and don't need rendezvous point
+ 				useful model
+
+ 			pim bidir mode
+ 				many to many
+ 				one to many
+ 				many to one
+
+ 		pim packets runs on ip
+ 			protocol number 103
+ 			224.0.0.13
+
+ 	types 	contain 			ip 						pim type
+ 	---------------------------------------------------------------------
+ 	0 		hello 				224.0.0.13 				all				*
+ 	---------------------------------------------------------------------
+ 	1 		register 			rp-add (unicast) 		sm
+ 	---------------------------------------------------------------------
+ 	2 		register stop 		fhr (unicast) 			sm
+ 	---------------------------------------------------------------------
+ 	3 		join/prone 			224.0.0.13 				sm, ssm, bidir 	*
+ 	---------------------------------------------------------------------
+ 	4  		bootstarp 			224.0.0.13 				sm, bidir 		*
+ 	---------------------------------------------------------------------
+ 	5 		assert 				224.0.0.13 				sm, dm, bidir
+ 	---------------------------------------------------------------------
+ 	8 		c-rp advertise 		bsr (unicast) 			sm, bidir 		*
+ 	---------------------------------------------------------------------
+ 	9 		state-refresh 		224.0.0.13 				dm
+ 	---------------------------------------------------------------------
+ 	10 		df-election 		224.0.0.13 				bidir
+ 	---------------------------------------------------------------------
+
+ 	*9 > if some path get prune afte 3 minutes retrieve pruned path set use them
+******************************
+qos
+	infrastructure technology tools
+
+	real time traffics > video and voice
+
+	latency
+	packet loss
+		noise
+		congestion
+			tail drop
+				congest avoidance > wred
+				congest management > queueing
+
+	delay
+	jitter
+	leak of bandwidth
+
+	codes 
+		g729 (8kb)
+		g711 (64kb)
+		g114 (international telecommunication union)(itu)
+
+	150 msec to 200 msec is valid delay for realtime application process and ...
+
+	delay types
+		propagation 
+			publish
+			frome one source to one destination
+			refraction index value
+			3*10pow8 msecond / v
+
+			isp use this little value for isp
+			higher means your speed is lower
+
+			cable length / light speed inside media
+
+		serialization
+			on bit format receive packets
+			has delay untill reach head of media
+
+			packet length / line speed or clock rate or bandwidth
+
+			*serial + propagation > fixed delay
+
+		processing / forwarding
+			fixed delay for devices which receive data and process them then transmit to egress port
+
+			cpu speed + load cpu + cef (hardware or software) > device delay
+
+			cpu arch (central or distribute) + config on interfaces
+
+	lowest delay has lower jitter
+	jitter will be generate on queueing delay
+		some times need dejitter buffer and has delay
+		in these situations we had buffer to send with higher speed
+		we have low latency queue (llq) for voip
+
+	isp use cir (cuommited information rate) worthless data get drop (policing)
+
+	in isp we use shape or queue and policy for data
+
+	qos > best effort, integrate service (intserv), diffrentiated services (diffservs)
+
+	best effort means has no qos
+
+	integrated service
+		reserved value for traffics
+		scalable
+		use resource reservation protocol (rsvp)
+			source ip and destination ip with bandwidth get reserved
+
+		pass message 
+		rsvp reserve receive as acknowledge
+
+		each reserve has own line and seperated has too much load and resource intensive also has delay cause generate path and calculate (decision making) which path is better
+		used for mpls traffic engineering also has extention
+
+		used call admition control (cac) for checking lines
+
+	diffrentiated service
+		best way
+		set mark for traffic types
+		has no reserved value
+		scalable
+		when receive data manage with high quality state
+
+		no limitation
+		in intserv we had signaling protocol and check states and reservations
+		here we use real time values
+		perhop must be configured
+
+	on our first equipment we set classification and tagign with specific and meaningful value
+	on egress we can manage behavior on traffic and data type
+	this mechanism help our fabric devices behave like special traffic (how behave)
+
+	mark dscp > nbar (network base application recognition) or acl
+		ontime mark and calculate then advertise to other fabric devices basically on tags
+
+	base on traffic type do something
+
+	access-list 100 permit tcp any any eq 80
+
+	class-map acl-example
+	match ip address 100
+
+	class-map nbar-example
+	match protocol http url a.com
+	match protocol http 
+
+	nbar version2 has more applications and larger database
+
+	on type of service field in ip packet headers find codes and 1 byte > 8 bit
+
+	ip precedence
+		--- 			---- 		-- > 8 data type
+		3 				3 			2
+		precedence 		tos 		unused
+
+		------ 	-- > 64 data type
+		6 		2
+		dscp 	ecn
+
+	diffrentiated service code point (dscp)
+		explicit congestion  notification (ecn)
+			congestion avoidance
+
+	r1------------------------r2------------------------r3
+			000000 00(d) 				000 00000(d)					
+			000000 01(v) 				000 00001(v)
+
+	incomplete 
+		is not suitable
+		one side is dscp another is ip precedence
+		we generate new format 
+
+	class selector
+		policy-map x
+		class ata
+		set dscp cs5
+
+	*perhop behavior 
+		classification and matching can decrease cpu load on router
+		on another hop can classificate 
+		these class selectors (cs) are limited and less count
+		in classification use 2 queue on ram (round robin between them) if gonna full must tail drop, better use drop priority
+
+	dscp
+		--- 		--- 		--
+		forward 	drop		ecn
+
+		ecn has special applications with congestion avoidance target
+		drop priority in congestion duration
+
+		fd
+		forward and drop
+		
+		xy
+		af
+		assued forwarding
+
+		which one forward faster ? 
+		which one drop faster ?
+
+		queue
+			dscp 10 , 12 , 8 
+
+		forward priority 		drop priority 			af 		cs/precedence			decimal 
+		***************************************************************************************
+		000 (0)					00 				0 	 			cs(0) 	> 		000000		0 
+		************************************************************	***********************
+		cs1 	
+		************************************************************	***********************
+		001 (1)					00 				0 		af10 	cs(1) 	> 		001000		8
+		------------------------------------------------------------	-----------------------
+		001 (1) 				01  			0 		af11 			> 		001010		10
+		------------------------------------------------------------	-----------------------
+		001 (1) 				10 				0 		af12 			> 		001100 	 	12
+		------------------------------------------------------------	-----------------------
+		001 (1) 				11 				0 		af13 			> 		001110 		14 
+		************************************************************	***********************
+		cs2 	
+		************************************************************	***********************
+		010 					00 				0 		af20 	cs(2) 	> 		010000  	16
+		------------------------------------------------------------	-----------------------
+		010 					01 				0 		af21 			> 		010010 		18
+		------------------------------------------------------------	-----------------------
+		010 					10 				0 		af22 			> 		010100 		20
+		------------------------------------------------------------	-----------------------
+		010 					11 				0 		af23 			> 		010110 		22 
+		************************************************************	***********************
+		cs3 	
+		************************************************************	***********************
+		011 					00 				0 				cs(3)	> 		011000 		24
+		------------------------------------------------------------	-----------------------
+		011 					01 				0 	 	af31  			> 		011010		26
+		------------------------------------------------------------	-----------------------
+		011 					10 				0 		af32			> 		011100		28
+		------------------------------------------------------------	-----------------------
+		011 					11 				0 	 	af33 			> 		011010		30 
+		************************************************************	***********************
+		cs4 	
+		************************************************************	***********************
+		100 					00 				0 				cs(4)	> 		100000 		32
+		------------------------------------------------------------	-----------------------
+		100 					01 				0   	af41			> 		100010 		34
+		------------------------------------------------------------	-----------------------
+		100 					10 				0  		af42			> 		100100		36
+		------------------------------------------------------------	-----------------------
+		100 					11 				0 	 	af43  			> 		100110		38 
+		************************************************************	***********************
+		cs5 	
+		************************************************************	***********************
+		101 					00 				0 				cs(5)	> 		101000 		40
+		------------------------------------------------------------	-----------------------
+		101 					11 				0 		ef46 			> 		101110		46 
+		************************************************************	***********************
+		cs6 	
+		************************************************************	***********************
+		110 					00 				0 				cs(6)	> 		110000 		48 
+		************************************************************	***********************
+		cs7	
+		************************************************************	***********************
+		111 					00 				0 				cs(7)	> 		171000 		56
+		------------------------------------------------------------	-----------------------
+
+		*expedited forwarding (ef)
+			fast convert and negotiate between 2 types liek dscp and precedence
+
+		same in drop priority
+			8 16 24 32 40 48 56
+			10 18 26 34 
+			12 20 28 36
+			14 22 30 38
+
+	best place add tags is layer 3 but some feature on some devices doesn't support layer2 so use layer 2
+	palced in 802.1q and cos (class of service) or priority code point
+		4 byte > 32 bit
+			16 bit for tpid (0x8100)
+			16 bit tci (tag control information)
+				vlan number
+
+		--- 	- 				------------
+		cos 	cfi bit 		vlan id
+
+		cfi > canonical frame indetector
+
+		set cos 0
+		#between 0 to 7
+
+		one ip phone and computer joined to vlan 2 and computer data goes to vlan 2 another traffic marked with vlan 5
+
+	dscp and ipp were in ip with length 6 and 3 (end to end packet)
+	cos were in layer 2 and dot1q length is 3 (vlan trunk)
+	tid were in wifi and 802.11 with length 3
+	exp were in mpls and wan with length 3
+
+	trust boundary is physical place for policies deployement on router and change point
+	each  packet received must clear dscp and tag again for it
+	ip phones must be carefull doesn't change the normal traffic like computers data never replaced with ef46
+
+	new design need classify the traffic by data type like class-http or class-ftp
+	these classes might be categories and splited to ipp or dscp
+	some times we need apply on interfaces or subinterfaces
+	detection on tags then manage the path
+
+	mpls lable
+		32 bit
+			lable > 20 bit (mpls forwarder)
+			exp > 3 bit (experimental)(0 to 7 higher is better)
+			bos > 1 bit (bottom of stack)
+			ttl > 8 bit (loop remover)
+
+	use layer 3 and 4 featrues on classification target
+	like type of service cause the marking
+	routers if see tos has value just check the tos field instead check whole packet
+	tos (type of service) has 8 bit
+		--- 	----- > is ipp
+		3 		5
+
+		------ 	-- > is dscp
+		6 		2
+
+	nbar (network base application recognition)
+		int gig0/0
+		ip nbar protocol discovery
+
+		protocol discovery help us to realize the realtime statistics, didn't help us on classification just analyze the traffic types
+
+		class-map x
+		match protocol ftp
+		#if set protocol here means need help and tools like nbar on data type detection
+
+		policy-map y
+		class ftp
+		set dscp af11
+
+		*mqc > modular qos cli
+
+		internal qos
+			class-map net-a
+			input interafce gig0/0
+
+			policy-map x
+			class net-a
+			set qos-group 1
+			#each traffic on this interafce will be on group like 1 and be local mode
+
+			class-map g1
+			match qos-group 1
+			*set policy here
+
+			*normally set this on ingress port
+
+			*qos group > each traffic reach the router could be tunnel then transfer also get encrypted
+			in this sate routers couldn't read packet payloads and headers
+			better put voip data inside internal marking then transmiton encrypted tunnel	
+
+	marking
+		layer2 internal marking
+		on layer 3 we have dot1q
+
+		pcp > priority code point is numebr betwe 0- 7 and higher is better
+
+		tpid + tci
+		0x8100 + tag control information
+						cos > 3 bit
+						cfi or dei > 1 bit
+							drop eligible indicator
+								means this packet has more priority on drop when got congest
+
+						vlan id  > 12 bit
+
+		routers receive data from layer 2 omit all information and tags, here we loss our labels and qos values, router must map labels and qos data to another layer like layer3 then omit layer 2 informations
+
+		ipv6 use traffic class instead of tos (they are same)
+		our marking will be on first hop
+
+	behavior aggregate
+		master plan on applications type
+		for perhop behavior or qos 
+
+		class-map data
+		match protocol ftp http ...
+		#in one policy we set many traffic type and manage or mark them under a label not many
+
+		class-map voip
+		match sip voip
+
+		red
+			random early detection
+			congestion avoidance
+
+			dscp
+				7 6 5 	4 3 2 	1 0
+				----- 	----- 	---
+				ipp 	cs 		
+						0 0 0
+
+			ef is the best code manage voip and realtime traffics
+
+	scavenger class
+		some data types like torrent has no priority and value, need omit them from lan
+		put them on class selector 0 (cs0) and high drop priority
+		also we can use cs1 and another class to use them if you want
+
+	trust boundary
+		where?
+		which device on network is the best section apply our policies (qos, mark, classification)
+		ip phones convert all dscp tags received from pc to 0 then mark again data 
+		if our layer2 switches couldn't tag and mark traffic better manage them on mls and routers
+
+	traffic condition
+		policy and shaping
+			cir > commited information rate
+			our cir were 50 mbps
+				isp clockrate and access rate
+				access rate means our media capacity is 100 mbps
+
+				if our cir were on 50 mbps or under it could be acceptable
+				if were higher means policing and crop happend
+
+				we set shaping o outgoing traffic and control mechanism
+					if traffic were 50 mbps access the media if were not better make queue
+					if our traffic were exeed 50 mbps and queue space must drop them
+
+				shape hel us manage bandwidth with best practices
+				we use burst time and burst value, forward the traffic in queue or buffer time
+				*normally switch has no shaping option
+
+				*policy tasks iis drop traffic in general
+					2 way 
+						confirm
+						exceed
+
+					3way
+						confirm
+						exceed
+						violation
+							purple range
+								if our traffic were between 50 mbps to 55 mbps rate on exceed value and set burst time ..
+								if were higher this range must remark in isp and convert them 
+
+				convert dscp codes in isp is normal procedure when get congest, remark traffic then drop them
+					af x1 > af x3
+
+			old versions used general traffic shaping (gts)
+			new version use class base shaping
+
+			we use token bucket algorithem (different with shape policy)
+				router has
+					cir 64 kbps
+					access-rate 128 kbps
+
+							|128 kbps
+							|------------64 kbps (cir)
+				access rate	|			|
+							|			|500 msec
+							---------------------------1 second
+									access rate time
+
+				shape put addition traffic to queue
+
+				128000 bit / 8 bit > 16 * 1000 bit (access rate)
+
+				64000 bit / 8 bit > 8 * 1000 bit (cir)
+
+				1000 msec or 1 second / 8 > 125 msecond
+
+				in this situation we put traffic on first 500 msecond (each 500 msec interval send traffic)
+				if calculate delay between intervals reach 500 msec so o=voip suitable delay were 150 msec and is not useful
+
+				500 msec send 
+				500 msec wait
+
+				1000 msec or 1 second / 8 > 125 msecond (if our transmission were 1 second and need 8 packet transfer per intervals reach 12 msec active time)
+					
+					125/2 > 62.5 msec
+						if during 125 msec use 62.5 msec for transmission can use higher rate without large delay so it's useful for voip
+
+						8 * 62.5 msec > 500 msec
+							we adjust our timing and divisions and use fixed and same time like before but decrease delay for voip also increase rate
+ 
+				commited time interval (cti) 				commited burst size (cbs)
+					tc 											bc
+
+					1000 msec in first model 					64000 bit
+						delay 500 msec
+
+					125 msec in second model 					8000 bit
+						delay 62.5 msec
+
+				usually isps  set over subscribtion to customers
+				*if need lowest delay must set time interval on lowest time
+
+				bc/cir is useful formula
+
+				tc = 50 msec
+
+				1000 / 50 > 20
+
+				64000 bit / 20 > 3200 bit
+
+				3200 / 8 > 400 byte on each interval can be transmit
+
+				*bc consider larger than the largest forwarding packet
+				*access rate has the most impact
+
+		token bucket
+			on each time interval we set specific bc to use
+			during this interval we had 50 capacity on bc and used 30
+			remaining was 20 and next interval add 50 bc capacity on it
+			got 70 and user transmit data on 50 our bc take 20 so next step add 30 on bc
+
+			token generator
+				in time interval collect all packet size no time duration
+
+		excees burst (be)
+			if sent blank interval couldn't made up
+			we use 2 queue
+				bc queue
+					consider bucket sizes were 50 and each intervals transfer it 
+					remaining parts convert to be queue
+
+				be queue
+					small store size
+					if were idle on cycle can transfer more
+
+	policing
+		1 > single rate 2 color marker \ policer
+			if traffic rate were smaller than policy rate our conditions will be like this
+				confirm if smaller and dro on exceed if were higher
+
+		2 > single rate 3 color marker \ policer (srtcm)
+			if were smaller than policy rate our traffic rate will be confirmed 
+			if isp has space on more traffic handeling could burst the traffic if not remark as exceeded and drop them
+			vilation rates also get drop without processing is exceed or has spaces or not
+
+		*on single rate 2 color we have token bucket and has no policing method so base on byte transfer in each interval decide what to do
+			has no time and no tokens
+
+			((packets present receive time - packets past recieved time ) * policy rate) / 8
+
+			devided to 8 make byte unit
+
+			differences by normal tc is our idle duration time, which effects on received token
+			after this our tokens counts be dynamic
+			our bucket size as same as bc
+
+			*single means one injection from token to buckets
+			2 color means 2 action will be happen
+
+		*single rate 3 color
+			has bucket (be) and 3 action (confirm, exceed, violation)
+
+		3 > two rate 3 color marker \ policer (trtcm)
+			in idle or inactive we use last be value
+			here we have 2 buckets
+			pir (peak information rate ) * cir
+			2 token generator and 2 bucket injection
+
+			if recieve packet with higher pir than token pir (tp) means violation 
+			if were equal pir with tp (token pir) means exceed
+			and if were same on cir or token cir (tc) means confirm
+
+	congest management
+		management handled by queue + schedule (who and when get transfer)(queue is buffer value in ram)
+			queue 
+				hardware (txq)(txring)
+					buffer
+						cpu couldn't manage the responses
+						fill our bandwidth 
+						has no management on data types
+
+						differences on interface bandwidth is main cause filling this queue
+
+						filling this queue means congest
+						so use software queue for priority and queue management on bandwidth
+
+				software (more generan and useful)
+					which traffic has more priority to transmit
+
+				has different on performance
+
+		avoidance handled by red
+			global synchronization
+				on seconds have congestion all users send traffic on half links capacity
+				agian use 2x transmit spaces and cause the congest
+				this procedure repeated 
+
+			random early detection
+				before filling the queue with non voip packets drop one packet with random method
+				help us to avoid tail drop
+
+				here we need ecn (explicit congest notification)
+					01 > 1
+					10 > 1 (00) > 2 means disable
+
+				has dependencies on application and hardware
+
+				dscp + ecn
+					higher traffic rate cause the congest so with red or wred we notify clients send less 
+					here has no droping mechanism just notify them
+
+					clients and end points must support ecn bit recognition
+
+				exn and red determine the queue depth then decide to drop them
+				ecn just notified
+******************************
+ip services
+	clock summer-time t date 12:42:30 day month year {offset}
+	#offset means optional and minutes addition on during summer time
+
+	clock timezone x offset
+	clock set 12:24:30 day month year
+
+	ntp master
+	#just convert device to ntp server and advertise time to network
+
+	ntp server
+	#both server and client
+
+	show ntp status
+	show ntp associate
+
+	*stratun ntp server reliablity 0 is ighest and 8 is default 15 is lowest
+
+	some commands
+		ping 192.168.2.1 rep 100000 size 100 timeout 0
+		#replies is not necessary
+
+		show interface serial 0/0/0
+		#input rate means ingress capacity
+
+		conf t
+		interface serial 0/0/0
+		load interval 30
+		#default is 5 minutes
+
+		traffic shaper rate 100000
+		cutom-queue-list 1
+
+		policy-map red
+		class class-default
+		random derect dscp-base
+
+		interface gig 0/0
+		service policy out red
+
+		*cisco support wred
+
+	hsrp config
+		standby 101 authentication text x1
+		standby 101 authentication key-string str1
+		standby 101 authentication key-chain ch1
+
+		standby 101 track gig0/0
+		standby 101 track gig0/0 10
+		#10 is decriment value
+
+		standby 101 preempt delay
+		standby 101 preempt delay reload
+		standby 101 preempt delay minimum
+
+		standby v2
+		
+		ipv6 unicast-routing
+		standby ipv6 autoconifg
+		#make by own
+
+		show standby brief
+		show standby vlan 100
+		show standby interface gig0/0
+
+	vrrp config
+		version 2 >  legacy
+		version 3
+			ipv4 and ipv6 (hierarchical)
+			ios xe
+
+		0000.5e00.01xx
+			xxx is group
+
+		224.0.0.18 multicast address
+
+		vrrp 101 timers advertise 10 msec
+		vrrp 101 timers learn
+		#one switch advertise on another set learn mode
+
+		vrrp 101 authentication text x1
+		vrrp 101 authentication key-string str1
+		vrrp 101 authentication key-chain ch1
+
+		vrrp 101 track gig0/0
+		vrrp 101 track gig0/0 10
+		#10 is decriment value
+
+	glbp config
+		udp 3222
+		224.0.0.102
+
+		glbp 10 weighting maximum up
+		glbp 10 weighting maximum down
+
+		glbp 10 load-balancing round-robin
+
+		track 1 interface gig 0/0 line-protocol
+		track 1 interface gig 0/0 ip-routing
+
+		track 1 ip route 1.1.1.1 255.255.255.255 reachability
+******************************
+overlay tunnel
+	undelay means infrastructure
+	overlay means protocols which make connection on network
+
+	ipsec
+	vxlan (virtual extensible lan)
+	mpls (multiple protocol lable switching)
+	list (locator id seperator protocol)
+	gre (generic routing encapsulation)
+
+	some times need private tunnel for transmission
+	this private tunnel were on internet and untrusted space
+	each vpn line is same as mpls, vxlan, gre,.....
+	the lines must be encrypted by ipsec
+
+	cisco vts (virtual topology systems)
+
+	gre
+		generic routing encapsulation
+		before tcpip we used spx/ipx (internetwork packet exchange)
+		base on novel networks
+		behave like tunnel
+		confilict with tcpip
+
+		made gre to make soloution
+		our gre payload is not important
+		our source ip with 4 byte and known as payloads
+		at the end we have packets point to destination also new packet generated
+
+		protocol number were 47
+
+		[[data][ipx]gre [ipx]]
+		payload + encapsulation
+		*these protocols inside the tunnel has transfer tasks said passenger or transport
+
+		on routing table we just forward them
+
+		interface tunnel 0
+		keepalive 10 30
+		#default values
+
+		tunnel ttl 2
+		tunnel source int gig0/0
+		tunnel source 100.100.100.1
+		#public ip
+
+		tunnel destination 100.100.100.2
+		ip address 192.168.1.1 255.255.255.252
+		exit
+
+		ip route 10.0.0.0 255.255.255.0 tun 0
+
+			*gre mtu were 1470 bytes
+			gre > 4 byte
+			new ip header 20
+
+		ip mtu 14711
+		ip bandwidth ...
+		#consider qos
+
+		*inside tunnel we use ttl 255, cause generated from source
+		inside packets we saw ttl 1 
+
+		*underload and overload if get comined cause eroor in routing protocols(up and down problem)
+		recursive routing problem
+		
+	ipsec
+		authentication in other word means filter our connection 
+		confidentiality in other word means if somebody connect to system has no access read attributes (no sniff)
+		integrity in other word means no changes on transmited data (tampening) use hmac
+
+		reply detection
+			our ipsec packets has a sequence number inside packets, sequence number prevent resend repeated packets
+
+		ipsec protocol
+			authentication header
+				no encryption
+
+				tunnel mode
+					all payload goes to new packet headers and format
+					contain new overload
+
+					*whole original paket repack inside another new packet like gre repacking
+
+				transport mode
+					just inject payloads to newest packet form
+					has no newest overlay and worked on same underlay
+			
+				*doesn't support nat-traversal and confidentiality
+
+				protocol number 51
+
+			encapsulation security payload
+				has encryption
+
+				protocol number 50
+
+				support all security features also support nat-traversal
+
+				esp authenticate
+					esp header + encrypt part (esp trailer + data + original ip)
+
+						*in tunnel	mode if forget add encrypted part cause sent packets on unencrypted
+
+					encryption methods
+						data encryption standard (des)
+							3des (triple des)
+							56 bit
+							symmetric 
+							lock door with one key and unlock it with same key
+
+						advance encryption standard (aes) 
+							128, 192, 256 bit
+							rinjdeal algorithem
+
+					hashing
+						message digest 5
+							128 bit
+							cisco use md5 hmac for ipsec
+
+						secure hash algorithem
+							160 bit
+							cisco use sha-1
+
+					transorm-set
+						preshared-key
+							assymetric
+								public and private key
+									rsa signature (cert)
+
+								key exchange
+									deffihellman groups
+										1 > 786 bit
+										2 > 1024 bit
+										5 > 1536
+										14 > is the best choice
+
+							symmetric
+								des, 3des, aes
+
+		how negotiate
+			1 > internet security association key management protocol (isakmp)
+				a framework which used for information exchaneg on first negotiation steps
+			
+			2 > internet key exchange (ike)
+				version 1
+				version 2
+
+				udp 500
+
+				when 2 peers negotiate which profile attribute on isakmp is same and usable
+
+			has dependencies
+			has order
+
+			our phase1 is a negotiation on management traffics and tunnel creation but phase2 is users data transmission
+			phase2 security association transfer users data
+
+			phase1 > profile transport (isakmp) 
+			phase2 > traffic transport (ipsec tunnel)
+
+			*isakmp > oakley and skeme
+
+			ike has now self processing like authentication or encryption
+
+			*on phase2 if set ah (authentication header) just apply anti-replay, integrity, authentication
+			if need more features must use esp
+
+			phase1
+				deffihellman groups
+				authentication
+				ike policy negotiate
+					profiles
+					life time (if set different values select lowest)
+					encryption
+
+				*ike phase1 modes
+					main mode (slower and high secure)
+						initiator
+							isakmp header, sa proposals (mm1)
+							#negotiation crypto setting
+
+							isakmp header, key, nonce (reply protection) (mm3)
+							#secret key exchange
+
+							isakmp header, idii, hash_i (mm5)
+							#prove identity
+
+							ike sa established
+
+						responder
+							isakmp header, chosen proposal (mm2)														#negotiation crypto setting
+
+							isakmp header, key, nonce (mm4)
+							#secret key exchange
+
+							isakmp header, idir, hash_r (mm6)
+							#prove identity
+
+						*mm5 and mm6 are encrypted but unauthenticated
+						*mm1 to mm4 are unencrypted and unauthenticated
+
+
+					aggressive mode (less secure and faster)
+						initiator
+							isakmp header, sa, key, nonce, idii (am1)
+							#negotiate crypto setting + 1 1/2 secret key exchange
+
+							isakmp header, hash_i (am3)
+							#initiator proves identity
+
+						responder
+							iskamp header, sa, key, nonce, idir, hash_r (am2)
+							#negotiate crypto setting + 2 1/2 key exchange + responder proves identity
+
+							ike sa established
+
+						*am3 is encrypted but unauthenticated
+						*am2 are unencrypted and responder authenticated
+						*am1 are unencrypted and responder unauthenticated
+
+			phase2
+				ipsec security association exchange
+
+					ipsec protocol
+					encapsulation mode
+					encryption
+					deffihellman groups
+						pfs
+							protect forward secrecy
+							on each new session generate new key and prevent attacks
+							additional feature
+
+							id protect (authentication)
+
+					authentication
+					life times
+
+				*ike phase2 modes
+					quick mode
+							initiator
+								request (qm1)
+									security association (transform set)
+									nonce
+									key exchange (if pfs got set)
+									propose traffic selector
+									nat address information
+
+								ack (qm3)
+							responder
+								yes or no (qm2)
+
+			if set tunnel on transport mode in ah (authentication header) can use integrity check values, contain hash olaced inside the packet
+
+			each ike version has 2 phase but differences between ike versions are on phase2 their phase1 are same
+				ikev2
+					has no ddos
+					use nat-traversal
+					less packet on negotiations
+					has built-in keepalive packets
+					less bandwidth consumption
+
+					differences on phases
+						has no 3 mode (main, aggresive, quick)
+
+						use 2 exchange
+							ike sa initiate (phase1)(unencrypted and unauthenticated)
+								contain ikev1 > mm1 to mm4
+								deffihellman 
+								crypto exchange
+
+								request (negotiate crypto setting)
+									vid, sa, ke, nonce
+ 
+								response (secret key exchange)
+									vid, sa, ke, nonce
+
+							ike authentication (phase2)(encrypted and unauthenticated)(prove identity)
+								contain ikev1 >  mm5,mm6 and qm1,qm2
+								authentication (asymmetric authenticate)
+
+								request
+									idi, auth, [cert], sa, ts, nat, spi
+
+								response
+									idr, auth, [cert],sa,ts, nat, spi
+
+					authentication methods
+						elliptic curve digital signature certificate (ecdsa-sig)
+
+		ipsec types
+			site to site
+				advantages > multivendor support
+				disadvantages > couldn't run on multisite model, administration overhead
+
+			dmvpn
+				mgre + ipsec
+
+		cisco group encrypted transport vpn (get vpn)
+			any to any
+			used original ip header
+			behave like private wan same as mpls
+
+			hipaa (healthcare information portability and accountability act)
+				the original hipaa rule was passed in 1996 and updated in 2003 and 2005
+				hipaa is a practice that protects information using technologies such as virtual private networks (vpns) and transport layer security (tls)
+
+				vpns encrypt confidential data when moving in and out of the network, and tls is called transport layer security, which is a protocol that encrypts patients' data
+				data breaches typically occur at the device level, and encryption protocols and techniques at the network level ensure that patient and company devices do not create vulnerabilities and that personal information held by the health and health insurance industries is protected from fraud and theft
+
+				hipaa also regulates the reach and breadth of group health plans and certain personal health insurance policies
+
+				hitech
+
+		cisco flex vpn
+			ikev2
+			combination of site to site and patial method (hub&spokes) and remote access vpns
+
+		Lempel Ziv Stac
+			payload compression
+			lossless compression algorithm
+			layer 3
+
+			crypto ipsec transform-set shayan esp aes-256 esp-shaa512-hmac
+			show crypto engine accelerator statistic
+
+		gre + ipsec
+			conf t
+			interface tunnel 0
+			tunnel source gig0/0
+			tunnel source 1.2.3.4
+
+			tunel destination 5.6.7.8
+			ip address 12.12.12.1 255.255.255.252
+
+			ip route 192.168.100.0 255.255.255.0 12.12.12.2
+			ip route 192.168.100.0 255.255.255.0 tunnel 0
+
+			*site-to-site crypto map 
+				ip access-list extended gre-tun
+				permit gre host 1.2.3.4 5.6.7.8
+				#public ip wanna negotiate first is our next is another users
+
+				#outer header
+				crypto isakmp policy 1
+				encryption aes 
+				hash sha
+				authentication preshared
+				group 5 14
+				lifetime
+				#set  24 hours (automated)
+
+				#*create a repository of values wanna check like ordered list if had differences checked next
+
+				crypto isakmp key 123 address 5.6.7.8
+				crypto isakmp key 123 address 0.0.0.0
+				#means multi gre
+
+				crypto ipsec transform-set shayan-transform esp-aes esp-sha-hmac
+
+				mode tunnel
+				#means ipsec over gre
+
+				mode transport
+				#means gre over ipsec
+
+				crpto map shayan-map 1 ipsec -isakmp
+				#didn't find 1 goes next , which profile type
+
+				match address gre-tun
+				set peer 5.6.7.8
+				set transform-set shayan-transform
+				
+				int gig0/0
+				#outside interface
+
+				crypto map shayan-map
+
+				show crypto isakmp policy
+				show crypto isakmp sa
+				show crypto ipsec transform-set
+				show crypto ipsec sa
+				show crypto ipsec sa details
+				show crypto ipsec security-association lifetime
+
+			*ipsec profile
+				#has no acl and fast forward
+
+				crypto isakmp policy 1
+				encryption aes 256
+				hash sha
+				authentication preshared
+				group 5
+
+				crypto isakmp key 123 address 5.6.7.8
+
+				crypto ipsec transform-set shayan-transform
+				mode tunnel
+
+				#*crypto is not useful on mpls cause has acl and much load
+
+				crypto ipsec profile shayan-ipsec-profile
+				set transform-set shayan-transform
+
+				interface tunnel 0
+				tunnel protection ipsec profile shayan-ipsec-profile
+
+			*site-to-site virtual tunnle interface (vti) over ipsec
+				crypto isakmp policy 1
+				encryption aes
+				hash sha
+				authentication preshared
+				group 5
+
+				crypto isakmp key 123 address 5.6.7.8
+
+				crypto ipsec transform-set shayan-transform
+				mode transport
+
+				crypto ipsec profile shayan-ipsec-profile
+				set transform-set shayan-transform
+
+				interface tunnel  0
+				tunnel source 1.2.3.4
+				tunnel destination 5.6.7.8
+				ip address 12.12.12.1 255.255.255.252
+				#here detect gre mode but need vti so set mode tunnel on next step
+
+				tunnel mode ipsec-ipv4
+				tunnel protection ipsec profile shayan-ipsec-profile
+
+	lisp
+		locator id seperation protocol
+		routing and architect mechanism
+			control plane and data plane
+
+		endpoint id (eid)
+			system identity same as ip on system
+
+		itr (ingress tunnel router)(start tunnel point)
+			capsulation happend
+
+		etr (egress tunnel router)(end tunnel point)
+
+		lisp site
+			contains many lisp routers adn eifs
+				each site is lisp router adn connected to lisp site
+					sites which itr and etr were connected on them
+
+		routing locator (rloc)
+			core and internet can be network facing
+			*behave like gre
+				put etr and otr into the rlocs
+				*gre put private ip into the public ip headers but is not same with rloc
+
+			has an ip address with some useful features
+
+		*a computer without lisp use ip address on same site, switching between sites (different ip) need some prerequisites like site id and ip address provide by lisp
+
+		lisp ip addressing
+			local ip or site information
+			targeted ip or site information
+
+		on changing sites we change rlocs not eid
+		our identity and location is different
+		itr and et change address and our rloc get changes
+
+		map server (ms)
+			like dns
+			has mapping between eid and rloc
+
+		map resolver (mr)
+			location of eids 
+			itr how can access to them
+
+			if eid wanna go another site with rloc need detect location and attributes like itr and etr thes values are on mapping server (ms) and map resolver (mr)
+
+		first event
+			itr wanna go another site (lisp site)
+			itr goes to mapping server and put map server for etr
+
+			etr send a map register message to map server
+				 in this message set subnets and eids
+				 also send itself rloc to map server
+
+				 *rloc > ippublic and private ranges
+
+				*map server create a map
+					10.1.2.0/24 is behinde 100.64.2.0/30
+
+				map server reply with map notify message to etr that i received your message
+					use udp 4342
+
+				*after cache we have ack on another lisp routers
+
+			one ip private wanna goes to another site 
+				check owned itr 
+				first record or first value is same site itr 
+				cause we need cache them and finding
+
+			next step is resolutions for itr 
+				send map request to map resolver and fetch information from site 2 (target site on client in site 1)
+				in this mechanism map resolver, resolved rlocs from site2
+
+				map resolver send our request to to etr and site 2 etr and rloc response
+					eid to rloc mapping on udp 4342
+						eid2 + rloc punlic ip site2
+							on itr resolving (cache)
+
+				*if our map resolver and map server were 2 different router must recieve data fram map resolver and sen to etr from map server
+
+			before this must aggregate all routes together on one unit then process all request but here we can process and access on seperated access
+			on routers we set default gateway and resolve some values 
+			before request to map resolver on itr check 2 parameters
+				do i have a default gateway?
+					if have resolve rlocs
+					if not must set default gateway
+
+				traffic must recieved from etr and itr
+					site lisp
+					register eid prefix
+
+			control plane > 4342 udp
+			data plane > 4341 udp
+
+		encapsulate (original ip header + data)(inner header) + lisp header + outer lisp udp header + outer lisp ip header (outer ip) + outer ethernet header
+
+		*like mpls vpn
+
+		has source port used by ecmp loadbalance
+
+		proxy etr\itr
+			some sites has no lisp (internet and datacenter) wanna use lisp or connect to lisp network must use petr (proxy etr) behave same as agent
+
+			map request sent to map resolver and return our targeted eid that is not on lisp topology
+			so has no place on map server or resolver
+			on replies we received negative values
+			here our itr must realize the petr or agent address (rloc)
+	
+			itr must resend each negative replies to petr or agent instead of map server or resolver
+			we can forward request to map resolver or server with nearest rloc to that prefix that contains the petr rloc
+
+		pro itr
+			itr connected to non lisp site and forward without encapsulation and tunnels 
+			if had native path should forward if not suppress the request
+
+			*native means our router has all routes
+
+			eid does register or not?
+
+			map request sent to map resolver and find etr
+			direct response from etr to itr (map reply and rloc) and encapsulate data drom etr to itr
+
+		xtr (itr or etr) > tunnel router
+		ip in udp ip 
+		shim
+
+		instance id (24bit)(like vrf and mpls vpn)(different sites has same ip) + lisps (default free zone > like internet)(routing table)
+
+		routing table and ip has aggregation issue
+			ip assignement 
+				by isp (send summary)
+				without isp (advertise ip)
+
+		traffic engineering
+			organization unit has 2 edge router must set weight on egress
+
+		multihoming
+			each isp must advertise 8k route on 2 edge router
+
+		instability 
+
+		vxlan
+			virtual lan extensible
+			4789 udp
+			8472 otv > overlay trasport virtualization
+
+			layer2 weak points in newest technique can be be powerfull
+
+			old version  (vlan) 12bit > on vxlan use 24 bit
+
+			baremetal server
+				physical servers
+
+			larger mac table
+			spanning tree block some ports (no ecmp)
+
+			vxlan just has data plane and use overlay tunnel or overlay	data plane encapsulation method
+
+			multicast underlay
+			static unicast vxlan tunnel
+				mac in ip udp
+
+			mp-bgp evpn controll plane
+			lisp controll plane (sda) (enterprise)
+
+			in vxlan we send traffic from eid1 to eid2 on same vlan with map resolver and server queries
+			send rlocs then bring up the vxlan tunnel betwen switch1 and switch2 (lisp routers like etr and itr)
+
+			pc1 to pc2
+				ethernet header > ip header > data .....
+				#layer3 / layer2 over tunnel
+
+				ip > udp > vxlan > rloc (public(source and destination))
+				#layer2 frame
+
+			encapsulation and data plane
+				control plane
+					evpn
+					static
+					lisp
+
+					on layer3 we have no spanning tree issue
+					use ecmp with isis
+					lear owned mac
+					cam table
+					light routing table
+
+					*between fabric edges has layer2 tunnel
+					*each part of vxlanis vxlan segment subset of vxlan fabric
+
+			vxlan network id > 24 bit
+				outer ethernet header
+				outer vxlan ip header (source vxlan ip)(destination vxlan ip)
+				outer vxlan udp header (udp source port)(udp destination port 4789)
+				vxlan header
+				encapsulated headers
+					original ethernet header
+					origin ip header
+					data (payload)
+
+			vtep (virtual tunnle end point)
+				equipments that run and end tunnels
+				asked from map resolver ehre is the x
+				use vni to seperate the destination and encapsulate them
+
+				vxlan (ip and udp header) + vlan tag (vni)
+
+				interface ip (core interface network fo rvxlan)
+
+				local lan interface (bvi (bridge virtual interface))
+					between local endpoints on same vlan can make connection without use or generate tunnel
+
+			vxlan gateway (is vtep)
+				old devices didn't support vxlan
+				here we van set vxlan segmentations on one vlan
+				vxlan made from lisp (layer3) and worked on layer2
+******************************
+wireless part placed on ccna wireless document
+******************************
+fabric technlogies
+	sda (software define access)
+	sdn (software define entwork)
+		works with vxlan
+
+		has dna on overlay
+		digital network architect
+
+	used on 
+		controll plane
+			dna and central platform
+			ise
+
+		data plane 
+			or network layer used lisp and vxlan
+		management plane
+			base automation
+			design
+			policy
+			provisioning
+			assurance
+
+		policy plane
+
+	base on accessible technologies in organization unit
+
+	campus fabric soloution
+		on fabric (overlay and underlay)
+
+		cli
+		yang
+		netconf
+
+	sda layer
+		usually set on ios xr not common ios
+		like isr ...
+
+	asic anf fpga + software support
+		use	isis routing protocol, is not same as other  (doesn't seems like l3 or l2)
+		this feature works over layer2
+		is protocol independent
+		has neighborshiping
+			use loop back interfaces
+
+		each vxlan on underlay tunnel reach the destination and rloc with isis
+
+	how config sda on underlay
+		manual ip addressing
+		auto underlay
+			cisco dna center lan automatic
+
+			cisco plug and play 
+			whole fabric get automatic configured
+			instead of isis could run ospf
+			enable multicast (help better forwarding traffic) and unicast on fabric
+
+	sda on overlay
+		network segmentation like vlan
+		host mobility
+		more security (trustsec)
+		all configs are automated
+			yang
+			netconf
+			cli (if get change named dna-cent (dnaac) no sda)
+
+	sda on overlay
+		control plane > lisp
+		data plane > vxlan
+		policy plane > trustsec (cts)
+
+		has eid and rloc
+
+		old technologies and newest technologies combination give us new enhanced features
+			distributed anycast gateway
+			vn extranet
+			fabric wireless
+
+	data plane (vxlan)
+		encapsulate traffic on layer2 (frame) on vrf instance segmentation on layer3
+			lisp behave like gre
+			layer2 get encapsulate on layer3
+
+		enhancements (32bit or 4byte)
+			g bit
+				group base policy extention bit
+				if were 1 means we have cisco trustsec
+
+			d bit
+				don't learn bit 
+				if were 1 means don't learn vtep egress and source ip
+
+			a bit
+				policy applied bit
+				if were 1 means policy deployed, sgt here is not important
+
+			group policy id (16 bit)
+				sgt tag (security group tag)
+					in sda known as scalable group tag
+					support 64 k tag
+
+		vxlan group policy option (vxlan gpo)
+			sda version
+				vxlan net id (vni) + reserved
+					outer ethernet header
+					outer vxlan ip header
+					outer vxlan udp header
+					vxlan header
+					original ethernet header
+					original ip header
+					data (payload)
+
+			possiblility use sgt in vxlan ethernet or vxlan gpo
+
+		fabric policy (trustsec)
+			tag addition on users traffic (sgt), control feature
+			on dnac we define tags and set allowed on unallow places
+			if need mobility must set sgt with profile and acl (dynamic acl (dacl))
+
+		network base segmentation and group base segmentation
+			vni
+			network address independet + policy group (sgt)
+				work on tags instead of work on ip
+
+			dynamic enforces with tag
+			transfer policy and tags to other networks (sxp)
+				transfer some policies with security exchnage protocol (sxp)
+					if some devices couldn't support this sgt convert to another format
+					send sgt tags to another device for recognition then send to unsupported devices
+
+					single or multi hop sxp
+
+		fabric control plane node (fcp)
+			in lisp use map server and map resolver (map all nodes and rlocs)
+
+		fabric border node (fbn)
+			core routers which connect our sda on layer3 to foreign network 
+
+			nodes proxy tunnels
+			petr or pitr
+			connect sda fabric to another network
+
+			formats > internal and default or default or just internal can be used
+
+			translation on accessibility and policies to foreign networks
+			rlocs behave like proxy in map server and map resolver with default route in fabric border (route internet to organization)
+
+			we have internal format means connect our sda fabric to our networks like datacenter, firewall ...
+			default format used for cloud accessiblity and internet
+
+		fabric intermediate node
+			each devices in fabric with no role in sda underlay
+			also has no effect on overlay
+
+			combination with sda fabric give us some features
+				on wlc and capwap tunnels we set petr or pitr on ap connection and wlc
+				our traffic adn data tunnel bringed up on vxlan 
+
+				wlc saved rloc information (ap and eid) 
+
+		fabric edge
+			switch or router with some features
+			onboarding
+				possiblility access on network with cable and some tasks for suers
+					mobility services
+					anycast gateway
+						use svi for gateway and vlan 1 activation on each switch
+
+					lisp(etr or itr)
+					endpoint authenticate (dot1x)
+
+		fabric edge nodes
+			endpoint connects to network on wire and wireless (fabric wlc) (sgt) 
+
+		after authentication on host port acl or vrf instance receive ip from dhcp and ip ranges also set sgt and group policy enforment (dacl)
+		dnac works with cisco ise
+
+		fabric edge put eid information on map resolver and map server in lisp and fabric control plane node
+			register fbn and fcp 
+
+		*better use all cisco products
+
+		control layer
+			ise + network control or data platform
+			central management
+
+			network assurance
+				ping
+				syslog
+				traceroute
+				snmp
+				debug
+				sla
+				span
+
+			dnac assurance
+				permissions on some background process
+
+			data controler in sda need some external application for some process
+
+			network control platform(ncp)
+				automation 
+					netconf
+					snmo
+					ssh
+
+			network data platform (ndp)
+				collect system status
+				https
+				netflow
+				syslog
+
+			dnca use api for ndp and ncp
+
+		dna design workflow
+			network hierarchy
+			network setting
+			image repository
+			network profile
+
+		dna policy workflow (security group acl)
+			dashboard
+			group base access control
+			ip base access control
+			application (qos)
+			virtual network
+			traffic copy
+
+		dna provisioning workflow
+			devices
+			fabric
+			fabric devices
+			host onboarding
+
+		dnac assurance workflow
+			dashboard
+			devices 360
+			clients 360
+			issue
+				active
+					trond
+
+				reactive
+******************************
+sdwan
+	*all info were on sdwan document
+	in some organization need many connectivity links so these infrastructures must be monitor and reach best reliablity
+	links might be e1 or t1, mpl, fiber, dsl ...
+	frame relay and atm
+		dlci and cpiaci (layer2 shared)
+
+	cloud base application
+		dropbox, meganz
+		some applications need best qos fro servicing and cause use sdwan on many platforms and links
+
+	cisco
+		sdwan > viptela
+		merakiwlc > ap
+
+	sdwan components
+		vmanage (management plane)
+			nms
+			a console which manage whole fabric
+
+		vsmart (control plane)
+			apply policy on all fabric
+
+			main engine of sdwan deployement
+
+		vbond (management plane)
+			provisioning routers and authentication
+
+		vedge (data plane)
+			devices on organization edge connect to fabric
+
+			goes to smart with forwarding data taget
+
+		vanalytic
+			analyze the links quality and assurance
+
+	cedge
+		cisco edge use viptela hardware and iosxe on them
+		encs
+			enterprise network compute system
+				csr
+				isr
+				asr 1k
+
+		all featrues need execute on sdwan devices above device list done
+			old features  + newe featrue on viptela images
+			*cedge has more features and options rather than vedge (viptela edge)
+
+											cedge	|	vedge
+ 			-------------------------------------------------
+			amp and amp thread grid |		*		|
+			enterprise firewall 	| 		* 		| 		*
+			umbrella dns security 	| 		* 		|
+			url filter 				| 		* 		|
+			ips snort 				| 		*		|
+			cisco trust anchor	 	| 		* 		|
+
+	viptela quality of exprience
+		rate between 0 to 10 
+		0 is the worst
+		10 is the best
+******************************
+network assurance
+	network diagnpstic tools
+		ping
+			type8 > request
+			type0 > reply
+
+			work over ip
+
+			df bit means don't fragment
+				has mtu 1500 byte
+				if receive larger than 1500 drop them so on layer 3 make fragment
+
+				*end to end discovery
+
+			*cisco ios icmp packet size > 100  
+
+		traceroute
+			path discovery with probe packets
+				on random udp port and ttl check the path and hops 
+
+				traceroute 1.2.3.4 2
+				#resolve name and just receive numbers
+
+				traceroute 1.2.3.4 probe 1
+				#instead of 3 send one
+
+				traceroute 1.2.3.4 ttl 1 1
+
+				*timestamp is real time reaching
+
+		debug
+			show debug
+			debug ip packet 1
+			#acl number
+
+		snmp
+			management information base (mib)
+				get or set (management) (161 udp)
+				trap (triger from device) (162 udo)
+
+				contain some object id (oid) which define deviec elements
+					asn(abstact syntax notation)
+
+				get (request or response)(solicited)
+					161 udp
+					on version 2 we see bulk request
+					next request
+
+				set
+					161 udp
+
+				trap and inform (162 udp)(unsolicited)
+					trap just generate from device (recieving doesn't matter)
+					inform use ack on receiving (if loss mustsend agian
+
+			version 1 > 32 bit
+			version 2 > add inform
+
+			version 2c and version 3 use 64bit nd high security 
+			on version 3 we have authentication, encryption, snmpview (access to one part of mib)
+
+			snmp-server community shayan 123 ro 1
+			#username, password, read-only, acl number
+
+			snmp-server host 1.1.1.1 community shayan
+			snmp-server host 1.1.1.1 inform version 2c community shayan
+			#generate inform snmp
+
+			snmp-server host 1.1.1.1 version 2c community shayan
+			#trap snmp
+
+			version 3 modes
+				no authentication and no privacy (no encryption)
+
+				use authentication and no privacy (no encryption)
+
+				use authentication and use privacy
+
+				nms send username on version 3 and check access level
+
+			snmp-server view admin-view mib-2 include
+			snmp-server view admin-view mib-2 exclude
+			#oid tree
+
+			snmp-server group admin-group version 3 priv ro 11
+			snmp-server group admin-group version 3 priv rw 11
+			#if didn't set full access
+
+			snmp-server user shayan admin-group version3
+			snmp-server user shayan admin-group version3 auth sha shayan priv des 123 11
+			snmp-server user shayan admin-group version3 auth sha shayan priv aes256 123 11
+			#user definition
+
+			snmp-server host 1.1.1.1 inform version 3 priv shayan
+
+			*on version 1 sent root password and community from snmp agent and nms
+
+		syslog
+			show logging
+			#show all logs since device power on
+
+			logging buffer 1000 4
+			#level 4 of information and log level on 10k lines or log count
+
+		netflow collector
+			cisco prime and dnac
+			detect users and organization consumption and does our loadbalance well?
+
+			show ip cache flow
+			ip flow-export destination 1.2.3.4 9999
+			ip flow-export destination 1.2.3.4 sctp
+
+			show ip flow-export
+
+			show ip flow-top-talker
+			top 2
+			sort-by bytes
+
+
+		flexible netflow (fnf)
+			flow record
+				data capture
+					some keyfield determine which flow on which port will be capture
+
+					flow recoord flow-test
+					match ip dscp
+					match ip source as
+					#show classified data with sort view
+
+					show flow record flow-test
+
+			flow monitor
+				flow monitor f-test
+				record flow-test
+				cache active timeout 5
+				#5 seconds
+
+				interface gig0/0
+				ip flow monitor in
+				ip flow monitor out
+
+				show flow monitor x cache
+
+				monitor	session 1 source interface gig0/0
+				monitor session 1 destination interface gig 0/1 encap replicate
+				#encapsulation replicate specifies that the destination interface replicates the source interface encapsulation method. if not selected, the default is to send packets in native form
+
+				monitor session 1 destination interface gig 0/1 encap replicate ingress dot1q vlan 5
+				#in interface 0/1 on vlan 5 send thw fully clone 
+
+				show monitor
+				show monitor sesionlocal
+
+				vlan 1000
+				remote soan
+				#disable learn mechanism
+
+
+			flow export
+				export where and which port
+
+				flow export f-test
+				destination 1.1.1.1
+				export protocol 9999
+				transport udp 9999
+
+				show flow exporter
+
+			flow sampler
+
+			we can define many flow record
+			we have keyfield and collector which are different from normal flow
+
+		port reflector (span)
+			use another resources and put on another interfaces
+
+			span
+				source and destination in on e session
+				switch mode and routed mode
+				hardware make session at the minimum 2
+
+				monitor session 1 filter vlan 1-10
+
+			erspan
+				span + routing
+
+				monitor session 1  type erspan-source
+				source interface gig0/0 rx
+				filter vlan 2
+				filter ip access-group 100
+				#acl number
+
+				no shutdown
+				destination
+				ip address 1.1.1.1
+				#device destination ip
+
+				erspan-id 2
+				origin ip address 2.2.2.2 
+				#device source ip 
+
+				exit
+
+				erspan ttl 32
+
+				show monitor session erspan-source session
+				#if wanna write for destination do same as above but replace source and destination terms
+
+		sla
+			check quality attributes on links
+
+			delay jitter loss
+
+			ip sla 1
+			icmp-echo 1.1.1.1 source-int loop 1
+			#ip can be source or destination
+
+			frequency 60
+			#default
+
+			show ip sla config
+			show ip sla statics
+
+			ip sla 1 schedule start-now life forever
+
+			http get google.com
+			ip http server
+			#if enable on router we have http server on it
+
+			dnac has day0-2 service
+				installation
+				design
+				maintenance
+				config sda fabric
+				software image management
+
+			network time tunnel
+				like video recorder record all network behavior
+				client 360
+******************************
+cisco safe
+	a framework used for higher security deployement
+	define secure domain
+
+	end to end malware is the worst attack like pos devices
+
+	central management system
+		consistant policy deployement (use the best version av and os)
+		workflow change management
+		keeping system patch (manage connectivity between object and policies also  alerts)
+
+	security intelligent
+		possiblility ransomware detection
+		every day increase attacks and more complexity on attack types
+		here we patch latest updates and detect behaviors
+
+		detect dynamic policies and historical values 
+
+		some attacks couldn't find in cve database and force users send too much traffic toward server
+
+		compliance
+			check our device are in good state or not after achieve good state can use services
+
+			use policies
+
+		segmentation
+			set borders for users
+			on old versions just use vlan and ip subnets
+			identity aware infrastructure
+			here we use dynamic acl but old versions was manual
+
+		network traffic telementry
+		contextual information
+
+		*huge perspective view on network threat defense
+
+		secure services > vpn , acp , encryption
+
+	cisco safe is fully modular
+
+		before 						during 						after
+		--------------------------------------------------------------------------------
+		enforce harden 				detect block defend 		scope contain remediation
+		--------------------------------------------------------------------------------
+		amp 						ngips 						amp
+		ngfw 						web security on amp 		behavior analysis
+		network access controll		email security on amp 		secure analysis
+
+	stealth watch
+		smaller scope have better manage on attack
+
+	cisco talos
+		on 2014 thread grid was stablished
+		an artificial intelligence which help organizations security and threat protection on cisco base products
+			iron port security applications (secapp)
+			source fire vulnerability research team (vrt)
+			cisco threat research analysis and communication (trac)
+
+			thread grid
+			amp
+			clam av
+			spam cop
+			snort
+			advance micrososft and industrial disclouser
+			ironnet
+			honeypot
+			talos community
+			senderbase
+			guideance
+			source fire
+
+		above  list is part of collaborative space to prevent cyber attacks and threats
+		talos is place each teams can research and analyze the different attak types
+
+		cisco thread grid
+			since 2014 
+			cisco bought them and used for file check 
+			behavior check and ...
+
+			dynamic analysis > files behavior checking
+			static analysis
+
+			run files on sandbox then check pollutation, determine activities scope then advertise thse status on all cisco devices
+			also deploye reverse engineering on test to generate new templates
+			some alwares detect are in sandbox and not rael world
+
+			glove box same as sandbox
+
+		advance malware protection (amp)
+			fire amp was the old name
+			on isr, meraki, wsa and esa use amp connector to use talos informations an thread grid 
+
+			amp ios
+				cisoc security connector (csc)
+
+		cisco umbrella
+			cisco dns and open dns
+				block some doamins
+
+			on dns queries and requests will be checked on umbrella database if were safe could be reachable
+			has 30 datacenters around the world and anycast dns checking 
+			175 billion dns request get collect
+			better use umbrella dns on dhcp server and options
+			if use anyconnet with routing which works with security modules use umbrella even if our vpn were off
+
+			umbrella has routing client features help us add tags on negotiations and provide higher security level
+
+		indicator of compromise (iocs)
+			after attack what should we do to reach the normal state
+
+		cisco anyconnect
+			tls
+			host scan (posture)
+			provide vpn
+
+		cisco cloud web security
+			endpoint use this feature then connect to internet
+			scan clients and their requests and make a proxy
+
+		wsa (web security appliance) and talos has live negotiation, each address gonna checked with talos database (validate requests) then pollutation were set and determined each 3 to 5 minutes got update from talos
+
+			some parameter get check from wsa like host, traffic type ....
+			url with higher level than threshould get block
+			web filter detect type of websites and block some malicious
+				realtime content analysis
+				dynamic content analysis (dca)
+
+			wsa use security intelligent provided by amp and talos
+			another	feature is casb (cloud access security broker)
+				during attack is useful
+				some clouds on private or public with pollutation
+				casb help us checks pollutation between enterprise network and cloud 
+
+				cloud lock and macafee
+				bitglass
+
+				layer4 traffic monitor
+					botnets and spyware (phonehome attack)
+
+			multiple anti malware scanning
+				amp scan
+					file reputation
+
+		application visibility control (avc)
+			macro controller inside the application
+
+		internet control adaptation protocol (icap)(dlp soloution)
+			set integrity between cisco and another dlp vendors and synchronize
+
+			when login on siteswith google some attributes like username transfer to them
+			*deep content inspection
+
+		after attack we use file retrospection
+			collect files from attack 
+			security intelligent and scanning will be send to thread grid, talos and amp
+			they send to cisco, then generate an alert and codes (cve) on devices
+
+			file diposition > malware or not?
+
+		global threat analytic (gta) use cisco amp (stealth watch) to analyze and advertise all threats 
+
+		cognetive threat analysis (cta)
+			collect data and determine source and targets, then send to amp
+
+		cisco esa (email security appliances)
+			global threat intelligence
+				talos amp thread grid
+					deploye an artificial intelligence on security modules
+					use reputation filter on endpoints make them safe
+
+			spam protection
+				cisco content adaptive scanning engine (case)
+					detect main and sub categories spams
+
+					cisco advance phishing protection (capp)
+						check mails link be secure and exclude the spam and phishing
+
+			forged email detect
+
+			cisco domain protection (cdp)
+				our staff didn't send phishing traffic from organization on internet
+
+			malware defence
+				gray mail and safe unsubscribe
+
+			url related protection 
+				scan email urls
+
+				also outbreak filter
+					cmmunication between esa and wsa
+
+					inside mails we have trusted links but destination is not
+					wsa if sense this model conenction must block them
+
+			web integrity tracking
+				esa and outbreaks rewrite all urls inside the lan and after this check validation on wsa
+				esa track and save statistics when use outbreaks
+
+			blind carbon copy
+				when you are sending email no one detect receiver
+
+		ngips
+			ids + ips
+				scan everything inside the network
+
+				each ips must contain these
+					realtime contextual awareness
+					advance threat protection
+					intelligent security automation
+					application visibility control
+					url filter
+					scalable
+					unparallel perfomance
+
+				firepower 9k has clustering
+				
+				smb and distributed enterprise
+					wsa 5506 w/x/h
+					asa 5508
+
+				commercial and enterprise
+					asa 5516 x
+					asa 5525 x
+					asa 5545 x
+					asa 5555 x
+
+				dc and and high performance compute also useful in service provider
+					asa 5585 x
+						ssp 10, 20, 40, 60
+
+					firepower 4100
+						4110, 4120, 4140
+
+					firepower 9300
+
+					asa software image used for upgrade old devices to newest
+						asa software images + firepower service  (ngfw + ngips) > on asa 5585 x
+
+					ftd (firepower threat defendse)
+						aggregate 2 above images on one image runs at 5500x
+						also run on isr
+
+					ftd or firepower services > fmc
+						device manager
+						fdm used for small office
+
+				asa
+					cli
+					csm (cisco security manager)
+					asdm (adaptive security device manager)
+					cisco defense orchestration
+
+		stealthwatch
+			a tool that collect all i/o traffics and detect pollutation then take an action on them
+			also manage encrypted data
+
+			malwares has some effect on files which might be recognizable before decryption
+
+			lancap provides stealthwatch
+
+			command and control attack
+			ransomware ddos attack
+			illicit crpto mining
+
+			stealthwatch is agentless and suitable for cloud runing
+			use machine learning algorithems
+
+			2 version
+				enterprise 
+					realtime visibility
+						organization activity contain cloud
+
+					flow rate license
+						collect and analyze traffic
+						data type and volume 
+
+					flow collector
+						vm and appliance
+
+						network telementry data
+							collect data from many devices
+
+						encrypted traffic analytic (eta)
+							use gta for threats
+
+					flow sensor
+						in some part just use sensors
+
+
+					management console
+						manage 25 collector
+						also ise help us in this step
+
+				cloud
+					public cloud
+						gpc
+						aws
+						azure
+
+						behave like saas
+						check and attention to flow log and stealthwatch (detect any type of traffic)
+							virtual public cloud will generate these
+
+					ipfix
+						just sent meta data on stealthwatch analytic data name from cloud to enterprise
+						some virtual appliance get install 
+						just sent meta data no payload or data
+
+			help us on threat intelligence and endpoint security
+			udp collector
+				some devices on network has telementry data wanna export and put on live action
+				if need forward 10 routers netflow to many places and need huge data transmission
+				our streams and collected data use udp director send data toward flow collector 
+				our critical and sensetive data send to many palces with less stream
+
+			ability to satisify requlatory requirement
+			network performance capacity planing
+			network segmentation
+			incident responses
+			realtime threat detection
+
+		ise
+			network access controll (nac)
+			stream line device onboarding
+				total network information view 
+
+			dot1x
+				port base authentication
+				network access devices (nad)
+					authenticator
+
+				supplicant
+					agent program
+
+				states
+					1-eapol start
+					2-eapol or eap requests id
+					3-eapol or eap response delivery
+					4-radius access request (attribute value pair (avr))
+					5-radius access challenges (avp > eap response (peap))
+					6-eapol (eap request (peap))
+					7-eapol (eap response = ok)
+					8-radius access request (avp eap response peap ok)
+					9-radius access accept (avp = eap success)(avp = vlam 2 dacl 1 sgt)
+					10-eap success
+
+					pc----------------switch------------ise
+					1 					2
+					3 							4
+							6					5
+							7 					8
+							10 					9
+
+					*md5 doesn't send 2way authentication
+
+				eap fast
+					flexible authentication via secure tunnel
+
+				tls run a encrypted tunel (eap tunnel) between suplicant and as base on certificate
+				in this tunnel authenticate users by different methods
+
+				tunnel outer layer
+					eap tls
+					ttl
+					fast
+
+				tunnel inner layer
+					eap gtc (peap v1)
+					mschap v2 (peap v0)
+						chap (challenge handshake authentication protocol)
+						pap (password authentication protocol)
+					eap tls
+
+				otp token srv
+					ldap
+					netid
+
+				eap fast use peap as cookie
+
+				we can use mab for ip-phones and came or printers
+					1-packet
+					2-radius access request
+						avp = mac x
+
+					3-radius access accept
+						avp = dvlan, dacl, sgt
+
+					printer------------switch-----------ise
+								1
+								2 					3
+
+			local web authentication (lwa)
+				change of authorization (coa)
+				no vlan assignement
+				support acl assignement
+
+				centralize web authorize (cwa)
+					decrease negative point in local web authentication
+
+					contain
+						change of authorization (coa)
+						dacl
+						vacl
+						posture
+						eap
+						self register
+
+		pxgrid
+			1
+				ise 1.3 xmpp
+
+			2
+				web socket restapi
+				stomp
+
+		trustsec
+			when we have a guest or new client assign a tag 
+			ise has sgt tag and authorization
+
+			sgt 
+				name and value
+
+			propagation process
+			sdwan sgt (scalable group tags)
+
+			ingress classification
+				process that sgt recieve permissions
+
+			propagation
+				dot1x
+				mab
+				web authentication
+					base on subnet/ip/vlan/interface... 
+
+				sxp
+					native tagging (inline tag)
+						switch can use dynamic (tag sgt automatic) and static (if has no authentication) model for sgt recognition
+						this method help us tag users with sgt and forward it to egress port
+
+						old devices drop sgt tags or negotiate with sxp devices
+
+						on users data we have cisco meta data and placed sgt values
+							sgt value 16 bit(64 bit name space)
+
+						sxp
+							layer2 point-to-point
+							where has no inline sgt
+			egress
+
+			if our device were no trustsec, ise will be negotiate with listener
+
+		mac security
+			802.11ae
+			layer2 encryption
+
+			key mechanism
+				macsec key agreement (mka) (down link)
+					clients to switch
+
+				security association protocol (sap) (up link)
+					switch wo switch
+
+			normally in ise profiles has priority
+
+			authentication and encryption
+				galios
+				counter mode advance encryption standard
+
+				aes/gcm 128
+
+			authentication
+				galios method authentication code (gmac)
+
+			if were dynamic mode configs must use dot1x before it
+				macsec ether type (2 byte)
+					0x88e5
+
+				tci or an (1 byte)
+					tag control information (which version is working)
+					association number (include what features)
+
+				sl (4/5 byte)
+					short length
+
+				packet number (3byte)
+					reply protection
+
+				sci
+					secure channel id
+						put connection on virtual port
+
+				icv (16byte)
+					integrity check value
+
+		access list
+			clear access-list counter
+
+			routers self traffic generated couldn't be on acl
+			at the end of acls if write log command means at each matching must generate log for us
+			hecking order
+			pacl
+			vacl
+			racl
+
+			pacl (port)
+				write acl on layer2 switched
+				just check ingress port values not egress
+
+				ip access-list extended pacl
+				deny icmp any any
+				deny ip any any
+
+				int gig0/0
+				switchport
+				ip access-group pacl in
+
+				*didn't block controll protocol (stp, cdp, vtp, dtp, udld)
+				*must support on hardware
+				*doesn't use ipv6, arp, mpls
+
+				show ip int gig0/0
+
+			racl (router)
+				if has no acl on devices we can use match clouse (remain information)
+
+			vacl (vlan)
+				doesn't hav specific place apply acl and need filter layer2 and layer3 packets
+
+				vlan access-map x 10
+				#sequence number
+
+				match ip address acl-10-11
+				match mac address acl-10-11
+				action drop
+				action forward 
+				#capture them
+				#on 6k switches we have this feature
+
+				action redirect
+
+				vlan filter x vlan-list 1
+
+				show valn filter
+				show vlan access-map
+				#used in span mode
+
+		base
+			line console 0
+			password 123
+			login
+			#means consider these passwords as an active, if you don't set this command never conenct to device
+
+				password types
+					0
+						default and no encryption
+
+					4
+						prior and not useful omit from os 15.3(3)(don't use them)
+
+					5
+						md5 
+
+					7
+						vigener cipher encrypt (not usefull)
+
+					8
+						no hackable
+						pass-base key drivation function 2 (pbkdf2)(sha256)
+						not exist on os
+
+					9
+						no hackable
+						script hash algorithem
+
+			username shayan type9 algorithem-type script secret 123
+
+			terminal history size
+
+			limit users just telnet one system with acl
+				access-list 2 permit 192.168.1.2
+				line vty 0 5
+				access class 2 out
+
+				access-list 1 permit 192.168.1.2
+				line vty 0 5
+				access class 1 in
+
+			reverse telnet
+				disable mechanism
+
+				line console 0
+				transport in non
+
+		radius use 1645 and 1812 for authentication and authorization, 1813 and1646 for accounting
+		radius use a package on returning values for allowed commands 
+		tacacs plus authorize each command seperately
+
+	zonebase firewall
+		can apply some policies on cisco routers
+
+		we have some zones like zone-self means router self packet generated
+		has differences with default zone 
+
+		inspect
+			store our states on communication with high performance on responding (establish)
+
+			pass > just send and receive traffic with no inspection method
+
+		show zone security x
+
+	copp
+		controll plane policy or protection
+
+		what amount of data will be check on router
+
+	epc
+		cisco embeded packet capture
+			on intervals capture data 
+			.pcap files
+
+	mqc
+		qos policy
+
+	devics hardening
+		disable lldp and cdp
+
+		nolldp transmit
+		no lldp receive
+		no lldp run
+
+		tcp or udp small service or server
+			by enabling these features access some options
+
+			sevice tcp-small-server
+
+			echo (port number 7)
+			discard (port number 9)
+			daytime (port number 13)
+			chargen (port number 19)
+
+			no service tcp-small-servers
+			no service udp-small-servers
+
+		half open detector
+			service tcp-keepalives-in
+			service tcp-keepalives-out
+			#better set this and turn of auto-negotiate with some devices which is off
+
+		ip redundant service
+			has eigrp between r1 and r2 
+
+							192.168.1.0/24
+			r1-------------------switch------------------r2------------internet
+									|
+									|
+									pc
+
+			pc need access internet so our pc gateway is r1 also has default information originate on r1 to destination r2 cause played eigrp on devices
+			if pc waan go internet must send packets to r1 
+			this is complex path internet access
+			on icmp packets we have icmp redirect message hel us change gateway on r2 and direct access
+			icmp-redirect type5
+
+			security issues need disable this
+				no ip redirect
+
+			first packet goes with r1 then change gataeway on second packet
+
+		arp proxy
+			disable it to avoid man in the middle attacks
+
+		service config
+		prevents the cisco ios device from an attempt to locate a configuration file on the network with tftp			unless cisco ios devices retrieve configurations from the network during startup
+
+			no service config
+
+		maintenance operation protocol (mop) service
+			interface gig0/0
+			no mop enable
+
+		packet assembler or disabler
+			disable packet assembler/disassembler (pad) service, which is used for x.25 networks
+
+			by default is disable and unused
+			used on frame relay and atm
+
+			no service pad
+
+			interface gig0/0
+			no service pad
+******************************
+virtualization
+	docker used for container engine
+
+	vswitch
+		nexus 1k ve series vswitch
+		appliance vswitch (avs)
+		open vswitch (ovs)
+		ibm dvs 5kv
+		vsphere switch
+
+	capex (cost of preparation)
+	opex (maintenance cost)
+
+	mano
+		element manager nfv (element manager system)
+			fault
+			config
+			accounting
+			performance
+			security
+
+		orchestration
+			nfv infrastructure
+			config management
+
+			*if doesn't need them got purged
+
+	if on service providers need do something must use these
+		operation support system (oss)
+		business support system (bss)
+
+	interupt request (irq)
+		some i/o devices after fully buffering send signal to cpu 
+		request to cpu with fetch from me all data
+
+	traffic transmission between vnfs means east-west traffic flow
+	recieve from pc or physical nic (pnic) means north-south traffic flow
+
+	cisco enfv
+		enterprise nfv and use less physical devices
+******************************
+network programming concept
+	overlay named north-bound-api (applications center adn controller)
+	underlay named south-bound-api (devices controller and dataplane)
+
+						| 	netconf 			| 	snmp
+	-------------------------------------------------------------
+	manage operation 	| 	netconf 			| 	snmp
+	-------------------------------------------------------------
+	encode 				| 	xml and json 		| 	ber
+	-------------------------------------------------------------
+	transport stack 	| 	ssh and tcp 		| 	udp
+	-------------------------------------------------------------
+	resource 			| 	path 				| 	oid
+	-------------------------------------------------------------
+	data modeling 		| 	yang 				| 	mib
+	-------------------------------------------------------------
+	data modeling lang 	| 	yang 				| 	smi
+
+
+	soap > simple object access protocol works like oid
+
+	netconf used remote procedure call (prc) on xml change values
+
+	restconf
+		works with same http packets and messages
+******************************
+automation tools
+	embeded event manager
+		applet (macro programs)
+			if see x got execute do something
+				a application execution on cisco ios
+
+				if then concept
+
+	event manager applet loop0
+	event syslog pattern "interface loopback0.*down" period 1
+	action 1.0 cli command "enable"
+	action 2.0 cli command "conf t"
+	action 3.0 cli command "interface loop 0"
+	action 4.0 cli command "shut"
+	action 5.0 cli command "no shut"
+	action 5.5 cli command "show interface loop 0"
+	#might error on it
+
+	action 6.0 syslog msg "i've fallen, and get up !"
+	action 7.0 mail server 192.168.1.10 to admin@ou.com
+	from no-reply@ou.com subject "loopback0, issue"
+	body "the loopback0 ...." $_cli_result
+
+	show event manager policy register
+	event manager session cli username shayan
+	#if need authentication
+
+	debug event manager all
+	#best way check event manager
+
+	need applet  when write do wr make a backup on ftp
+		event manager envirment	filename router.cfg
+		event manager envirment tftp-server tftp://192.168.1.10/
+		event manager applet backup-configs-shayan
+		event cli pattern "write mem."* sync yes
+		action 1.0 cli command "enable"
+		action 2.0 cli command "conf t"
+		action 3.0 cli command "file promt quiet"
+		#bypass confirms action on ios
+
+		action 4.0 cli command "end"
+		action 5.0 cli command "copy start $tftpserver$filename"
+		action 6.0 cli command "conf t"
+		action 7.0 cli command "no file promt quiet"
+		action 8.0 syslog priority inform msg "configuration file changed! tftp backup successfull."
+
+	embeded event manager and tool command language (tcl)
+		tclsh
+		foreach address{
+		192.168.1.0
+		192.168.2.0
+		}{ping $address
+		}
+		tcl quit
+
+		event manager applet ping
+		event no 
+		#don't run automatically when i say run
+
+		action 1.0 cli command "enable"
+		action 1.1 cli command "tclsh flash:/ping.tcl"
+		#can use ftp
+		#on gns3 we have problem on runing this
+		#run above code
+
+		event manager run ping
+		#on priviledge mode called ping.tcl or applet
+		#cause run in user mode must set enable command
+
+		more tftp:/192.168.1.10/ping.tcl
+
+	puppet
+		agent
+		server
+			master replication (optional)
+			master of master (mom)
+
+		console
+		database
+
+		admin
+			puppet mom (puppet database)
+
+			master replication
+			master compiler
+				2 above items goes to loadbalancer and then goes to agent
+
+				*these called puppet module
+					manifest
+						some codes write by dsl (domain specific lang (ruby))
+
+					templates
+					files
+	salt stack
+		created on python
+		yang and dsl
+
+		system > master
+		minions > agent
+
+		0mq
+			distributed messaging platform
+
+		or use tornado or ssh
+			out driver or reactor
+
+			event driver like eem (embeded event manager)
+				beacon (minions) + reactor (master)
+
+		instead of manifest use pillars and grains
+			grains are a proxy recieve data from devices and froward to pillars 
+			differences with beacon is beacon notify the reator on each item generation
+			but on pillars and grains we always received signals 
+
+		salt stack command
+			globing (minions id) target
+			#reciever system
+
+			syntax module function
+				commands
+				aurguments
+
+	syndic > enterprise

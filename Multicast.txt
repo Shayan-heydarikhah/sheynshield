@@ -1,0 +1,1559 @@
+Multicast
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+multicast ip concept
+	many to many
+		routing protocols or collaborate
+
+	one to many
+		general
+
+	many to one
+
+	in basic invention of broadcast and anycast was multicast
+
+	224.y.z.w to 239.y.z.w
+	class d without mask
+	iana controll this range
+
+	multicast address for permanent groups 
+		224.0.0.0 - 224.0.0.255
+			ospf 224.0.0.5 - 224.0.0.6
+			no body must not usse this range for network
+
+		type 
+			local 
+			routed
+
+		224.0.1.0 - 224.0.1.255 > routers advertise and transfer them
+		224.0.0.1 > all multicast host
+		224.0.0.2 > all multicast routers
+		224.0.04 > dvmrp (distance vector multicast routing protocol)(cisco exclusive and supported)
+		224.0.0.5 > all ospf routers
+		224.0.0.6 > all ospf dr
+		224.0.0.9 > ripv2 routers
+		224.0.0.10 > eigrp routers
+		224.0.0.13 > pim routers (protocol independent multicast)
+		224.0.0.22 > igmp v3
+		224.0.0.25 > rgmp (router group management protocol)
+		224.0.1.39 > cisco rp announce
+		224.0.1.40 > cisco rp discovery
+
+		multicast for surc specify
+			232.0.0.0 - 232.255.255.255
+
+		anysource multicast (asm)	
+			pc1 > pc2 + pc3 (request to destination like 239.1.1.1) (depends on requests)
+
+		source specific multicast (ssm) 
+			pc1 > pc2 + pc3 (if request comes from specific surce could have access to multicast)
+
+		glop addressing > 233.0.0.0 - 233.255.255.255
+			we can generate multicast ip from our isp public ip without any certificate or confirmation
+
+			233.as.as.ou (ou part is optional)
+
+			each organization has unique as and bee like this
+				as 10 > 233.00000000.00000010.x > x could be between 0-255
+
+				233.0.10.5
+
+			as 6000 > 6000 in binary is 00010111011100000 > 00010111.011100000 
+				233.23.113.x
+
+		private range 
+			239.0.0.0 - 239.255.255.255
+			not routeable on internet just used in lan or internal objects
+			we shoulld use iana confirmation to assignment
+			transite group or transite multicast address
+
+		224.0.2.0 - 224.0.255.255 > 65024 adhoc1
+		224.3.0.0 - 224.4.255.255 > adhoc 2
+		233.252.0.0 - 233.255.255.255 > adhoc 3
+		224.2.0.0 - 224.2.255.255 > sdp \ sap
+		239.0.0.0 - 239.255.255.255 > administrativly scope
+
+		reserved 
+			224.1.0.0 - 224.1.255.255
+			224.5.0.0 - 224.255.255.255
+			225.0.0.0 - 231.255.255.255
+			234.0.0.0 - 238.255.255.255
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+multicast mac concept
+	on ehternet
+	we have special mac address on multicast that didn't use client mac address
+	unique mac on multicast has diffrences with multicast mac activation on os
+	administrativly and logical get set till we need the multicast mac or request to multicast
+	when open multicast application our multicast mac get enable and created
+	multicast mac address must be on many system unlike the unicast mac
+	normally applications enable this mac address and ip address
+
+	we have source ip on unicast and request transmit to multicast destination address
+	in network that doesn't have routing need access to 239.1.1.1 so doesn't know how many arp needed also where should be send to find them
+
+	base on some rules we know what is the multiccast mac and don't use arp for them
+	multicast ip mapping to multicast mac address (starts with these and contain oui part)
+		ipv4 > 0100.5e.....
+		ipv6 > 3333.33......
+
+		0100.5e 	xx.xxxx
+		-------		-------
+		24bit 		24bit
+		oui 		nic
+
+		0100.5e0	 x.xxxx > (0is fixed part)
+		-------- 	 ------
+		25 bit 		 23bit
+
+		multicast ip > 239.1.1.1
+			239.00000001.00000001.00000001
+			     -------------------------
+			     			23bit get seperated
+
+			0100.5e 	0 				1 .0101
+			------- 	-				-------
+			24bit 		25th bit 		23 bit
+
+			mac > 0100.5e01.0101
+			ip > 239.1.1.1
+
+	example
+		239.255.0.6
+
+		0100.5e0 x.xxxx
+
+		ip converting 
+			255.0.6 > (1)1111111.00000000.00000110 		*(1) changed with 0 fixed part in multicast part
+					  -------- -------- --------
+					  8bit 		8bit 	8bit
+
+					  0100.5e 0  1111111.0000 0000 0000 0110 
+					  ---------  ---------------------------
+					  25bit 			23bit
+
+					  0100.5e 0111 1111 .0000 0000 0000 0110
+
+					  mac > 0100.5e7f.0006
+					  ip > 239.255.0.6
+
+		*do we have different mac for many ip address ?
+			no
+			239.1.1.1|
+					 | > 0100.5e01.0101
+			238.1.1.1|
+
+			all 23 bit at least are same
+
+	class d > 1110 xxxx.x yyyyyyy.yyyyyyyy.yyyyyyyy
+				   ------
+				   5bit
+				   means each 32 part change mac
+				   1mac and 332 multicast ip
+
+				   stephen deering > design a  multicast concept
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+igmpv1
+	host extention for ip multicast
+	applied on ipv4 and works layer3
+	porotocolo number is 2
+	usually use ttl 1 (scope > segment)
+	multicast ip > 239.1.1.1 on application
+	224.0.0.1 means all hosts (also visible on routers)
+	224.0.0.2 means all routers (just routers not hosts)
+
+	type of packets
+		1- host memebership query
+		2- host memebership report
+
+	on each interval 60 seconds we have general query or host memebership query 
+	destination of these are 224.0.0.1
+	each client need multicast or used application on muticast listen or recieve this
+	then each client need recieve data send host membership report
+
+	on igmp version 1 we doesn't have leave mechanism and wait 180 seconds if didn't recieve report message for queries , detect leave concept
+	in duration 180 seconds we recieve 3*60 seconds membership query or general query in our network
+
+	on clients
+		int fast 0/0
+		ip igmp join-group 224.1.1.1
+		ip igmp version 1
+
+	on servers
+		ip multicast-routing (enable multicast routing)
+		int fast 0/0
+		ip pim dense-mode
+		ip igmp version 1
+
+		sh ip mroute
+
+	in normal we doesn't have multicast route
+
+	igmp header version 1
+		version 4bit
+		type 3bit
+		unused 8bit
+		checksum 16bit
+		group address 32 bit
+
+		igmp version 1 has 2 type message 
+			11 > means 0x11 and membership query
+			12 > means 0x12 and membership report
+
+	if client use unsolicited mode and join immediately didn't wait 60 seconds for query
+
+		sh ip igmp groups
+
+		*last system gives a report and from the set of requests from all systems in that area, a request is made again and instead of one person, everyone is involved
+
+		sh ip igmp int fast 0/0 (say igmp is enable or not)
+
+	in normal if set dense mode works on igmp v2
+
+		debug ip igmp (multicast routing table (mrt))
+
+	if transfer from multicast source to network multicast packets on 225.1.1.1 no one replied or deny it cause no one requested
+
+		no ip routing 
+		ip default-gateway 192.168.2.1
+		int fast 0/0
+		no sh
+		ip address 192.168.2.2 255.255.255.0
+
+	if config on igmp v1 and recieve igmp v2 could not understand
+
+	igmp v2 hs no limitation like v1
+	igmp v2 is igmp v1 iwth more tools
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+igmpv2
+	invent on 1997
+	0x11 > general query or membership query (each 60 seconds)
+	0x12 > host membership report
+	0x17 > leave message
+
+	when pc request for multicast traffic not every pc answer or join
+
+	igmp header version 2
+		type
+		version
+		max response time
+		checksum
+		group address
+
+	on turning back of report or response from client to multicast source doesn't need recieve packets
+	0x11 send from multicast to client
+	each client reply 0x12 to multicast 
+	in igmpv2 use one 0x12 packet instead of many packets
+	use last report
+
+	response suppression mechanism
+
+	when recieve general query in lan and all nodes reply report packets to make joining mechanism
+	in last reported all clients use random time and set localy also different
+	each node reach 0 send report 
+	here instead of 0x12 use 0x16 to destination 224.1.1.1
+	router and another nodes detect this event
+	when another nodes detect this event didn't send report again so make suppress
+
+	send leave 0x17 message to router just ommit one system but here router use another packet like 0x11 and name of packet is > group specify query (just send on leave mechanism) means still has users or must make tear down
+
+	if has no user get tear down but has user must make query and report .....
+
+	in version 2 aggregate version and type then name type on header
+		v1
+			type / version 		reserved 
+			4bit / 4bit 		8bit
+
+		v2
+			type		max respose time 
+			8bit 		8bit
+
+	on version how could make compatibality
+		in v1 use 0x11 or 0x12 in v2 use 11 or 12
+
+		v1 
+			type 0001
+			version 0001
+			reserved
+
+		v2
+			type 00010001
+			max response time 00000001
+			checksum x
+
+		*on version 1 causse we doesn't have max res time must bypass this and check another parts
+
+		on version 2 we just use 0x16 instead of 0x12 but for compatibality could detect 0x12
+		also use 0x17 on v2 for leave
+
+		each client use random timer for multicast group in verison 2 and 0x11
+		eahc node reach faster to 0 on timer must send report and aother nodes use suppress mechansm
+
+		if we have too many clients in requests group might see alot of cpu usage on router so for this make max response time when query recieved on client must reply in max 10 seconds to multicast source
+		if has many client our timers must growth so must controll time ranges
+
+		0000 0000 > 0 > 0/10 > 100/10 > 10
+		1111 1111 > 255 > 255/10 > 0 to 25/30 seconds is ma wait time or timer range
+
+		after leae message and group specify didn't wait 10 seconds and max response time be 1 seconds and use 2 packets in english we wait 2 seconds
+
+			int fast 0/0
+			ip igmp query-interval 1-18000 second (60 is default)
+
+			sh ip igmp int fas 0/0
+
+			int fast 0/0
+			ip igmp query-max-respons-time 15 second
+
+		*why recieved 2 group specify
+			cause users busy time 
+			2-3 seconds must wait to leave 
+			last member query interval (max res time) 1000 msec
+			last member query count 2000 msec
+
+			int fast 0/0
+			ip igmp last-member-query-interval 2000 msec
+			ip igmp last-member-query-count 3 (packet count)
+
+	query election
+		a router manage and transfer all queries and use gateway if used 2 router for this what should to do?
+
+		ip multicast routing
+		int fas 0/0
+		ip pim dense-mode
+
+		sh ip igmp int fas 0/0
+			igmp query router is this system
+
+		each one has lower ip address must be querier
+		if get lost our querier 12 second wait then manage queries (query timeout)
+		query interval has effect on election must set x2 time for election and query
+
+			int fas0/0
+			ip igmp querier-timeout 90
+
+			*v1 use this mechanism on another name routing protocol pim , doesn't use election in seperated tool
+
+	if somebody leaves didn't happen in real time 
+	0x17 generae then group specify happen to detect is another one to use traffics
+	immediate leave 
+		in organization we have a system interested to recieve data
+		doesn't need send group specify from router cause we have one system
+		instead of normal leave must use immediate leave
+
+			int fast 0/0
+			ip igmp immediate-leave group-list 1
+
+			access-list permit 225.1.1.1
+
+		when we have many system in area and wanna leave immediately just use leave one of the systems not all leave requests
+
+			int fast 0/0
+			ip igmp static-group 224.1.1.1 (make manual report memebership on router whitout expiration)
+
+		we can limit joining request range
+			int fast 0/0
+			ip igmp access-group 1
+
+			access-list 1 permit 225.1.1.1
+
+			clear ip igmp groups
+
+			int fast 0/0
+			ip igmp limit 1 (just access 2 multicast address comes to lan)
+
+			*if we had session access it to use till expire after expire filter them
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+igmpv3
+	source specific multicast
+	on version 1 doesn't matter the soure 
+	important things are destination and channels
+	any source multicast
+
+	if attacker use multicast ip to make trouble what should we do?
+		on version 3 check source then use v1&v2 options 
+		source specific multicast
+
+		ssm > 232.0.0.0/8
+
+
+			int fast 0/0
+			ip igmp version 2
+			ip pim sparse-mode
+
+		we doesn't have modification on join 
+		on edge
+			int fast 0/0
+			ip igmp v3
+			ip pim sparse-mode
+			ip pim ssm-default (active routing on 232.0.0.0)(better use ssm range)
+			ip pim ssm range 10
+
+			access-list 10 permit 225.1.1.1
+
+		on client
+			int fast 0/0
+			ip igmp v3
+			ip igmp join-group 225.1.1.1 source 192.168.2.10
+
+	version 3 use 0x22 (membership report group address > 224.0.0.22 (igmp v3 all multicast routers))
+	also reserve 00 and checksum
+	we have general query like before 
+		0x11
+		0x12
+		0x17
+		0x16
+		max response time
+	v1 and v2 used 224.0.0.2
+	on version 3 we have 2 type report
+		include > source contain this
+		exclude > source except these
+
+	url rondezvous directory (urd) >>> igmp v3lite
+		cisco convert and emulate ssm and v3 igmp
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+igmpv3 lite
+	almost alot of os and devices support v3 might see some devices couldn't work on v3 so must convert and emulate them
+	works on applications with cisco
+		int fast 0/0
+		ip igmp v3 lite
+		ip pim sparse-mode
+
+	igmp v3
+		(s,g)
+		source , group
+
+	igmp v1 and v2
+		(*,g)
+		all , group
+
+	hot side igmp library (hsi)
+		designed by talarian
+		compilers with this liberary > v3lite
+		compatible with infrastructure
+
+		client liberary
+			some apis on application and system
+
+		igmp v3 lite daemon
+			activate on os and system to make reciving (s,g) posibility
+
+		hsi just recieve (g) for os with v3lite daemon (s) transfer to router and negotiation start
+		v3lite daemon contain (s,g) or membership include
+
+	urd or url rondezvous directory used for websites and web application 
+	works on tcp 465 
+	in past were 659
+	when recieved http just forward to destination but with urd , intercept happen and help to work zerotouch model
+	instead forward to port 80 use 465 
+	on this method we have intercept them > (s,g)
+	in normal mode ssm must use this
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cgmp or igmp snooping
+	switch couldn't realize igmp mac or multicast mac
+	so make flood multicast mac to find them
+	we need to reduce load on lan with accurate diagnose
+	this flood get contradiction
+	switch complete mac table and learn source mac of packets no one had request to source 0100.5e01.0101 all of them are on unicast mac
+	cgmp or igmp snooping on learning mechanism help switch work smarter than before
+	every one wanna vieo server data or mac 0100.5e01.0101 and forward on switch cache the mac of client on reply jsut forward on specific mac
+	cgm was cisco exclusive and depricated 
+		cisco group management protocol
+	igmp snooping is snatdard still use
+	cgmp or igmp snooping works on port of switch to router side
+
+	we had cat os in past with 5k series on ios we use igmp also cgmp
+		on switch and r1
+			int fast 0/0
+			ip cgmp
+
+		when pc sent igmp join to router , router inject muticast group and mac on port 
+		router say switch wwrite these items for pc2 and save them on fast 0/0 that is our link
+		roouter transmit cgmp to switch
+			unicast source address (usa)(ip of client on lan) and group destination address (gda)(mac address of group that need access)
+
+		switch on mac table set pc2 access on multicast mac
+
+		when igmp leave recieved from pc to 224.0.0.2 on router our multicast mac address 0100.5e01.0101 detect
+		then router send cgmp leave to switch 
+			usa > mac pc or client 1
+			gda > mac multicast 1
+		after these switch delete items
+		then send group specific if has user continue transfering (here use cgmp to detect who get down) , if no one requested  make cgmp leave
+		group specific without responder 
+			empty usa
+			gda is multicast mac address
+
+		when cgmp sent to switch recieved on 0100.0cdd.dddd (with this detect must make flood)
+			deug ip cgmp
+
+		on layer 2
+		cgmp first of all actions define router and switch together (cgmp join)
+			usa > router mac address
+			gda > 0000.0000.0000
+
+			*this is hello mechanism
+
+		after these users comes with their owned mac address and ip and request to multicast ip
+		this request goes through the switch 
+		router say mac1 and ip1 requested for mac and ip of multicast 
+		router set mac1 and multicast together on switch 
+			usa > mac1
+			gda > multicast mac address
+
+		do these with cgmp join
+		for each igmp query we have cgmp join
+		when recieve leave message our multicast mac address get extracted and send to switch to add them on cgmp leave , users didn't say which group get leave
+		if router take cgmp to disable make usa and gda to 0000.0000.0000
+
+	cgmp header
+		version 4bit	type 4bit	reerved 16bit 	count 16bit
+							gda 32bit
+				gda 16 bit 			usa 16 bit
+							usa 32bit
+
+	each 60 seconds advertise
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+igmp snooping 
+	sh ip igmp-snooping monitor 
+	sh ip igmp-snooping querier
+	sh ip igmp-snooping groups
+
+	debug ip igmp snooping router
+
+	sh ip igmp-snooping
+
+	igmp has simple behavior for snooping and detect easily our packets
+	active or igmp aware 
+		router ----------- switch ---------- pc1
+									*igmp to router
+
+		switch detect igmp and find destination mac set pc and multicast mac together
+
+	in igmp snoping router has a port with some parameters that detect switch has a port to router
+		igmp general query
+			if recieve this on each interface means outside hand
+			could detect by routing protocols like ospf
+				224.0.0.5 or 224.0.0.6 with 0100.5e00.0006 or 0100.5e00.0005
+		or pimv1 and hsrp
+			224.0.0.2 
+			0100.5e00.0002
+
+		pimv2
+			224.0.0.13
+			0100.5e00.000d
+
+		dvmp
+			224.0.0.4
+			0100.5e00.0004
+
+	in default we were using igmp snooping and works pervlan
+	switch must has asiic cips on boards
+
+	when recieve general membership query from router and switch forward them to clients here learn all mac addresses on switch
+	each 60 second repeat general memebership query for requests and make suppression on clients to make less requests and load on router if one client timmer reach 0 and report sent all another waiters can recieve multicast data
+	another systems violate the suppression mechanism and couldn't find the requests on join with switch and igmp
+	this is good soloution 
+	if report for join from pc comes to switch , switch forward it to router
+	if general query comes from router to switch and clients alll clients recieve that
+	and start timer for announcing themselves to router seperately
+	on thin method we have no suppression
+	if leave happened after sending group specific switch must detect has no request on clinets so check this on switch and didn't advertise anything to router
+	if has users set join and group specific mechanism if doesn't have any users must advertise to ruter leave message
+	best practice is immediate leave setup on each client port on switch
+
+		ip igmp-snooping vlan 1 immediate-leave
+		ip igmp-snooping vlan 1 last-member-query-count 2
+		ip igmp-snooping vlan 1 last-member-query-interval 1000
+
+		*here each single client doesn't send leave message to router and managed by switch
+
+	switches on first generations doesn't work on layer 3
+	those days flood the multicast packets
+	problem is detection between igmp and traffic on layer 2 switches
+	main part is data plane and control plane
+	if recieve a traffic by switch end it to cpu
+	after layer 3 we used asiic for igmp snooping and detect the diffrences
+
+	better don't set this
+		no ip igmp snooping report-suppression
+
+	here is diffrent
+		ip igmp snooping vlan 1 mrouter learn pim-dvmrp
+		ip igmp snooping vlan 1 mrouter interface fast 0/0 (how can find router better)
+		ip igmp snooping vlan 1 static 0100.5e01.0909 int ehter 0/1 (static joining)
+
+		sh mac-address table multicast igmp-snooping
+
+	rgmp (router group management protocol)
+		after igmp and cgmp is applicated
+		when switch use igmp detect the router side and realize traffic types
+		some routers doesn't interest in multicast handeling so reduce load
+		rdgmp protect routers from multicast traffics and load
+		we use some message group for this feature and negotiate between swwitch and router to make special group access
+		is not compatible with cgmp like igmp incompatiblity with cgmp
+		224.0.0.25
+
+			int fast 0/0
+			ip rgmp
+
+		hello > each 30 seconds
+		join
+		leave
+		bye > when goes off
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+igmp proxy
+	unidirectional link routing (udlr)
+		one direction of traffic flow
+		eigrp is 2way or biderectional must be on this mode
+		this issue need some prerequisite like backup link from down stream and up stream
+		figure that we ave a server and use satelite to access the sources and returning path is backup link
+		here we find trouble
+		when use pim join on links response on same interface so satelite path is unidirectional 
+		downstream router must be like a proxy and transfer pim join to upstream and udlr get active then works on proxy mode normaly multicast routing couldn't manage these types
+
+	r1 router timer > 400 seconds
+		when router works on version 1 and clients are on version 2 till timer get 0 wait and works on version 1 then works on version 2
+		interoperability
+
+		when router recieve 0x12 from pc or clients findout they are working on version 1
+		then another pc like pc2 sent 0x16 to router means i'm on version 2
+		when pc2 send leave ur leave mechanism start with group specific and suppression method
+		pc1 worked on version 1 and couldn't detect and realize these type message so could reply the message?
+		no 
+		couldn't join again also router is working on version 2 never send again version 1 messages cause pc1 is version 1 and doesn't answer the suppression message
+
+		here our router didn't accept the leave message or suppression so wait 60 seconds and recieve general query
+		if some body need these general queries must recieve and send report if were not detect leave must be happen
+
+		here our pc2 with version 2 get leave and our pc1 witht version 1 still recieve muticast data
+
+		but here transfer all multicast data to all nodes and this is trouble
+		must wait for 180 seconds on leave and 260 seconds wait to convert from version 1 to version 2
+		*v1 host present count timer
+		260 seconds from the last version 1  message
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pim
+	is cisco exclusive
+	version 1
+	version 2
+		30 second hello
+		105 seconds hold
+		port 103
+		224.0.0.13
+		ttl > 1
+
+	modes
+		dense
+		sparse
+		dense-spars
+
+	on pim we requested and make neighborship then flood th traffics
+
+	dense mode mens flood happen on each interface except ingress port
+
+	on muticast migh have loop so use rpf (reverse path forward)
+	at the begining of flood packets we have source ip and check it on rib then detect which interface must take flooding on valid segments
+	rpf check > check each multicast on rib unicast 
+	pim draw a tree of packet flow and flood 
+	shortest path tree (spt)
+		rpf base and fast
+		rib and unicast 
+		(s,g) > igmp v3
+
+	destination ip means we have group
+		sh ip mroute
+
+			224.0.1.40 > doesn't matter on dense mode
+			192.168.1.10 is source , 239.1.1.1 is group , int fast 0/0
+			outgoing >fast 0/0 null
+
+			term and flags
+				p > prone
+				t > spt
+				or pt > means didn't send to anyone
+
+			rpf neighbor 
+				when send pim neighbor then rpf assigned
+				on first router use 0.0.0.0 > myself
+
+			(*,239.1.1.1) > dense mode and spt
+			applicated on sparse mode and rondezvous point 
+
+	dense mode
+		for corrected use interface and forward on it like dense mode
+		if recieve dense mode to prevent spontaneous sending pim and multicast all routers send each other pim then all interfaces except ingress goes to forward mode
+		after proning our outgoing interfaces get modified and correct them
+
+		each 3 minutes we have same above mechanism and make prone 
+		dense mode is not appicates so on ios xr and nxos get ommit
+
+		sh ip pim neighbor
+			when recieve a request for (*,239.1.1.1)
+			advertise and set outgoing interface on all interfaces till recieve traffic and didn't happen proning alsso rfp didn't check
+			when (s,g) happen and prone happened also convert from (*,g)
+
+			unicast rib with rpf check select the shortest path so protocol independet multicast meaning get sense here
+
+			on dense mode we have few join message
+			with prone we have assert timer
+			after 3 minutes draw same tree and flood then prone them
+
+			if has triangle topology must know that path get ommit other path get forward from prone mode
+
+			prone hapen in another situation when no request from clients on router detect on downstreams
+
+			each 3 minute draw a repeated toplogy and tree so state refresh before 180 seconds prone state send agian
+
+				sh ip pim neighbor 
+					mode
+					state refresh is term s
+	
+				sh ip pim int fast 0/0 details
+
+				int fast 0/0
+				ip pim state-refresh origination-interval 60 (newest ios get disable for not applicated dense mode)
+
+			if some one get join our device get graft (unicast packets with ack growth the tree)
+
+				graft + graft ack
+
+	lan specivy issu (pim-dm)
+		proned override	
+			diffrences on ptp (just fast prone) and multiaccess (think then prone)
+			on multiacceess we have problem if one shared link recieve leave message prune all another requests
+			turn on a 3 second timer for a collection or group if want that request with group continue traffic forwarding if not make prone
+			same concept on pim override like join pim and prone pim
+
+			rarely situations we have join message on dense mode
+
+	assert 
+		if have 2 router on edge of organization one of them forward multicast traffic sooner than another then detetect duplicat on another edge device multicast data forwarding
+		with assert we can set which device is better to manage forwarding
+		lowest ad
+		lowest metric 
+		bigger ip
+
+		after election lossers get prone
+
+
+	igmp querier
+		on version 2 lowest ip address must manage queries
+		querier just ask queries not more and forwarding happen by assert
+
+	designaaed router
+		applicated on version 1
+		pim select biggest ip address on dr and querier
+
+		on version 2 we select dr but didn't use it (pim hello)
+
+			int fast0/0
+			ip pim dr-priority 
+
+	pim dense mode used when we have multi request and recivers and majuriity need packets
+	in sparse mode some of the clients need packets
+
+	dvmrp > like rip 224.0.0.4
+		32 hop limit
+		mbon (multicas media)(cisco just join on it not more)
+
+	spars mode
+		some users are in different points and broadcast on the network
+		between routers we have neighborship unlike dense mode didn't draw tree ... fast
+		just at the first our tree growth till one hop
+		if nodes requested could recieve data
+		clients requested igmp multicast and the edge router of organization send pim join to router  that is closest multicast source
+		and the multicast gateways get open
+
+	pim dense deploye push model
+	pim sparse deploye poll model
+
+	better set and use rondezvous point
+
+		all routers know which router on network is rp or rondezvous point
+		r1 is closest router to multicast source and forward data to rp 
+
+		clients requested with igmp membership query and routers sent pim join to rp
+		rp replied their joins and draw first tree from another clients edge routers to rp
+		when rp define the source of multicasts to routers delete the tree from routers to rp and draw newest tree from routers to r1 or closest router on multicast source
+		here connect directly
+
+			ip pim sparse-mode
+			ip multicast-routing
+			ip pim rp-address 192.168.254.3
+
+			sh ip pim neighbor
+			sh ip mroute
+
+		till couldn't retrieve the tree our sparse mode doesn't work 
+
+		on rp
+			ip pim rp-address 192.168.254.3
+
+			then up 2 tunnels
+			also turning up a tunnel on each router use rp
+			r1 knows the rp and make tunnel betwen itself and rp or r3
+			normal tunnel 
+			and multicast converted on it and behave like unicast
+			forward it on tunnel
+			register message or unicast tunnel sent to rp that r1 arrived to r3
+			if on rp detect has no users send register stop to r1 and say still has no users but don't send anything
+
+			on r1 we have tree
+				10.1.1.10 (source) , 239.1.1.1 (group)
+				outgoing interfase null
+				flags > pft
+					proned
+					register 
+					spt
+
+			on sparse mode we checked the path from routers to shortest path to rp on rib unicast and send pim join
+			might have a transite router on these requests so we have re generation and forwarding mode on transite router 
+			on requested router we have (*,g)
+			on rp we have (*,g )and rpf say itself router toward multicast ip has rpf 0.0.0.0
+			before said (10.1.1.10,239.1.1.1)(s,g) were visible from r1 and outgoing interface is null
+
+		source base tree (on dense)
+		shortest path tree
+
+		router path tree or rondezvous pint tree or rondezvous path tree
+		shared tree
+
+		spt (s,g)
+		rpt (*,g)
+
+		we have cache mechanism on rp and above procedure
+		our first packet just get tunnel and make register stop  or register
+		we said source registeration each 60 seconds
+
+		r3 has cach and r1 from the multicast source forward the main traffics to r3
+		we forward them on tunnels
+		r3 recieved rpt and export the r1 data from tunnel
+		trasfer them to r4 or users router
+		here r4 detect the source from these packets with (s,g)
+		then make a pim join and spt betwee r4 and r1
+		in this step we doesn't have tunnels
+		send second register stop 
+
+		each router on these path regenerate packets
+
+		on r1 after multicast connectivity between r3 or rp say has (s,g) and 3 minutes time on outgoing interface to r2  with forwarding state
+		flags are > tf
+			spt > has a tree on spt with source r1 and s1 r2 and r3 another are rpt
+			f means recived from register and tunnel
+
+		rpf neighbor is 0.0.0.0
+		on r3 we have 2 record on ip mroute
+			(*,g) > rpt (all path is on it)
+			(s,g) > spt (just r1,2,3)
+
+		on r4,5 just has (s,g ) at the firt steps after detection get delete
+		then use rpt
+		has flag s > sparse mode
+
+		on r1 we have (*,g) for each (*,g) use a seperated(s,g)
+		on cisco has timer
+
+		r3 must request this tree or spt tree forever if stop requesting jsut has 3 minutes on cache
+		spt is up till rp get requested also client requested
+		each 60 recieved queries and our tunnels and path is up if get stop we have 180 seconds forwarding then break connection
+		rpt is client side and ommit spt if source 11 has no traffic forwarding till 180 sconds
+		here changed the path and should use better path
+
+		here must our routers client or r4 request to closest router to source or r1 directly
+		instead of drwa rpt make switch over on spt and send pim join on r1 ip address with s1(10.1.1.10)
+		then make prone for rpt and r5
+		send rpt bt to r5 and distroy the path
+		r5 close the path 
+		r4 sent spt to r1 and use jt flag (hoin and spt)
+		before this used rpt now use spt
+		r4 draw tree on (s,g) then make prone on (*,g)
+
+			ip pim spt-threshod 0 (when need switch over and recieved 0 means infinit and disable , changed it from rpt to spt)
+
+	on some scenarios need use 2 rp for seperated multicat groups 
+		r5 > 239.1.1.1
+		r6 > 239.1.1.2
+
+		could use acl
+			ip pim rp-address 5.5.5.5 1 (acl number)
+			ip pim rp-address 6.6.6.6 2 
+
+			access-list 1 permit 239.1.1.1
+			access-list 2 permit 239.1.1.2
+
+			sh ip pim rp mapping
+				which router which group if see ? mark means could resolved
+
+			ip host r6 6.6.6.6
+
+			*better use another mechanism for acls
+				access-list 1 permit 239.1.1.1
+				access-list 1 permit 239.1.1.0 0.0.0.255
+
+		for reduandancy
+			auto-rp (just cisco)
+			bsr (bootstrap rp) > standard also cisco could use that
+
+			ip pim rp-address 6.6.6.6
+
+		all rp routers must make mapping on network then rp agents advertise the rp address
+		if had 2 rp router what should we do
+		rp routers at the begining set values on mapping agent then biggest ip get advertise if get down another router manage the advertisement
+
+		autorp
+			cisco rp announce > 224.0.1.39 (applicated on rp advertisement)
+			cisoc rp discovery > 224.0.1.40 (mapping agent)
+
+
+				int fast 0/0
+				ip pim sparse-dense model
+					*before detectiing rp works like dense mode after rp discovery works on rp and flood it change to spars mode
+
+		the rp could be mapping agent
+		on r5 or rp
+			ip pim rp-address 5.5.5.5
+			ip pim sen-rp-announce loop 0 scope 4 group-list 1 interval 60
+				*ttl or scope / group list is defult
+				must set ttl or scope on mapping agent highger value
+
+		is necessary write (ip pim rp-address 5.5.5.5) on rp router like r5? no
+			cause with (ip pim send-rp-announce loop 0 scope 5) detect it
+
+			access-list 1 permit 239.1.1.1
+			ip pim send-rp-announce loop 0 scope 5 group-list 1
+				*casue works on dense we have 2 flood and 2 multicast advertisement
+
+			clear ip pim rp-mapping
+
+			on all sparse router interface must recieve multicast ecept 224.0.1.39 and 224.0.1.40 and flood its
+				on global rp router
+					ip pim autorp listener 
+
+			best practice is all interfaces setup on sparse mode
+	when works on sparse mode till make join we doesn't have any multicast traffic forwarding
+	when you set rp on another router and has connectivit betweeen some router directly our announces couldn't forward so better disconnect the link
+
+		debug ip pim auto-rp
+
+		on r1
+			ip pim auto-rp listener (forward the rp packets)
+
+			sh ip pim rp mapping
+
+	sometimes need make filter on making rp routers on ntwork
+	r6 or mapping aagent
+		ip pim rp-announce-filter rp-list 11 group-list 10
+
+		access-list 10 permit 239.1.1.1
+		access-list 11 permit 5.5.5.5
+
+	r5
+		access-list 1 permit 239.1.1.1
+
+	each rp definition means candidate
+
+	bsr	(bootstrap router)
+		like auto-rp
+		equal mapping agent
+
+		advertise and learn all routers our rp
+		from pim v1 were on cisco in version 2 of pim we have standard 
+		in bsr we have announce and discovery
+
+		candidated rp is not real rp 
+		candidated bsr contain many bsr and  must have at least one bsr
+		in bsr we doesn't have 239.0.1.39 and 239.0.1.40
+		instead of announce and discovery we have bootstrap is subset of pim 224.0.0.13
+		source bsr and 224.0.0.13
+		didn't forward unless on version 2 set frowarding
+		forward on non rpf and didn't forward except these if enable pim sparse-mode could forwrd it
+		make them flood
+		on rpf interface forward and pass but on non rpf flood them
+		just rp for announce packets use unicast packets to connect on bsr
+		bsr packet ttl is 1 must regenerate packts
+		resolve the bsr ip address from bootstrap
+		and with rp ip or self ip address requested to bsr
+		on bsr define all routers to all groups 
+		but the rp addvertised later
+		at the begining we have crp 
+		all noes or routers must be on sparse mode
+		here we don't have autorp and rp and listener
+
+			ip pim bsr-candidate loop 0 (advertise with loop 0 to other)(casue we don't have another bsr maek this mmain bsr(must set loop 0 on pim sparse-mode))
+
+			ip pim rp-candid loop0 (must joined to sparse mode with loop0)
+
+			debug ip pim bsr
+			sh ip pim bsr-router
+			sh ip pim rp mapping 
+			sh ip pim rp mapping elected
+			sh ip pim rp mapping inuse
+
+			*interval is 60 seconds for bsr
+			just works on version 2 of pim
+
+		if had many rp we could advertise it on bsr
+		but how clients use these routers 
+		our bsr select from them
+		make tunnel up
+
+
+		rp election on bsr
+			1- longest match multicast address
+				if had many rp must use specific part of multicast group and this rp is winner
+				like this
+					r5 > 224.0.0.0/24
+					r6 > 239.1.1.1 (this is winner)
+
+					r5
+						access-list 1 permit 239.0.0.0 0.0.0.255
+						ip pim rp-candid loop 0 group-list 1
+
+					r6
+						access-list 1 permit 239.0.0.0.1 0.0.0.255
+						ip pim rp-candid loop 0 group-list 1
+
+			2- lowest priority
+				r5
+					ip pim rp-candid loop 1 group-list 1 priority 10
+					access-list 1 permit 239.0.0.0 0.0.0.255
+
+			3- highest hash value
+				ip pim bsr-cand loop 0 31 (hash)
+				sh ip pim rp-hash 239.1.1.1
+			4- highest ip address
+
+	on mapping agent at the begining we select rp address then autorp advertise it
+	for some destinations on rp we should use man rp for each rp we have different hash
+	each ip has higher hsh tha others use that rp for multicast 
+		we can use loadbalancing on rp
+		when has hash=0
+			use bigest ip that is rp criterion
+			then hash bsr value changed and get modified
+			must use composition of highest ip and hash
+				group > g
+				mask > m
+				ip rp > c
+
+				value (g,m,c(i)) = ((1103515245*(g*m)+12345xor c(i))+12345)mod 2^31
+
+				hash mas 32 bit if set 31 means 2^1 we have couple couple groups and binary model
+
+				r5
+					ip pim bsr-candid loop 0 
+					ip pim bsr-candid loop 0 10 (r5 is the main bsr router in network)
+	
+					*bsr election contain highest priority and highest ip adress
+
+		must set suitable ttls for scope if use higher value our packets goes out of control
+			bsr border is soloution and our x interface is in our bsr border must not advertise more than this
+
+			int fast 0/0 (outgoing interface of isp)
+			ip pim bsr-border
+
+			sh ip pim interface fast 0/0
+
+			ip pim bsr-candid loop 0 31 10 accept-rp-candid 1 (31 is hash and 10 is priority 1 is acl) 
+			access-list 1 permit 5.5.5.5
+
+	anycast rp
+		if some one were near or closer than another rp must use closest if get trouble must make fault telorance
+		has no diffrences between static or autorp 
+		all of them are on sparse mode
+
+		r5
+			ip pim rp-address 10.10.10.10
+		
+		r1
+			ip multicast routing
+			ip pim rp-address 10.10.10.10
+			ip pim sparse-mode
+
+			*none of the routers doesn't know which of the r5or r6 has 10.10.10.10  just know path and closest way
+		on sparse mode concept just use 239.1.1.1 and forward traffic on it and reached by rp 
+		another user requested on 0x16 and make pim join between clients router and closest rp router this is on igp path base
+		if our source of muticast were on another rp router and all requests recieved by another rp router for distance subject
+
+		these 2 router doesn't know eachother so must use msdp to handel this problem
+		sync them
+		with source address packets or sa packets say router has many packets wanna join the multicast so draw rpt 
+
+		mstp > multicast source discovery protocol
+		*applicated to join each as umbers together
+
+		r5
+			ip msdp peer 6.6.6.6 connect-source loop 0  (tcp 3way handshake tcp 639)
+				*before this transmit register and regiter stop
+
+			sh ip msdp peer
+			sh ip msdp sa-cache
+
+		*msdp after detect source make switch over
+		if has many rp must design the msdp like mesh
+
+			ip pim rp-address 10.10.10.10 override (if learned dynamic set higher priority for dynamic)
+				*when define static  must refer to dynamic
+
+	msdp
+		main task is make connectivity between as numbers
+
+		normally didn't forward bsr between as
+
+		must deploye pim sparse mode
+
+		r1
+			ip multicast routing
+			int serial 0/0/0
+			ip pim sparse-mode
+			int fast 0/0
+			ip pim sparse-mode
+			int loop 0
+			ip pim sparse-mode
+			ip pim rp-address 1.1.1.1 (add just this command on all nodes)
+
+
+			router bgp 65000
+			neighbor 2.2.2.2 remote-as 65000
+			neighbor 3.3.3.3 remote as 65000
+			nieghbr 2.2.2.2 update-source loop 0
+
+			network 1.1.1.1 mask 255.255.255.255 (advertise this)
+
+			*we have ibgp esh and igp on inter as
+
+		r2
+			ip multicast routing
+			int serial 0/0/0
+			ip pim sparse-mode
+			int fast 0/0
+			ip pim sparse-mode
+			ip pim rp-address 1.1.1.1
+
+			router bgp 65000
+			neighbor 1.1.1.1 remote-as 650000
+			neighbor 1.1.1.1 update-source loop 0
+			neighbor 1.1.1.1 next-hop-self
+
+			neighbor 11.0.0.2 remote-as 65001
+
+		r3
+			ip multicast routing
+			int serial 0/0/0
+			ip pim sparse-mode
+			int fast 0/0
+			ip pim sparse-mode
+			ip pim rp-address 1.1.1.1
+
+			router bgp 65000
+			neighbor 1.1.1.1 remote-as 650000
+			neighbor 1.1.1.1 update-source loop 0
+			neighbor 1.1.1.1 next-hop-self
+
+			neighbor 11.0.0.6 remote-as 65001
+
+		*we have same bgp config on r7 and r4 but use network 4.4.4.4/32 and 7.7.7.7/32 for neighbors
+		now must transmit all traffic to r1 and as 65000 then decide what should we do
+		best practice is each as has rp and forward from rp to each part
+		connect each as rp together
+
+		on r1
+			ip msdp peer 4.4.4.4 connect-source loop 0 remote-as 65001
+			ip msdp peer 7.7.7.7 connect-source loop 0 remote-as 65002
+
+		on r4
+			ip pim rp-address 4.4.4.4 (add this on all as router)
+
+		make connectivity on r7 and r4 like this
+		from the multicast source we forward traffic to network 239.1.1.2
+		just one pc recive this (pc on as 65000 not another pcs in another as)
+		cause we didn't recieve any pim join
+		might didn't recieve traffic but had pim join
+
+		on r4 and r7 say we don't have an ingress multicast interface but knows the multicast ip
+			sh ip mroute
+				232.1.1.2 has some requests
+					(101.0.0.2,232.1.1.2)
+					flags > m > msdp
+					incoming > null
+					outgoing > lan
+
+			cause is our multicast traffic goes to r1 and rp 
+			then didn't register anyone
+			source and group get detected an msdp sent this to r4 , r4 could learn the group but couldn't resolved the source
+			clients behinde the router r4 and r7 can access the networks with default route or ospf and bgp redistribution
+			make nat on client side routers
+
+			r1
+				router bgp 65000
+				network 101.0.0.0 mask 255.255.255.0
+				network 100.0.0.0 mask 255.255.255.0
+
+				*here r4 and r7 leanr the sources path
+
+				ip msdp description 
+				ip msdp keepalive 4.4.4.4 30 45 (30 is interval 45 is hold)
+				ip msdp password peer 7.7.7.7 cisco
+
+				clear ip msdp peer 7.7.7.7 (each 60 seconds send it)
+					* if has no traffic interrupt neighboring
+
+				ip msdp shutdown peer 7.7.7.7
+				ip msdp timer 5  (fast recovery means after shut and noshut make neighborship)
+				ip msdp sa-limit 4.4.4.4 15 (acceptable time range)
+					*connection recovery interval each 30 seconds try to recover
+
+			r4
+				ip msdp cache-sa-state (record the which records of sa saved)
+					on ios xe
+						sh ip msdp sa-cache
+
+
+			we have ibgp spllit horizion roll and didn't learn r7 to r4 so best soloution is ibgp mesh or route reflector design in as
+
+			on r1,4,7 (here we have seperated link between r4 and r7)
+				ip msdp mesh-group a 4.4.4.4
+				ip msdp mesh-group a 7.7.7.7
+
+				*when we have mesh 
+				recieved from which of them don't send to each of them
+				must write on each msdp peer
+
+			sometimes for a ip has many requests and it's not reachable or recieved sa then reject it
+				ip msdp cache-rejected-sa 2 (here didn't flush the cache and requests just resolve them faster)
+
+				r4
+					ip msdp sa-limit peer 1.1.1.1 2 (just 2 record saved)
+
+					sh ip msdp sa-cache rejected-sa
+
+					ip msdp sa-filter out 5.5.5.5 1
+						we can use routemap \ acl \ rp-list \ rp-route-map
+
+					sh ip msdp peer
+					sh ip msdp 5.5.5.5
+					sh ip msdp accepted-sas
+					sh ip msdp advertise-sas
+					sh ip msdp summary
+					sh ip msdp count
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+igmp querier
+	designated pim dr and pim forwarder
+	wehn activate on router our igmp make igmp general query
+	if has many routers on lan
+	can we offer has many request on same address from many routers ?
+	our target is detect what ip address does need
+	each router must known but must not each 60 seconds requestted
+	from v2 and version 3 of igmp set querier
+	each of them hs lowest ip will be querier
+
+
+		ip pim sparse-mode
+
+	if has no event till 120 seconds means get lost
+	on igmp version 1 we used designated router
+	higher dr means we have highest priority and bigger ip
+
+		sh ip igmp fast 0/0 (says we have queriring router but need pim dr)
+
+	we have diffrent concept on pim dr , if recieve 239.1.1.1 requests from clients
+	base on querier mechanism  our smaller router ip adddress
+	but here we have dr that must requested to r1 and sent pim join
+	if has same priority select the dr base on biggest ip address
+
+		ip pim dr-priority 1 (1 is default)
+
+	register and join on r3 happend make dr on version 1 of igmp
+	in version one we have dr and querier on diffrent router
+
+	after dr selection all queries handle by dr
+	igmp v1 just has igmp querier
+
+	pim forwarder
+		pim join and query general are controll plane model and not data
+		if join happend real traffic forward and ingress from which interface or router
+		run prone and assert mechanism works on lower ad or lower metric or bigger ip address
+		r2 and r3 see eachother asserts then advertise together till known which of them must forward
+		normally dr is forwarder of data
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+multicast routig protocol
+	dense
+		pim dense
+		link state
+			mospf
+		distance vector
+			dvmrp
+
+	sparse
+		cbt (core base tree)
+		pim sparse mode
+			pim ssm
+			bidirectional pim
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+biderectional pim
+	static rp
+		type of the sparse mode
+
+		we have spt firt tree from r1 to rp
+		rpt second tree from rp to client
+		switch over mechanism between r3 or rp and r5 make convert on path and use shortest igp path
+		here we have many launched tree and has many spt and rpt depends on router roll
+		if had many surce for multicast traffic
+		for each source must draw tree and correct them between rpt and spt
+		in sparse mode we have many sender our topology get fuck
+		we use pim bidirectional to reduce load
+		pim sparse mode work on unidirectional
+
+		rp in some scnarios remind and use for bridge the traffic from source to destinations and requests
+		we don't have tunnel and register or register stop
+		r1 one or closest router to source detect which interface is connected to bidirectional rp (directly connect to rp)
+
+		rp used the last befor requests and forward traffics to client but didn't switch over them also draw one tree 
+		might this path were the bad routing path but has less tree
+
+		if another source forward traffic on last path again 
+			at the first phase sent to rp and forward multiple traffics on one tree we didn't use rpf check here
+
+			ip multicast-routin 
+			int fast 0/0
+			ip pim sparse-mode
+			exit
+			ip pim bid-enbale
+			ip pim rp-address 3.3.3.3 bdir
+
+			sh ip mroute
+				*,224.0.0.0/4
+				rp 3.3.3.3
+				flags > b > bidirectional
+				incoming int > all multicast recievers are acceptable 
+				rpf neighbor > 192.168.12.2
+				bidir upstream > egress port to rp
+
+		*exactly we have one tree from sender to rp and another tree from rp to pc that requested
+
+	designated forwarder
+		on bidirectional pim we have a router near to rp
+		this distance based on igp
+		rpf on router before accept the traffic 
+		get rpf checks then accept based on  unicast rib 
+
+		unlike this situation we have diffrent mechnaism on bidirectional pim
+		we haven't rpf check 
+		for loop prevention on each interface set one router on df
+		df has access to forward traffic toward rp
+		if has same distance on router our policy works on bigger ip address
+
+			sh ip pim interface df
+
+		like rpf but unidirectional behavior for forwarding
+
+		bidir pim with aut rp
+			ip pim bidir-enable
+			ip pim send0rp0announce loop 0 scope 5 group-list 1 bidir 
+
+			ip pim auto-rp listener (is important on every routers)
+
+			ip pim bidir-enable
+			ip pim rp-candid loop 0 group-list 1 bidir
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+pim ssm (source specific multicast)
+	igmp version 1 and version 2 were asm (any source multicast)
+	igmp version 3 > ssm (just specific source must request to me)
+
+	here we doesn't have share tree and rp
+
+	pim join (232.1.1.1 , 192.168.1.50)
+
+	just has spt and no rpt
+
+		ip igmp v3
+		ip pim ssm default
+		ip pim ssm range 1 (acl number)
+
+		ip multicast 
+		ip igmp join-group 232.1.1.1 source 192.168.1.50
+			*1.50 is multicast server ip
+
+	spt is the shortest path but has many path and resource intensive
+	when use (sh ip mroute)
+		flags 
+			st
+				ssm and spt
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ssm mapping
+	when is not full ssm mode must works like urd on igmp v3 lite
+	when is not fully support ssm is applicated
+	request 232.1.1.1
+
+	clients with version 2 of igmp requested and memebership from source 192.168.11.10
+
+	static mode mapping
+		conert v2 to v3
+
+			ip igmp ssm-map enable
+			ip igmp ssm-map static 1 192.168.11.10
+
+			access-list 1 permit 232.1.1.1
+
+			no ip igmp ssm-map query dns
+
+			*we have dns query tool and say when you have static mode must
+			deploye on all nodes
+				ip pim ssm default
+				ip multicast-route
+				int fast 0/0
+				ip pim sparse-mode
+
+				on clients
+					ip igmp join-group 232.1.1.1
+
+					*(*,g) cause version 2
+			secnond path is dns server reply and respons the requests on domain base
+				pc 1 on domain a
+				pc 2 on domain b
+
+					ip dns-server
+					ip host 1.1.1.232.a 192.168.111.10
+					ip host 1.1.1.232.b 192.168.11.10
+
+				normally is active
+
+				r3
+					ip igmp ssm-map enable
+					ip igmp ssm-map	query dns
+					ip name-server 192.168.1.10
+					ip domain multicast a
+
+					*after responses say pim joins forward to r1
+
+					sh ip igmp ssm-mapping
+					sh ip igmp ssm-mapping 239.1.1.1
+
+					ip igmp static-group 232.1.1.1 source 192.168.11.10
+						*work with this but router doesn't have v4 so
+
+						ip ifmp static-group 232.1.1.1 source ssm-map
+
+						sh hosts
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+multicast stub routing and igmp helper
+	if used dense mode each 3 minutes get fuck cause draw again topology
+		ip im passive-interface (deny send and recieve pim)
+			conatain controll and ... get stub with this
+
+		ip pim neighbor-filter 1
+			the interface to r2 from r1
+
+	if clients on stub area need recive multicast what should do
+	ue igmp helper lie dhcp helper
+
+		ip igmp helper-address 192.168.12.1
+
+			igmp doesn't need pim 
+			directly connect to igmp and recieve data
+			pim is enable
+			but get passive
+
+			on interfaces 	
+				ip pim dense-mode
+
+				* here without neighborship transmit all multicast packets
+
+			when get passive our dense mode command get ommit
+			r1
+				access-list 1 deny any
+				int fast 0/0
+				ip pim neighbor-filter 1
+
+				*r2 wih 1 could make neighbor ship but r1 to r2 couldn't
+
+				access-list 1 deny any
+				int fast 0/0 (r1 interface to r2)
+				ip pim neighbor-filter 1
+
+				sh ip pim  int fast 0/0 details
+
+				int loop 0
+				ip pim sparse-mode
+				ip pim rp-address 1.1.1.1
+				int fast 0/0 (to r2 from r1)
+				ip pim sparse-mode
+				ip pim passive
+
+			r2
+				int fast 0/0
+				ip pim sparse-mode
+				int fast 0/0 (client side)
+				ip pim sparse-mode
+				ip igmp helper-address 192.168.12.1
+				ip pim rp-address 1.1.1.1
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+multicast igmp proxy
+	udlr (unidirectional link roting)
+	some links are unidirectional
+	upstream sent 
+	downstream get fuck
+	to unidirectional forwarding
+	r1
+		access-list 1 deny any
+		fast 0/0
+		ip access-group in
+		ip multicast-routing
+		int fast 0/0
+		ip pim dense-mode
+		int fast 0/2 (satelite side)
+		ip igmp unidirectional-lin
+
+		ip route 0.0.0.0 0.0.0.0 192.168.11.1
+		sh ip igmp udlr
+
+	r2
+		ip multicast-routing
+		int range fas 0/0-2/0
+		ip pim dense-mode
+		int fast 0/0(client side)
+		ippim sparse-mode
+		ip igmp mroute-proxy loop 0
+		int fast 0/1
+		ip pim sparse-mode
+		ip pim rp-address 2.2.2.2
+		int fast 2/0 (satelite side)
+		ip igmp unidirectional-link
+		int loop 0
+		ip igmp proxy-service
+		ip igmp helper-address udl fast 0/2 (when forward traffic to fast 0/2 send traffic to router that recieved it self udl packets)
+
+		ip route 192.168.1.0 255.255.255.0 192.168.12.1 (must run igp between r2 and r3)
+
+		router ospf 1
+		network 192.168.23.2 0.0.0.0 area 0
+		network 2.2.2.2 0.0.0.0 area 0
+		redist static subnets
+
+	r3
+		ip multicast-routing
+		ip pim rp-address 2.2.2.2
+		int fast 0/0
+		ip pim sparse-mode
+		ip route ....
+
+		router ospf 1
+		network 192.168.23.3 0.0.0.0 area 0
+		network 192.168.3.3 0.0.0.0 area 0
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+multicast scopping
+	till whih router send traffic
+
+		ip multicast ttl-treshold 
+		sh ip pim int fast 0/0 
+			252
+			in normal is 0 but cisco has a number for it
+			on forwrd mode if be equal or greater than 0 could enter
+			can set 10 if enter must be 10 if be lower than 10 get block
+
+			ios v15 and higher get ommit
+			on the borders better use range like 239.0.0.0/8
+
+		access-list 100 deny ip any 224.0.0.0 63.255.255.255
+		access-list 100 permit ip any any
+
+		int fast 0/0 (to r5)
+		ip access-group 100 out

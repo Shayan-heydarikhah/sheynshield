@@ -1,0 +1,53 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+l2tp + ipsec : 
+ 
+vpdn enabel 
+vpdn group l2tp 
+accept-dialin 
+protocol l2tp 
+virtual-temp 1 
+exit 
+ 
+no l2tp tnnel authentication 
+exit 
+(if we have connectivity between two routers must set , if connections are between pc and router must set this command) 
+ 
+interface virtual-temp 1 
+ip unnumbe fas 0/1 
+ 
+ppp authentication ms-chap-v2 
+peer default ip address pool l2tp-pool (define pool for virtual-temp) 
+ip local pool l2tp 20.1.1.1 20.1.1.10 (define range for vpn connections) 
+ 
+ 
+crypto isakmp policy 10 
+encryprion ae 256 
+hash sha 
+authentication pre 
+group 20 
+exit 
+ 
+crypto isakmp key cisco123 address 0.0.0.0 0.0.0.0 
+crypto ipsec transform-set r1-set esp-aes esp-sha-hmac 
+mode transport 
+exit 
+ 
+crypto dynamic-map d-map 10 
+set  transform-set r1-set 
+exit 
+ 
+crypto map r1-map 10 ipsec-isakmp dynamic d-map 
+ 
+interface f 0/1 
+crypto map  r1-map 
+ 
+debug crypto ipsec 
+debug crypto isakmp 
+ 
+sh vpdn 
+ 
+user cisco pass cisco123 
+ 
+after making these must check routing and making vppn connection in client. 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+make user pass

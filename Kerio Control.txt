@@ -1,0 +1,366 @@
+Kerio Control :
+
+general :
+	kerio has 2 hand :
+		internal : must set ip and dns with no gw
+		external (wan) : must set ip and gw with no dns
+
+		in interface section must define them
+	
+	kerio clean all data from hdd nad make a partition on it (one percent full format og hdd)
+	
+	esxi 5/5 or 6
+
+	if need install on hypervisor must set these :
+		ram 8 gig
+		cpu 4 core
+		hdd 200 gig
+		linux os others 3
+
+connecting to kerio :
+	https://192.168.1.1:4081/admin
+
+	if  you can't connect msut enable remote admin on shell
+
+	ports :
+		4081 https
+		4080 http
+
+	must unchecked firts chckbox
+
+	after login must disable all auto updates :
+		1 > advance option > software update
+		2 > antivirus > check update
+		3 > ips ids
+
+directory service integrated with kerio :
+	domain and users login > directory services > advance
+		1 : every body in ad goes to internet
+		2 : every body in ad goes to internet after authenticated by kerio
+
+		we can import users with options just need set ad 
+
+		must define in dns some values like ip a record and name to resolve clients + computer name
+
+	must enable mapuser checkbox.
+
+	dc rule in kerio :
+		src > dc ip
+		des > internet interface
+		service > ntp , dns
+		nat > internet enable
+		
+		in command prompt :
+			w32tm monitor
+			w32tm /query computer:dc  /status
+			w32tm /config  /computer:dc /manualpeerlist:"3.ir.pool.ntp.org" /reliable:yes /update /resync /syncfromconfig:manual
+
+	for authentication users before using internet :
+		domain and users login > always required users to be authenticate...
+
+		before users connect to internet must login on kerio 
+
+	if run psiphone can use backdoor and goes to internet without authentication :
+		we can also use content filter to solve this problem, must checked remote access to behave like acl + app locker
+		src > any authenticate users or specific users
+		des > internet interface
+		translate > yes internet interface
+
+	we can set 2 step authentication for users :
+		domain & users > security options (required 2step + allow remote ....)(works with google authenticator)
+
+hotspot or login page :
+	advance option > force ssl certification...... (disable it)
+	at the end of rules before deny all set login page filter :
+		src > trusted 
+		des > internet interface
+		protocol > http
+		translate > enable
+		allow
+
+if some boidy join our network and could not be authenticate (just connect and don't run any protocols) :
+	src > authenticate users (u1 + u2 can goes to login page and internet and u3 can't)
+	des > internet interface
+	protocol > http
+	translate > yes
+	action > drope \deny
+
+free internet :
+	src > authenticate users
+	des > normal sitees
+	nat > vpn + free
+
+
+	src > guest
+	des > internet
+	nat > intern
+
+		domain & users > guest > set password for guest
+
+wrong login password :
+	domain & users > security option > login guessing  protection (blockin ....)
+
+reverse proxy :
+	allow reverse connection from any host (full one nat)(make established connection)
+	reverse proxy works for wan user access to lan reachabiliity
+	work like man in the middle
+	we can use f5 and adc concept and publish many services on one ip public
+	has host parameter , service behinde the kerio
+
+	proxy server has http cache option that cache downloaded files and retransfer them to clients need repeated files
+	ttl let users cache websites and read faster from cache 
+
+interface for internet and qos :
+	native :
+		normal interface card
+	ppoe :
+		fiber ,adsl ,vdsl
+		dial
+		ip
+		dynamic ip
+
+	we have additional ip would be use in
+	has 2 mode for output interface :
+		1 > default setting 
+			in this section we have 2 mode 
+			perconnection (banks confilict)
+			per user
+		2 > use specific
+		3 > use another ... (use for failover)
+
+		load balance mode :
+			nat option is important must be set on speific ip and isp , must set mailservers and sfp records on ip if our nat get fail all mails make spamm
+
+			failover
+				use cnnection failover
+					primary
+					secondary
+			loadbalance
+
+		rule :
+			src > autherntication users
+			des > internet
+			service > http
+			nat > loadbalance perconnection
+
+		interface > advance > probe (sla and track)
+
+	bandwidth management :
+		qos in kerio is marking packets can handel on another devices
+
+	we can make portforward option with portmapping
+
+rule for dhcp server :
+	src > any or lan interfaces (with any maybe have problem because trusted interface means wellknown interface range)
+	des > firewall
+	services > dhcp or guest
+
+if some one comes to network with static ip and manual set ip kerio must block him or her connections :
+	security setting :
+		mac filtering > miscellanous block
+		zero network config 
+		connection limit (sync flood)
+
+if set inspection on default mode all traffics will be ceck also antivirus do same with port by port scanning
+
+default and prerequists rules are :
+	firewall manager :
+		src > trusted interface
+		des > firewalls
+		any
+		any
+		allow
+	firewall traffic :
+		src > firewall
+		des > any
+		any
+		any
+		allow
+	block other traffics :
+		src > any
+		des > any
+		any
+		any
+		drop
+
+for some apps like wsus and wds .....  must set ip static in kerio and let them to goes out
+	ntlm authentication can be used when we sign in windows and it use our user pass and login automatically in kerio if need to join and check authentication :
+		domain and users login > authentication option > web authentication ntlm
+
+		ie :
+			security > local interanet \ trusted
+			advance > authentication deligateion (enable)
+
+		firefox :
+			about:config
+			network-authenticatiion-ntlm (add kerio ip address)
+
+	or we can use active hosts and make login users automatic by mac if cant see mac address or not be on same br domain
+		domain and users login > authentication option 
+			must set kerio like wsus and ... like computer and mapped it to system with ip resered address and static ip address
+			also we can set idle time out for users
+
+	for quata solution we must define system services in special mode and must set a special username and limits 
+
+users right access :
+	users > edit users
+		have seperated setting :
+			rights
+			quata
+				exceed quatation > don't block further traffic > notify ... (if fully use your quata goes to another vlan)
+				bandwidth managemnet & qos option has many ways to solve problem at above
+				we cant set groups at quata
+				we can make group for some sites and don't make limit quatation on them
+					account & monitoring > data gathering > accounting exceptions
+					in account & monitoring we have option (account periodic for static) to reset quata
+					for some ip address don't count quata
+			pereferences :
+				filter scripts
+					active x
+					html script
+					java script
+
+for enterprise access points must set ip address of radius and authenticates 
+
+http://controlltest0.com (in browsers)
+
+shift + system health > ssh eanble
+
+if unchecked application & web filter on content filter our content flter rules didn't check applications
+	in content filter we compare and checked header with content
+
+	send email notify for users non https container (checked)
+
+
+	safe search \safe web :
+		make trusted conectivity beetwen clients and valid websites
+
+	forbiden word :
+		skip word for filtering
+			check web pages contents and weight to repeated words count
+
+	https inspection :
+		decrypt traffic https + show legacy ....
+		exclude pecific traffic from decryption
+
+		we must add ca on dc :
+			computer config > policy > windows setting > public key policy > trusted root ca  
+
+		some times we don't need to read sites with inspection mode so :
+			decrypt specific traffic only (must create group)
+
+VPN :
+	3 type vpn :
+		vpn server kerio :
+			users connect to kerio and use it like internal network
+		vpn client kerio :
+			our kerio works like client and connect to another server
+		site to site :
+			2 kerios connect to each other
+
+		interface > vpn
+			kerio vpn (certificate encapsulation + udp 4020) (limited publishe)
+			ipsec (l2tp)
+
+			in pptp vpn mode should unchecked keep connection
+
+			must define and set another range of our lan range
+
+			vpn rule :
+				src > admin users
+				des > server
+				nat > vpn free
+
+				src  > client vpn
+				des > internet
+				nat > enable
+
+				or
+
+				src > any
+				des > firewall 
+				nat > enable
+
+			in vpn interface and kerio vpn we have :
+				vpn clients access the internet through the vpn (if some one want use internet use the connection or not)
+					use routing table
+
+				we have custom route here can seperate some routes from kerio filters
+
+				it's better set our organization dns in rules :
+					rule 1 :
+						src > vpn
+						des > firewall
+						port > dns
+
+					rule 2 :
+						src > vpn
+						des > any
+						port > dns
+
+					specific dns ip > auto suffix
+
+		site to site :
+			src > any
+			des > firewall
+			service > ipsec kerio vpn
+
+
+we can see inside the files with kerio if has password or be warmfull or ... drop it or deny
+in email scanning if see virus can add " contains virus" at the end off or subject mail
+
+ips :
+	use snort engine
+	must disable updates
+	we can use advance options and add rules , ignore them
+	minners will detect and get block with this
+
+proxy :
+	direct access > dhcp option and port 3128
+	non transparent >  128.106.14.227 :8080
+
+we have many attacks on voip
+
+ha :
+	it need one interface  for replicate without ip add  hus same vlan
+		master (instance mode)
+		shared secret
+		sync interface
+		
+	must have same configs and be in same vlan
+
+	rule :
+		src > lan \ ha ip address in front view
+		des > 224.0.0.18 \ ha ip address in front view
+		service > vrrp
+
+	
+kms server :
+	install kms emulator service 
+	set in dns on domain at other new record (svr record)
+		_vlmcs
+		_tcp
+		weight 100
+		1688
+		kms.rayancollege.com
+
+	also need a record for resolving data.
+
+for update our kerio :
+	in original kerio must update our files then turn off ips ids antivirus
+	then ssh to orginal kerio and download :
+		/var/winroute/geoip + bitdefender + snort
+
+		203399b8di7z9zg
+
+backup & restore :
+	works better with ftp
+	restore > same configs
+	transfer > delay restore
+
+	daily backup
+
+advance option > data encrypted (hdd protection)
+	
+then upload them on other kerio that e turned of ips ids antivirus and not original case
+and we can see get update.

@@ -1,0 +1,1379 @@
+Web Security Appliance
+******************************
+general speaking
+	powerful all-in-one network security
+	application visibility and control
+	data loss prevention
+	advanced malware protection
+	protect roaming users
+	cognitive threat analysis
+
+	wsa > system administration > policy trace
+		help us to test our url filters
+
+	wsa > system administration > return address
+
+	wsa > system administration > ssl configuration
+
+	wsa > system administration > users
+
+	wsa > system administration > timezone
+
+	wsa > system administration > time setting
+
+	wsa > system administration > system upgrade
+
+	wsa > network > high availability
+
+	wsa > network > dns
+
+	wsa > network > ise
+
+	wsa > network > certificate management
+
+	wsa > web security manager > routing policy
+
+	wsa > web security manager > external dlp
+
+	wsa > web security manager > outbound malware scanning
+
+	wsa > web security manager > cisco data security
+
+	web cache communication protocols (wccp)
+		developed by cisco systems specifies interactions between one or more routers (or layer 3 switches) and one or more web-caches
+
+		the purpose of the interaction is to establish and maintain the transparent redirection of selected types of traffic flowing through a group of routers
+
+		the selected traffic is redirected to a group of web-caches with the aim of optimizing resource usage and lowering response times
+		
+		the minimum requirement for using wccp with wsa is
+			minimum of two interfaces or sub-interfaces not secondary addresses on the network device doing wccp commands to enable wccp protocol on the cisco router
+
+			ip wccp web-cache redirect-list 120 password anything
+			!password is optional
+
+			access-list 120 permit ip host 192.168.112.14 any
+
+		*the redirect-list option specifies an access-list to filter which traffic is to be redirected to wccp web-cache device
+******************************
+cloud web security (cws)
+	sans
+
+	url filter
+	zero day
+	granula application policies
+	sio
+		with this detect reputation item on wsa
+		compatible with all components
+
+	avc
+	reporting
+
+	clients with special agents connected to cws then will be protected behinde cws
+	routers and .. edge devices received users data , forward it to cws , after checking and verify access them to go away
+
+	proxy browsers and any connect
+
+	cws on cisco asa configs
+		asa > config > device management > cloud web security
+			proxy1.scansafe.net
+			8080
+			proxy2.scansafe.net
+
+			license key
+			retry counter 5
+
+		*need service policy to redirect traffic
+			esa > config > firewall > service policy rule
+				traffic classification 
+					source & destination ip address (access list)
+
+				access list
+					match 
+					source > any
+					destination > any
+					service > tcp/http
+
+				role action
+					cws > config
+					fail close
+						http-proxy
+
+		asa > monitor > propeties > cws 
+
+		asa cli
+			sh run scansafe
+			sh scansafe server
+			sh scansafe statistics
+			shh service-policy inspect scansafe
+
+	asa cx module for cws (statefull ngfw)
+		default asa-cx ip > 192.168.8.8
+		prime security manager (prsm)
+
+		policy options
+			cxsc
+				fail close
+				fail open
+
+		on cli session cxsc console (redirect web traffic)
+			access-list 1 permit tcp any any eqport 80
+			class-map my-cx-class
+			match access-list 1
+			policy-map my-cx-policy
+			class my-cx-class
+
+			cxsc fail-close auth-proxy
+			service-policy my-cx-policy
+
+			asa cx ssp (security service processor)(starts from 2007)
+				modular
+					url filtering
+					avc
+					decryption ssl/tls
+					authentication
+
+					*behave like cisco firepower but on cisco asa
+					works like proxy to make decryption
+
+					cx is hardware module for 5585x asa series andsoftware feature for 5500x asa series
+
+
+	cisco ios and cws (old version of ios)
+		parameter-map type content-scan global
+		!content-scan means cws and on new version use cws term instead
+
+		server scansafe primary 1.2.3.4 port http 8080 http 443
+		server scansafe secondary 5.6.7.8 port http 8080 http 443
+
+		license 7 xyz
+		source interface gig0/0
+		timeout server 20 
+		timeout session-inactive 50
+		usergroup 1 username test
+		server scansafe on-filter block-all
+		!doesn't exist on new ios versions
+
+		usergroup exclude test2
+
+		interface gig0/0
+		content-scan out
+		!if use cws term instead means new version
+
+		ip virtual-reassembly in
+		ip virtual-reassembly out
+
+		show content-scan
+		show cws
+
+		*on new ios version replace content-scan with cws
+******************************
+http
+	stateless 
+	textbase
+	request and response
+		use cookie as negotiation method
+			another cookie name is transaction
+				t1 > index, html get download
+				t2 > authentication
+				t3 > content
+				-----------------------
+				all transactions are on one or single http session
+
+		server doesn't save t2 and need a mechanism to remember who you are so for this problem generate a random cookie to detect you are authenticated
+		we have same cookie but different authentication credential
+
+		persistance on tcp 80 means your cookie will be saved on browser and another time could use them
+		but temporary cookies after closing browser will purge
+
+	http version 2 is faster
+	another versions 0.9, 1.0, 1.1
+	on first versions our tcp and http traffic goes on one session on v.9 and 1.0 has seperated  sessions on tcp and transactions
+	each transaction on one tcp session
+	on version 1.1 combine some alternate mode and define persistance mode
+		on one tcp session deplaye all trans action that covered by http sesssion
+
+	same behavior on http v2
+
+	http message structure
+		request / response or status line 
+			request is client side and response or status is server side
+
+		headers 
+			depends on packet type
+
+		empty line
+
+		body
+
+	"<method><url><version>"
+	"get /index.html http/1.1"
+	------
+	action
+		 ----------
+		 resources
+		 			----------
+		 			signaling
+
+	might have many headers but host field is mandatory
+
+	host > header and request resource
+			-----------------------
+					url
+
+	url   
+			www.cisco.com (host header)
+		  +
+		  	/index.html http/1.1 (url)
+
+	http method
+		get
+			retrieve header & body & content
+
+		head
+			retrieve header
+
+		push
+			upload data on server / send data to server
+
+	http response (generated by server)
+		<version><code><reason>
+				 ------
+				 result
+				 		-------
+				 		description
+
+		results
+			1xy > informational (browsers don't received them)
+			2xy > succuess (category)
+			3xy > redirection (location header)
+			4xy > client side error 
+			5xy > server side error (see on browsers)
+
+		responses 
+			contain many part or one part
+			body or empty line
+
+		combine http and ssl/tls
+			tcp 443
+			ssl/tls > reencapsulate and protect
+
+		protect entire http packet (request / status line , header , body(contain url and host header , content))
+			encryption 
+			integrity check
+******************************
+advance web content filtering solution
+	1- fast web proxy service
+	2- granular traffic control
+	3- malware and spyware protection 
+
+	url filtering like ftd
+	application visibility and control (application control and macro app controller)
+	file controll and amp
+	antivirus macafee and sophos
+	https decryption
+
+	physical products
+		1xx > smb
+		3xx > medium
+		6xx > large and enterprise
+			has raid 10
+
+	virtual products
+		esxi
+		ucs
+		kvm
+
+		s000v (test vm), s100v, s300v, s600v
+
+	ram (gig) 	4 	6 	8 	24
+	cpu (core) 	1 	2 	4 	12
+	hdd (gig) 	250 250 1t 	2.4t
+
+	ayncos 1.1.0 (wsa version)
+
+	wsa interfacs
+		web proxy
+			p1 (just used for in or out)
+			p2
+
+		optional
+			t1 (only o)
+			t2
+
+		mgmt
+			m1
+				used http and https ssh also used for data
+******************************
+initialize
+	192.168.42.42 /24 port 8080 or 8443 also ssh on m1 interface
+	we have console port
+
+	etherconfig
+		l1/l2 
+			duplex
+			speed
+			vlans 
+			subinterface
+			interface setting
+
+	interfaceconfig
+		ip
+		netmask
+		l3setting
+
+	routeconfig
+		static ip route
+		default route 
+			setgaetway
+
+	ntpconfig
+		ntpserver
+
+	dnsconfig
+		dnsflash
+		nslookup
+			nslookup test.com
+
+		dig
+			dig@1.2.3.4 test.com
+			!examine test.com from ip 1.2.3.4
+
+	ping
+	traceroute
+	telnet
+	tail
+		wsa logs
+
+	arp
+		ccp or ndp cache
+
+	ndp
+	packet capture
+	testauthconfig
+	diagnostic
+	wccpstat
+
+	appliance mode operation
+		standard (we use this)
+			on permise (normal wsa)
+
+		cloud
+			web security connector
+			directly connect to cisco cloud and control all taska
+
+		web hybrid
+			combination above options
+
+		on wizard we have m 1 and p1 for network config which must have to set dns base (fqdn) name on them
+		must be reachable from dns server
+			wsap.com on p1
+
+			better enable mgmt just on m1 link not more
+
+			on port t1 (in) and t2 (out) have simplex mode but on t1 we have in and oit like full duplex
+
+			we have seperated and different routing for each p1 and m1 interfaces
+				mgmt
+					default gateway 192.168.5.1
+				
+				p1 
+					default gateway 192.168.123.2 
+					destination 172.16.3.0/24  gateway 192.168.123.10
+******************************
+modes
+	proxy
+		explicit forwarding
+		transparent
+
+	l4tm (layer 4 traffic monitor)
+		need a copy of traffics to t1 and/or t2
+			promiscuous mode
+				span or rspan hub network tap
+
+		ids
+			detect malware over http and non-http tcp ports (1-65535)
+			infected flows canbe blocked with an rst flag in tcp
+
+	how redirect users traffic to wsa
+		cliens browser proxy setting
+			ip and port will be set
+
+		proxy autoconfig (pac)
+			javascript code url and proxy setting information
+
+	important consideration
+		dns resolutioin performed by wsa
+			clients send all web traffic to wsa and all destination are wsa unaware about this 
+
+		second model is route to wsa and has no more default route to download any web content
+			*wsa can retrieve dns and make a proxy mthod on dns queries
+			all packets will be inspect then reply to clients 
+			destination and source will be replaced by wsa
+
+	web traffic redirection
+		client browser are unaware of the proxy
+			redirect performed by network 
+				router / switch / asa with wccp2
+
+	*on asa must block all direct requests to web on client side just accept traffics with wsa destination or edge router ip
+
+	cisco-proprietary solution for traffic redirection
+		relies on service group(s) that control what traffic will be intercepted
+	 		standard (well-known "web-cache")
+				tcp destination port 80
+		
+			dynamic (user-defined id)
+				custom traffic
+
+	wccp registration
+		wccp client (proxy) sends "here i am" packet (udp port 2048)
+			tells the wccp server (router/switch/asa) what service group to join
+
+			proposed group matches local configuration and ack sent to them "i see you"
+
+	wsa requires wccp version 2
+		wccp v2.01 is needed for ipv6 traffic
+
+	platform-specific requirements
+	 	certain switches (3560s) support wccp in the routing sdm template only
+	 		sdm prefer routing
+		
+		asa only allows for intra-interface redirection
+	 		clients & wsa must connect to the same asa interface (inside)
+
+	 asa just have intra-interface redirection and cliens &  asa must be on same interfaces
+	 	cisco ios
+	 		ip wccp version 2
+	 		ip wccp service-nr redirect-list 1 group-list 1
+	 		!dynamic mode 1-100 
+
+	 		ip wccp web-cache redirect-list 1 group-list 1
+	 		!standard
+
+	 		*we set which port address will be checked on access-lists also on redirect list
+	 		*on group-list we can set which wsa be active and works
+
+	 		interface gig0/0
+	 		ip wccp web-cache redirect in
+	 		ip wccp web-cache redirect out
+
+	 		up wccp service-nr redirect in
+	 		up wccp service-nr redirect out
+
+	 		*better use in cause better performance
+
+	 	asa
+	 		wccp service-nr redirect-list 1 group-list 1
+	 		wccp interface gig0/0 service-nr redirect in
+
+	 		wccp web-cache redirect-list 1 group-list 1
+	 		wccp interface gig0/0 web-cache redirect in
+
+	 		wccp interface inside 90 redirect in
+	 		
+	 		sh run wccp
+	 		sh wccp 90 detail
+	 		sh wccp 90 service
+
+	 	wsa > security service > web proxy
+	 		http proxy 80 , 3128
+
+	 		proxy mode
+	 			transparent
+	 				transparent and explicit forwarding
+
+	 			forward
+	 				just used for explicit forwarding
+
+	 	wsa > network > transparent redirection
+	 		set wccp instead use l4
+	 		default is l4
+
+	 		then add service 
+	 			0 is web-cache
+	 			1-255 is dynamic we were add our service on 0 so set here and port 80 and 443
+
+	 			loadbalance on 
+	 				server address
+	 				client address
+	 					if have many wsa and too many clients better use one of these
+
+	 			router ip address > 192.168.21.10
+	 				asa edge address which has wccp service runing 
+
+	 	commit
+
+	 	wsa cli
+	 		tail
+	 		1
+******************************
+identification profiles
+	identification profiles are used for transaction classification
+		 group client requests based on common criteria (index) to simplify the access policy
+			subnet, protocol, port, user agent & url category
+
+			*bas eon groups we have many parameters could be binded
+	
+		 control authentication requirements
+			visibility
+				who requested with more details
+
+			identity-based policies
+
+	id profiles doesn't cross the proxy and for each new transaction need to validate 
+		like sequence numbers has priority
+		all condition on profiles must match to profile
+			profiles
+			protocols 
+			subnets
+			useragents
+
+	global identification profiles catch all
+		no authentication
+
+	authentication types
+		regular
+			requires a realm
+		
+			active directory or ldap and wsa combination
+			a global id profile with no authentication for all users
+
+		transparent
+			ise, asa (anyconnect), ad software agent
+
+			indirect access with agent installation
+		
+		exemption
+			for clients/apps that cannot be authenticated
+				windows update, google update, etc	
+		
+		failed
+			guest access
+				support guest privileges
+
+	authentication surrogates
+		identity tracking
+			ip address (recommended)
+			cookies
+
+	wsa > web security manager > identification profiles (id profile definition)
+		enable
+			add name > x
+			user id methods
+				network > ise (use ise)
+				network > authentication (normal authentication)
+
+			define member by subnets
+			define memebr by protocols	
+				http/https
+				native ftp
+
+			advance 
+				proxy
+				url categories
+				useragents
+
+		global id profile
+			has a line which make exemption 
+
+			exempt from authentication or id profile
+
+	wsa > network > authentication (relms and global setting)
+		add realm
+			name > x
+			server type
+				ldap (basic authentication)
+				active directory (kerbros, ntlmssp, basic authentication)
+
+			active directory authentication
+				active directory server
+					1.1.1.1
+
+				active directory account
+					domain > test.com
+					computer account > location > admin
+
+				active directory agent
+					enable transparent user-id using active directory agent
+
+				network security
+					client signing required
+
+			test
+				*must set dns to make connection
+
+		global setting
+			action if authentication server / service unavailable
+				permit without authentication
+				block if authentication fails
+
+			fail authentication hardening
+				log guest user by
+					ip address
+					username as enterd ny end user
+
+			re-authentication
+				enable re-authentication prompt if end user blocked by url category / user session restrication
+
+			basic authentication token ttl
+				3600 second
+
+			authentication setting
+				credential encryption 
+					https connection for authentication
+
+				https port redirection
+
+				redirect hostname
+					x.y.com
+
+				credential cache options
+					surrogates timeout 3600 seconds
+					client ip idel timeout 3600 seconds
+					cache size 8192 (entries number)
+
+				user session restriction
+					prohibit an authenticated user from accessing the internet from different ip address
+						restriction timeout 300 seconds
+
+				advance 
+******************************
+access policy
+	access policies inspect all transactions processed by the wsa
+		plain-text http & ftp traffic
+			including decrypted https
+		
+		https
+			only if https proxy is disabled
+
+	wsa > security services > web proxy
+		proxy http ports  80 3128
+
+	traffics might be allow or block on one controll setting
+		url filter
+		application visibility and controll
+		malware scanning
+
+	policy table is evaluated similar to identification profiles
+		top-down first-match processing
+			all policy conditions must be met to match the policy
+		
+		identification profile, protocol, port, client subnet ip & more
+			global policy acts as a catch-all
+				it also serves as a source of default settings for custom policies
+
+	has first initial and evaluation
+
+	wsa > web security manager > access policies
+		global policy
+			protocols and user agent
+			applications (364 items monitor)
+			ur filte (85 item monitor)
+			objects
+			antimalwareand reputation 
+				web reputation enable
+				antimalware scan enable
+
+		add
+			name > x
+			identification profiles and users
+				all
+				selected on e or more identification profile
+
+			advance
+				proxy port
+				subnets
+				time range
+					wsa > web security manager > define timerange and quotas
+
+				protocols
+					https/http
+					ftp over http
+
+				usermanager
+				url filtering
+
+				*after these select one by one security parts and rename them
+				*we can add on custom url or id profile or access policy, better use these on access policy to make combination
+
+		commit
+
+	policy
+		intemediary
+				give access other engines process
+				like monitor
+
+		final
+			prevent process other engine
+				like allow, block, redirect
+
+	transaction request porcess order
+		http
+			bypass list 
+			identification
+			wbrs scoring
+			authentication
+			authorization/guest
+			-----------------------------after this use per policy scoring
+			protocols & user agents
+			custom url category
+			url category
+			application filter (avc)
+			object filter
+			mime type filter
+			av/malware scanning
+		---------------------------------------------------------------------
+		https
+			https
+			bypass list
+			identification
+			custom url category
+			wbrs scoring
+			authentication
+			authorization/guest
+			-----------------------------after this use per policy scoring
+			decryption
+			url category
+			application filter (avc)
+			object filter
+			mime type filter
+			av/malware scanning
+			encryption
+
+	wsa > web security manager > bypass setting
+		bypass above process order
+
+		proxy bypass
+		application bypass
+
+	transaction response processing order
+		file size
+		application visibility control
+		web reputation (wbrs)
+		malware scanning
+
+	url filtering
+		suppurt through web usage control
+
+		wsa > security services > acceptable use controlls
+			must enable them to give access on using access policy
+
+		wsa > web security manager > access policy
+
+		*received all categories from cisco on databases
+		if were not exist mon database must check on dynamic content aanalysiz to make sure
+	
+		wsa > web security manager > custom url categories
+			here can set exemptions
+			checks before these categories
+	
+			wsa > web security manager > access policies
+				show us some links for categories
+	
+				uncategorized urls
+					default action for update categories
+					uncategories url
+						block
+						warning
+						monitor
+	
+				content filter
+					safe search
+					site content ranking
+
+			we have a method for include or exclude the custom urls category combination with device url filter default values
+				block
+				redirect
+				allow
+				monitor
+				warn
+				quota base
+				time base
+
+			also could add this on identification profiles advanced part and url filters
+
+	protocols and user agent
+		wsa > security services > acceptable use controlls
+			must enable them to give access on using access policy
+
+		wsa > web security manager > access policies
+			use dlobal policy setting
+			define custom setting
+			disable setting for this policy
+
+			block protocols
+				http/https
+				native ftp
+				ftp over http
+
+			http connect port
+				8080
+				21
+				443
+				563
+				8443
+				20
+
+			block custom user agent (regex)
+				block some browsers and applicaiton here
+
+	*in order first check the profiles and users on id profile then global part, if we set allow optioni on some sites and block agents our agents just works on allowed url not more
+
+	application visibility control (avc)
+		deep content inspection on the application layer
+		inspect on type of application or macro applications
+		drop usage
+		set bandwidth limitation
+
+		wsa > security services > acceptable use controlls
+			must enable them to give access on using access policy
+
+		wsa > web security manager > access policies
+			applicationi and object click on links show us more details
+
+			application
+				use global policy applications setting
+				custom setting on define application
+
+					*set bandwidth and application behavior
+
+			object
+				block object type
+
+				object size
+					ftp maximum download size
+					https or https maximum download size
+
+		wsa > system administration > upgrade and update setting
+			check update for application databases
+
+	antimalware and reputation (wbrs)
+		wsa > security services > acceptable use controlls
+			must enable them to give access on using access policy
+
+		from -10 to +10 scoring as scoring for trused and untrusted
+
+		wsa > web security manager > access policies
+			antimalware and reputation
+				access policy
+					block (-10 to -6)
+					scan (-5.9 to +5.9)
+					allow (6 to +10)
+
+				adaptive policy if were enable we couldn't change range and customize the scale of wbrs
+
+				decryption policy
+					block (-10 to -6)
+					decryption (-5.9 to +5.9)
+					passthrough (+6 to +10)
+
+				data security policy
+					used for uploads
+
+					block (-10 to -6)
+					monitor (-5.9 to 0)
+
+				cisco  dvs antimalware setting
+					enable suspect user agent scanning
+					enable antimalware scanning
+						sophos
+						webroot
+******************************
+decryption policy
+	take control over encrypted web traffic
+		offer advanced https handling
+			decryption
+			control of invalid or revoked certificates
+		
+		processed like access policies
+
+	wsa performs decryption as a man-in-the-middle (mitm)
+		works like ftd's "decrypt - resign" approach
+
+	useful on access policies
+	control with sni (server name identifier)
+
+	must assign a certificate that generated by device (wsa) and set on clients then brows the web
+
+	actions
+		monitor
+			log & evaluate further
+
+		decrypt
+			decrypt & evaluate the traffic against the access policies
+
+		pass through
+			allow encrypted traffic
+
+		drop
+			block encrypted traffic
+
+	must enable https proxy (bydefault is disable if wanna make mimt must enable that)
+
+	wsa > security services > http proxy
+		enable https proxy
+			port 443
+			certificate
+				need self-signed cas certificate or asa certificate as edge ca server
+					wsa > network > certificate manager > manage trusted root certificate
+
+				or will be self-signed
+					common name > wsa.x.com
+					organization > training
+					organization unit > it
+					country > usa
+					duration > 12
+					generate
+
+			decryption options
+				enable decryption for authentication
+					if the user has not been authenticated prior to the https transaction the request will be denied if not decrypted
+
+				enable decryption for display of end-user notification pages
+					decryption is necessary to display an end-user notification page in the event of a policy block
+
+				enable decryption for display of the end-user acknowledgement page
+					if the user has not acknowledged the web proxy prior to the https transaction the acknowledgement page cannot be displayed without decryption and the request will be denied
+
+				enable decryption for enhanced application visibility and control
+					enabling this option will improve the efficacy of detection for some https applications
+					decryption may cause other https applications to fail unless the root certificate for signing is installed on the client
+
+					must enable certs
+
+			invalid certificate options
+				invalid certificate handeling
+
+			online certificate status protocol (ocsp)
+
+			*after submit need  confirm all http or https handeling will be on https proxy
+			*need some log subscription (https log)
+				wsa > system administration > log subscription
+
+	wsa > web security manager > decryption policies
+		roles will be check from right to left
+
+		global policy
+			identification profiles > all
+
+			1- url filter (85 monitor item)
+			2- web reputation enable
+			3- default action is decryption
+
+		add policy
+			name > x
+			identification profiles > lanx
+			advance
+				proxy ports
+				subnets
+				time range
+				url category
+				user agent
+
+			url filter (set categories by clicking on it)
+				wsa > web security manager > custom url categories
+
+				we can set some actions on this state  for uncategorized urls
+					drop
+					decryption
+					pass through
+					monitor
+
+				set default action on it
+
+			web reputation
+				drop > -10 to -9
+				decryption > -8.9 to +5.9
+				passthrough > +6 to +10
+
+				sites with no score 
+					monitor
+						means move them to default action
+
+			default action
+				default global setting action
+				drop
+				decryption
+				pass through without decryption
+******************************
+amp
+	security intelligence opertaion
+
+	url filtering > reputation filter > dynamic content analysis (dca) > signature base antimalware > amp
+
+	wsa > system administration > feature key
+		file reputation and file analysis
+
+		state is dormant menas is not enable on wsa
+
+			*asa must have access to amp cloud and thread grid
+
+			tcp 38137 and 443 used for amp cloud
+
+			thread grid use tcp 443
+
+	wsa > security services > antimalware and reputation
+		thread grid used file analysis
+		amp use file reputation
+
+		by default engine is disable
+		but must set amp service and click on check boxes to allow and license aggrements
+
+		on advance part we can set amp works on americas serve or private cloud
+			https://pancea.threadgrid.com
+
+			cloud server pool
+				cloud-sa.amp.sourcefire.com
+
+			use ssl 443 (switch from 32137 to 443)
+
+	wsa > web security manager > access policies
+		on specific policy enable and set antimalware and reputation
+			advance malware protection setting
+				cisco dvs (dynamic streaming) antimalware setting
+					*disable sophos and webroot to use direct connection on amp analysis
+					*enable suspect user agent scanning
+
+				amp setting
+					enable file reputation filter and file analysis
+						set action on block
+
+						*send hash of files to amp
+
+				web reputation setting
+					enable web reputation filter
+
+		*must use database from cisco for checking
+
+	workflow public clod file analysis deployement
+		query the file reputation service
+			recognized file (amp cloud)
+				good
+					deliver file to client
+
+				bad
+					block file
+
+				undetermined
+					score is below configured reputation threshold
+						deliver file to client
+
+					score is above configured reputation threshold
+						block or monitor
+
+				*if the file is known to the reputation service but there is insufficient information for a definitive verdict the reputation service returns a threat score based on characteristics of the file such as threat fingerprint and behavioral analysis
+				if this score meets or exceeds the configured reputation thresholdt the appliance applies the action that you have configured in the access policy for malicious or high-risk files
+
+				*if the reputation service has no information about the file and the file does not meet the criteria for analysis the file is considered clean and the file is released to the end user  
+				if you have enabled the cloud-based file analysis service and the reputation service has no information about the file and the file meets the criteria for files that can be analyzed then the file is considered clean and is optionally sent for analysis
+
+				*if file reputation or file analysis verdict information is unavailable because the connection with the service timed out the file is considered clean and is released to the end user
+
+			unrecognized
+				yes
+					deliver file to cliend and send file for analysis (might be quarantine after detect)
+
+				no
+					deliver file to client
+******************************
+wsa cli
+	tail 
+	2
+
+	resetconfig 
+	!used to restore to factory defaults
+
+	ifconfig
+	!used to configure management interface
+	
+	sethostname
+	!used to change the hostname
+	
+	setgateway
+	!used to set the default gateway
+	
+	dnsconfig
+	!used to define the nameserver
+	
+	dnsflush
+	!used to flush the dns cache
+	
+	showconfig
+	!used to verify the running configuration
+	
+	settz
+	!used to set the timezone
+
+	settime
+	!used to set the time
+
+	passwd
+	!used to change the admin password
+
+	version 
+	!used to verify the version
+
+	upgrade
+	!used to upgrade the wsa version
+
+	revert
+	!used to revert to previous wsa version
+
+	loadconfig
+	!used to load a configuration file
+
+	date
+	!used to verify date and time
+
+	displayalerts
+	!used to verify alerts
+
+	authcache
+	!used to flush entries from proxy authentication cache
+
+	userconfig
+	!used to create a user account
+
+	failover on wsa
+		failoverconfig
+		new
+
+		1
+		!group id, must be same
+
+		yes
+		!active failover group
+
+		wsa1.x.com
+		!hostname
+
+		192.168.123.3/24
+		!must be same as failover ip address, must be same
+
+		1
+		!set management interface on failover
+
+		105
+		!higher priority for master,default is 100 (1-255)
+
+		3
+		!advertisemnet intervals
+
+		cisco
+		!password
+
+		preemtive
+		!enable option
+
+		yes
+
+		commit
+
+		wsa > network > ha
+			ha global setting
+				preemtive
+
+				*don't replicate configs just perform gateway redundancy like hsrp
+******************************
+pxgrid
+	make integration on ise and wsa
+	with this can access to more attributes like whos wanna more access or access to where
+	base on username limit or control cause ise is central manager
+	works on security group tags (sgt)
+
+	wsa > network > ise
+
+	ise > workcenter > trustsec > components
+		define sgt
+
+	ise > administration > certificate
+		with these make trusted connection also on wsa
+******************************
+conclusion
+	wsa username > admin and password is ironport 
+
+	on first initialization of wsa ask redirect http to http must say no
+
+	wsa > system administration > setup wizard
+	
+	wsa cli
+		adminaccessconfig
+		loadbalance
+		2
+
+	ftp tool and paste license on /configuration
+
+	wsa > web security manager > identification profiles
+
+	authentication (active directory or ldap)
+		basic
+			popup login
+			explicit (authentication 402) vs transparent (redirect 307)
+
+		ntlm
+			sso
+
+		user reporting
+
+	wsa > network > authentication
+		add realm
+
+	have dns and records on wsa over dns server
+
+	ldap 389
+	sldap 636
+
+	wsa > web security manager > identity
+		below of page has key for authentication actiation on specific user
+		identity and authentication
+
+	wsa > report > users
+	wsa > report > report by user location
+
+	explicit proxy
+		manual (recommended)
+		pac (proxy auto config)(like file)
+			wsa > security services > pac file hosting
+				enable and editing
+					pac server port 9001
+
+					*we can put pac file on active directory
+
+		wpad (web pa discovery)
+			chrome setting
+				network
+					proxy
+						lan setting
+							use auto config script
+								pac file serverip or auto (wpad)
+								recommended use manual
+
+	transparent proxy
+		wccpv2
+			service group default > 0 means web cache on port 80
+
+			61-62 wide area applicationi service
+
+			70 is https cache port 443
+
+			90-97 user define
+
+			99 > reverse proxy
+
+			cisco ios
+				depug ip wccp packet
+				debug ip wccp events
+
+				ip wccp web-cache
+				!on group 0
+
+				interface gig0/0
+				ip wccp web-cache redirect in
+				show ip wccp
+				!normaly works on version 2
+
+		pbr
+			over port 80 if received requests forward to wsa, wsa forward directly to internet
+			l3 > ip
+			l4 > port
+			l7 > url
+
+		l4 or l7 switch
+
+	asa and wccp
+		device setup > interface setting
+			enable traffic between 2 or more host connected to same interface (enable it)
+	
+		device management > advance > wccp
+			service group
+				dynamic service group number > 91 and redirection group list
+					*a acl for filter requests overr tcp 80 and 443
+
+				redirection > outside and service group 91
+
+		ips / ids
+			application and module or s/w (software)
+
+			inline 
+				direct connection to switch or run span or mirror on switch
+				make copy from traffic and take action
+
+				has no snmp v3 and syslog
+
+			promiscuous
+				passive mode or ids
+
+				make copy and alert
+
+				has no snmp v3 and syslog
+
+			ips device manager (idm)
+				device has this by default
+
+				legacy
+
+			express means plugin
+
+			false positive (60 k signature)
+
+			target value rating (tvr)
+				has importance value base on this checked and take actioni 
+
+			event action override (eao)
+				a extention on these importance values
+				
+		config > policies > ips policies > signature definitions
+			sig 0 
+				default 
+				list of signatures
+
+			fidelity rating > reliablity
+				how many time happen this roll
+
+		config > policies > ips policies > global crrelation
+			inspect and reputation
+				on
+					sensor base
+						aggresive
+						reputation filtering > on
+
+			network participation
+				anomaly detection
+					ad0
+						illegal zone
+							general
+
+							*on specific range checks anomalies
+
+							external zone 0.0.0.0 255.255.255.255 (illegal zone)
+							internal zone 192.168.1.0 255.255.255.0 (illegal zone)
+
+		config > policies > ips policy 
+			add
+
+		config > policies > event action role
+			role 0
+				general
+					use meta event generator
+					use event action filter
+					deny attacker duration 3600 sec
+					block action duration 30 minuts	
+					maximum deny attacker 10000
+
+				os identification > os passive finger printing analysis
+				attach relevence rating (arr)
+					can restric
+
+		by default http and telnet is disable
+
+	*for transparent wccp must set default gateway on asa or edge
+
+	wsa > network > transparent redirection
+		wccpv2
+			add service
+				dynamic service id 91
+				ports 80,443,8080
+				router ip 
+
+				*we can add 8 links

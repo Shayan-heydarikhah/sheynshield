@@ -1,0 +1,2377 @@
+ccna wireless
+  ****************************
+  general speaking 
+    wireless use radio frequencies (rf) as data transfer
+    wlan or wireless lan modulation signals into the 802.11 wifi technology 
+    
+    bluetooth works on 802.15
+
+    topologies
+      rf  signals use same frequencies bands on wifi 
+      2.4 ghrz or 5 ghrz
+        frequency = 4 cycles/second = 4 hertz
+
+      halfduplex
+
+      might have collision if wanna send same  time or receive
+      same access method concepts
+      csma\cs and air time
+
+      air time stands for a duration of transmission dataon air
+
+    basic service set (bss)
+      an access point  which has many services to clients
+      contain authentication capability
+
+      bss id is another name of mac bss
+
+      contain ssid and bssid
+
+      at the first clients negotiation time called station (sta)
+
+    directions
+      unidirectional
+        transmiter              receiver
+        a ---------------------> b
+
+      bidirectional
+        transmiter              receiver
+        a ---------------------> b
+        a <--------------------- b
+
+
+      interference from simulate transmission
+        transmiter              receiver
+        a < ------------------- > a'
+        b < ------------------- > b'
+        c < ------------------- > c'
+
+    between clients connectivity on bss we have access point media
+
+    ssid stands for service set identifier 
+      seperating infrastructure of access points
+
+    cell or basic service area (bsa)
+
+    ap mode > infrastructure mode
+
+    usually connected to distributed system (ds) which are network switches
+
+    switch
+      vlan 10 >>> ap1
+
+      vlan 20 >>> ap2
+
+      vlan 30 >>> ap3
+
+      vlan 40 >>> ap4
+      ---------------
+        all of them converted to 802.3 ethernet
+        *different with ethernet and might have 4 different signal and frames with mac address
+
+    otherwise our ap is translationi bridge
+    better use different ssid for each vlan over ap
+    virtual ap base on different ssid and bss
+
+                                                                      | ssid 1 > bss 1 (mac 1) >> vlan 10
+                                                                      | ssid 2 > bss 2 (mac 2) >> vlan 20
+    ds (distributed system) ------------ trunk port -------------- ap | ssid 3 > bss 3 (mac 3) >> vlan 30
+                                                                      | ssid 4 > bss 4 (mac 4) >> vlan 40
+                                                                      | ssid 5 > bss 5 (mac 5) >> vlan 50
+
+    *cauase all clients are on same frequency we have same air time so get trouble
+
+    extended service ser (ess)
+      a huge ap could not manage all buildings so connect many ap to ds
+      here we make ess that make connection on many bss 
+
+      routing and coverege
+
+      we have mobility on many bss
+      must have 15% coverege
+
+    independent basic service set (ibss)
+      each 2 system cna connect and negotiate together without ap
+      adhoc
+
+    ibss > adhoc
+    bss
+    ess
+  ****************************
+  repeater
+    if distances between ap were too much need connect to ds to make a bss
+    if did not our bss had no meaning
+    repeater help us cover more area and extended our signals
+
+    ds ---------- ap1 -------------- ap-repeater ----------------- c2 
+                  |                       |
+                  c1                      c3
+          *******************        
+                         ///////////////////////////////////////////
+                         coverege
+
+    when signals enter the ap1 and arrived to repeater will be forward to c2 and c3 
+    also ap1 airtime get half or distroy 
+    each system just on one frequency band could have send just one time not more
+    some newest repeaters have 2 transmiter and receivers (2 channels work at the same time)
+
+    normal and old repeaters 
+      one transmiter
+      one receiver 
+
+      *the yare on one frequency band and like halfduplex
+
+
+    if were single cell get trouble and had collision
+
+    work group bridge (wgb)
+      some printers and prepherals has no wireless nic and config ap like wgb to convert wire connection to wireless
+
+      normal 
+        cisco proprietary  in infrastructure mode
+
+      universal
+        standard
+        connect devices to wgb
+
+    outdoor bridge
+      point to point
+      point to multipoint
+      parabolic
+        set ap on bridge mode and use for point to point
+
+      omni directional
+        point to multipoint 
+
+    mesh 
+      used in large scale networks and combination with extended repeater
+      many ap works on different channels
+
+    signals
+      wire
+        voltages   voltage drop     signals
+          5        4.9              1
+
+          1        0.9              0
+
+      wireless
+        wave + modulation nethods (ofdm, dsss, fhss)
+
+        waves are on omni direction
+
+              |
+              |  
+        ------|------electronic field
+              |
+              |
+              management field
+
+          frequency means repeat some thing at the unit time
+          higher speed means more frequence also more data transmission but less coverege 
+          if use high speed could not detect and analyze data
+
+          spread spectrum
+            bands
+              channels
+
+          signal bandwidth
+            a intervals on signals which operate and dependes on modulation method
+
+          dsss works on 22 mhrz 
+          ofdm works on 20 mhrz
+
+          we have many channels
+            1 > 2412
+            2 > 2417
+            3 > 2422
+            5 > 2432
+
+
+            *if one device works on channel 1 another one could not works on channel 2 and get collision
+
+            recommended use channels 1,6,11 on ap which are close together
+
+            interference
+              co channel
+                both device works on same channel like channel 1
+
+              neighbor channels
+                both device works on different channels like channel 1 and 6
+
+          unlicense national information infrastructure (unii)
+            5 ghrz band and 20 mhrz units
+
+            5180 to 5240 > unii1
+            5260 to 5320 > unii2
+            5500 to 5700 > unii2 extended
+            5745 to 5845 > unii3
+  ****************************
+  wireless and ap standards
+    wifi aliance and ieee
+    1997 invent 802.11 base on 2.4 ghrz
+
+    802.11    2.4 ghrz    5 ghrz    maximum data rate     adopted
+    ---------------------------------------------------------------
+    802.11    *                     2mbps                 1997
+    ---------------------------------------------------------------
+    b         *                     11mbps                1999
+    ---------------------------------------------------------------
+    g         *                     54mbps                2003
+    ---------------------------------------------------------------
+    a                     *         54mbps                1999
+    ---------------------------------------------------------------
+    n         *           *         600mbps               2009 (high throughput)
+    ---------------------------------------------------------------
+    ac                    *         6.93gbps              2013 (very high throughput)
+    ---------------------------------------------------------------
+    ax        *           *         4*ac                  2019 (high efficiency)(used for iot)
+
+    cisco wireless architecture
+      autonomous (independent)
+        many ap distribute our vlans 
+        channels get trouble (more coverege than normal or blind spot)
+        rouge ap make collision for approved ap
+        power of channels must be same as transmit power level
+
+      cloud
+        cisco meraki aps
+          some configss to conenct internet
+          base on cloud and meraki get manage and use serial number 
+          we are under sanction
+
+      split-mac
+        wlc
+          ap get join on it
+          reoptimization channels (dynamic channel assignment (dca))
+          qos
+          checking signals for qouges
+          transmit power level 
+          chdm > coverege hole
+
+    like before our ds or access layer which connects clients must connect and passthrough wlans joined to valns 
+    base on vlan tags on walns must forward traffic to ds
+    need trunk interfaces
+    not suitable for large scale networks
+
+    cisco prime used for joined aps and management seperately
+
+    each ap config seperately and everything happend on ap useful for small busines
+
+    wlc (wireless lan controlle)
+      most task will be on wlc
+      ap converted to lightweight ap
+      ap contain beacon packets with ssdi and probe
+        probe used if were hiffen and without ssid
+          reply from ap and request from clients
+
+      lightweight ap  protocol (lwapp)
+        used before capwap cisco proprietary 
+
+      control and provisioning of ap
+        capwap
+          like gre
+          has 2 channel between each ap and wlc one of them used for data aanother is controller
+          layer3 tunnel without tag
+          in destination open packets and detect which ap must config and set tag
+
+          control
+            udp 5246
+            authentication and encryption
+
+          data
+            udp 5247
+            dtls (data transport layer security)
+
+          capwap is same with lightweight ap
+          unlike autonomous mode that has automatic mapping and control, on split mac just received traffics no mapping 
+          on split-mac we tunnel user and vlans traffics to wlc
+
+          wlc works on discovery and join with ap
+
+          in data tunnel capwap this data goes to wlc and wlc control them on ssid and tag base
+
+          users authentication and join request goes to ap and forward to wlc here all management all things will be on wlc not ap
+
+          ap just distribute wireless signals
+
+          dynamic channel assignment (dca)
+          transmit power optimization (tpo) / transmit power level (tpc)
+          self healing wireless coverege (chdm)
+          flexible client routing
+            distribute ssid and seamless (mobility option)
+
+          dynamic client loadbalancing
+            in area we have many ap 
+            on 15%coverege must loadbalance traffic
+
+          wireless ips
+          security management
+          rf monitoring
+            interferences and adhoc, rouge, noise, .....
+  ****************************
+  wlc deployement
+    unified or centralized
+      many ap on access layer and wlc placed on core layer
+      5760 advance wlc with 6k ap management
+      64k client support
+
+    cloud base deployement
+      datacenter
+      used onpermise cloud resources and run over organization unit servers
+      virtual wlc
+      3k ap get managed
+      32k clients support
+
+    embeded deployement or converged mode
+      access layer and wcm
+      some switches has wlc like 3850, 4500 or 6500 
+      manage 200 ap
+      used for small scale
+      4k client support
+
+    mobility express (ciscoc n)
+      in lightweight ap find wlc images and connect to wlc with tunnels
+      used for very small business
+      2k clients support
+
+    cisco ap mode
+      local > default  
+        normal mode working
+        provide bss and might be many
+        if ap don't end or received signals could be local mode and analyze all channels 
+
+    monitor > resource monitor
+      has no traffic transmission just monitor features
+      tell us that sa (clients or stations) positions
+
+    flex connect
+      if has afew bandwidth on branch and we have printer and printer queue there so get trouble
+      if were on same range and same network our connection be up
+
+    sniffer behave like wireshark 
+      event and packet monitor
+
+    rouge detector
+
+    flex bridge > flex connect and bridge
+
+    bridge 
+      many sites on many building on mesh mode
+
+    spectrum experter connect
+
+    metageek analyzer andd spectrum expert
+
+    securing wireless network
+      clients joining steps
+        ap and authentication
+          authentication base on hardware not clients
+          end users (users) binded on endpoint (mac address) seperately
+
+        data must be encrypted
+
+        eavesdropping (encryption) and tampering (has)
+
+    *between ap and clients must have privacy to protect passwords and safe authentication
+    ap must ahve some authentication steps cause attackets might use same name and steps like us for ssid
+    ap must send beacons to clients
+      message privacy
+        cuase we use air as media for transmissions so must use a key on source with encryption 
+        destination must open it with asymetric or symetric key
+
+        ap > group key > shared key between ap and endpoint and not penterable
+
+        message integrity check (mic)
+          if some one change packets and forward it on network check them
+          base on crc
+          operation on data will be at the end of packets
+            encrypted dtaa + mic
+
+    wmp 300 n packet tracer
+
+    authentication methods (checks on client side not ap side)
+      open
+        no authentication
+        just join request
+
+      wep
+        wired equivalent privacy
+        encryption mechanism with rc4
+        each frame will be process and encrypted as private frame
+        use a authentication key for encryption
+
+        a random packet with challenge packet name goes to clients from ap
+        clients encrypt data with that shared key whhich received from ap
+        encrypted data transmit to ap and after decryption on ap if were same could negotiate with each other
+
+        104 bit and 40 bit
+
+        defined in 2004 and 80211i
+
+      802.1x or eap (extensible authentication protocol)
+        framware get change
+        
+        supplicant is client
+        
+        authenticator is a device which authenticate
+
+        authentication server is database which check users attributes
+
+        in ap we have open authentication mechanism toward supplicant and ap
+        when user wanna enter network must authenticate on web authenticate model with eap frame
+          database on authentication server not on ap
+
+      leap is depricated
+        cisco proprietary
+        bidirectional authentication from ap to clients and clients to ap
+        user and passwords were on authentication server
+        authentication server sen challenge to users and users make encryption on challenges
+        and reply it to authentication server 
+        after decryption by authentication server and see same challenge code means it is okey
+
+        leap change wep keys as dynamic challenge and get better 
+        hardware maden on wep base and next generation was dot1x which works on software
+        then coding get change and get f..k
+
+      eap fast
+        flexible authenticate secure tunneling
+          protected access credential
+
+        authentication server has a shared key which install for users
+        user ans authentication server base on this key could see each other
+        after authentication make tls tunnel (transport layer security)
+        inside the tunnel again secure username and password
+
+        phase 0 is pac that installed on authentication server and clients
+
+        phase 1 is authentication server and client authentication on tls each other
+
+        phase 2 is end user get authenticate on tls and make connection
+
+        *has no open pacekts here
+
+      peap
+        protected eap
+        like eap fast but authentication server doesn't need generate pac file then send to client
+        works on digital cert
+        on authentication server we have certificate authority
+
+        clients use mschapv2 or gtc (general token card) introduce it self to authentication server
+
+        doesn't have pki installation capability 
+        rfid tag and medical service 
+
+        pki is solution of cert
+
+      eap tls
+        each part use pki and digital cert 
+        then run tls and check username and password over tls
+
+    privacy and integrity check
+      tkip
+        temporal key integrity protocol
+        between 1997 and 802.11  and wep 802.11i in 2004 
+        used for correction 
+        use tkip inside packets security afte 80211i rarely use this
+        after 2012 get depricated
+
+        mic > hash
+        
+        time stamp avoid reply attack (prevent send or received similar)
+        
+        sender mac address will be inside the mic
+        
+        sequence number 
+          if a packet with repeated sequence number received which forwarded from attacekr could detect
+
+        key mixing algorithem
+          wep 
+            each frame has different 128bit key 
+
+          longer initialization vector 
+            24 bit to 48 bit
+            avoid bruteforce
+
+      ccmp
+        counter / cbc mac (cipher block chaining message authentication code) protocol
+        wpa2
+          aes (advance encryption system)
+          cbc mac used fo rhashing
+
+          nist (national instute of standard and technology)
+          open  (hardware must support)
+
+      gcmp (galios / counter mode protocol)
+        wpa3 after 2018
+          aes (advance encryption system)
+          gmac (galois message authentication code)
+
+      wifialliance 
+      wifi.org
+      wifi protected access
+                                                wpa       wpa2    wpa3
+      ---------------------------------------------------------------------
+      authentication with preshared key         *         *        *
+      ---------------------------------------------------------------------
+      authentication with dot1x                 *         *        *
+      ---------------------------------------------------------------------
+      encryption and mic with tkip              *         
+      ---------------------------------------------------------------------
+      encryption and muc with aes and ccmp      *         *
+      ---------------------------------------------------------------------
+      encryption and muc with aes and gcmp                         *
+
+      wpa2 authentication
+        psk
+        personal
+        enterprise (dot1x)
+
+      wpa3
+        protected mgmt frame
+          beacon and probe need authentication
+
+          ap encrypt data and clients decrypt
+          per group encrypt ap messages
+
+      *aes is better than wpa2
+
+      4way handshake
+        encrypted key be more secure
+         on wpa and wpa2 weak key might get cracked
+         on wpa3 we have simultanous authenticate for equals which provide higher security layers
+         used forward secrecy and prevent decryption and encryption
+  ****************************
+  buildind wlan
+    autonomous ap or lightweight ap
+    just set one ssid and send it 
+    without tag
+    must set trunk for many tags and ssid
+
+    lightweight has some features in ap and all tasks are on wlc with capwap tunnels manage all things
+
+    each ssid has one bssid and bss
+    base these detect our ap
+    packet trace
+      ap-pt-a
+        without console just has power
+        single vlan
+
+      ap-pt-n
+      ap-pt-w
+
+    cisco ap > bvi
+      interface bvi 1 
+      ip address 10.21.104.91 255.255.255.0
+      no sh
+      sh ip interface brief
+
+    on web browser
+      10.91.104.91 (express setup)
+
+        optimize radio network for
+          throughput
+            unlike below
+
+          range
+            more power
+            more coverege
+            less spedd
+
+        express security
+          ssid
+            broadcast ssid in beacon
+              *unchecking this means hide ssid
+
+          vlan
+            no vlan
+            or range vlan
+            native vlan
+
+          security
+
+    wlc models
+      all models service ports are 1 port and 1 gig
+
+      model     distribution port
+      2504      4 * 1g
+      5508      8 * 1g
+      5520      2 * 1g / 10g
+      5760      6 * 1g / 10g
+      flex7510  2 * 10g
+      8510      2 * 10g
+      8540      4 * 1g / 10g
+      wism2     2 * 10g internal and over switch 6500 modules
+
+      *some models has redundant and ha port
+
+    wlc port means physical interface
+    wlc interfacae means logical
+
+    baudrate 9600
+    8data bit and 1 stop bit
+    ------------------------console port
+
+    outof bond management
+    access port on switchport
+    ------------------------
+    service port
+
+    all tasks all on this
+    capwap control and data
+    has link aggregation group option and switch side must be mode on  
+    -----------------------
+    distribution system port
+
+    2504 no redundant or service port
+
+    3504 just has no service port
+
+    how conect to ciscco wlc
+      interface 
+        dynamic
+          ap has many ssid and many vlans to authenticate users
+          config on wlc and push on ap
+          each user connect to specific ssid base on them and bssid forward traffic over capwap tunnel toward wlc
+          after receiving by wlc, wlc put traffic on specific vlan
+          make wlans for each ssid and vlan
+          bind and map all  x ssid x bssid x wlan to one vlan 
+
+        mgmt
+          is not physical port
+          enter with distributed system port
+          all request are over network
+          all traffic for authentication on ds port also send to this
+
+        redundancy mgmt
+          when make redundancy on many wlc 
+          wlc-1 has mgmt port and need access on another wlc-2
+          use this interface to reach the standby wlc
+
+        virtual interface
+          used for dhcp relay agent
+          used when we hav no vlan segmentation
+          not routeable
+          used for mobility
+
+        service port interface
+          like physical port also has logical part
+          single ip assignment and access to device
+          is not like mgmt port
+
+    https://192.168.1.1
+      wlc > wlan
+        create new
+          type wlan
+          proofile name > x
+          ssid > x 
+          id > x
+
+          *too many vlan over wlan isnot suitable
+
+          16 active wlan
+          has best performance but you can create 512 wlan
+          *air time and beacons must consider as definition
+
+          default wlc ip 192.168.1.1/28
+
+          3702 lightweight ap on packet tracer
+
+          usually use dhcp for ap ip assignment
+          in dhcp we have wlc ip option
+
+          in wlc might have many radius server or authentication if were on eap 
+            wlc > security > aaa > radius authentication server
+              new
+                server index
+                server ip
+                shared secret
+                confirm shared secret
+                port 1812
+
+                *used for normal admin users
+
+          create dynamic interface
+            wlc > controller > interface
+              name
+              vlan id
+
+              has some configs depends on dhcp
+
+              apply
+
+          cause need many vlans must create relay
+          dynamic interface must directly request to dhcp
+
+          wlc > wlan
+            new
+              type wlan
+              id
+              status up and enable
+
+              interface group
+                attach dynamic interface to which wlan
+
+              security
+                wpa
+                wpa2
+                wpa3
+                non (open)
+                802.1x
+
+                aaa service
+                  add radius source
+
+                advance session timeout
+                  1800 seconds for authentication
+
+            wlc > security > wireless protection policies
+                client exclusion policies > client exclusion 60 second
+
+            clients could not directly connect to wlc must use lan cable 
+              wlc > mgmt > mgmt wireless
+
+            vwlc used for eveng
+
+////////////////////////////
+
+encor wireless
+  ****************************
+  general speaking
+    on antenna have some alternating current and variable electromagnetic field which eistribute on all directions 
+
+    cycle is one fully top down section
+
+    frequency is cycle measurement unit on one second cycle count means frequency
+
+    each cycle in time unit called hertz
+      1000 > khrz
+      100000 > mhrz
+      100000000 > ghrz
+
+    3 khrz to 300 ghrz named radio frequencies
+
+    am band or am broadcast
+        2.4 ghrz
+            
+        5ghrz
+            5.150 to 5.250
+            5.250 to 5350 (still free)
+            5.470 to 5.725
+            5.725 to 5825
+
+    signal bandwidth is wider in radio frequencies
+
+    frequence 2.41 2 is main frequence must cut another parts
+        
+                 * 
+        |      *   *  |
+        |    *       *| 
+        |  *          *
+        |*            | *
+        |-------------|---------------
+                      spectrula mask
+                        filtering border to force signals work on thier ranges
+
+    in frequency band 2.4 we have space on 5 mhrz for each channels but recommended use 22mhrz space
+
+    phase means 2 single signal start from on epoint and overlap or cover each other
+
+    wave length
+        a length that pass on one cycle
+            lower frequence carry more data and more wave legnth
+                2.4 ghrz use 4.92 inch
+
+            high frequence carry less data and has less wave length
+                5ghrz use 2.36 inch
+
+    amplitute
+        signal domain
+
+        am is larger and fm is smaller
+
+    relative power is useful
+        db = 10 (log p2 on base 10 - log p1 on base 10) = 10 (log p2/p1 on base 10)
+
+        law of zero
+            10 pow 1 is 10 
+                power of device is 10x of first power
+
+                db = 10 (log p2/p1 on base 10)
+                db = 10 1m/1m on base 10 = 0
+                    10 pow x = 0
+
+                *absolute power means powers are same
+
+        law of ten
+            db = 10 (log 10/1 on base 10) = 1
+
+            *p2 is 10x p1
+
+        law of three
+            db = 10 (log 2m/1m) = 3
+
+            *p2 = 3 dbm p1
+            p2 originator dbm
+
+    on signal transmission how many weakness happen?
+
+    cable loss and gain antenna loss
+        for db on meter we have lossfrpm receiver or transmiter reach the antenna
+        tx power dbm - tx cable db + tx antenna dbi > eirp calculate (main power through put)
+
+        tx antenna dbi
+            has gain and not  positive empowering
+            and make directions 
+            gain as passive model
+
+            isotropic send on one direction not many directions 
+
+        *eirp > effective isotropic radiated power
+            usint isotropic and dbi
+
+        each country has many puls base on these could have some specific potency or power
+            31/22/26 db
+
+        depends on weather 
+        eirp related to countries national organization
+
+        antennas use dbd and base on dipole not isotropic
+
+        on x axis or vector we have 2.4 dbi gain
+
+    link budget
+        on the way some eirp and attributes options signals get modified and after changes must be acceptable
+
+        rx signals > tx power - tx cable - free space + rx antenna  - rx cable
+
+        *free space path loss
+
+        received signals stergth indicator 
+            in destination received signals on what power and dbm 
+            tx in source were on what absolute value
+                tx > 100 mw like 20 dbm to 1 mw 0 dbm  
+                rx > 0 mw  like -100 dbm to 1 mw 0 dbm
+
+        0 to 100 
+        20 is great
+        20-50 is good
+        50-70 is so-so
+        70-100 is worst
+
+        base on hardware have different power
+
+        threshold or sensetivity levl
+            base on sensetivity we have threshold and intelligible
+
+        focus on rssi
+            powerful signals don't attention to noise
+        noise floor
+
+            lower is better and better signal quality
+        
+        signal to noise ration (snr)
+            noise distnace to main signal
+            most qualities assigns to this
+
+        signals and waves just carry some electronical pulses and base of these puls detect and understand codings and modulations and ...
+        our carrier signals has no meaning
+
+    bad ideas 
+        1
+            when need transfer bit 1 use puls and sending bit 0 cut the line altogether
+            here we have issue on quality detection 
+            cause in detecting link health gonna confuse mainly on sending bit 0 could not findout send bit 0 or get power loss
+
+        2
+            when send bit 1 use puls and part + 
+            when send bit 0 use part and puls -
+            issue on synchronization and could not detect start and end of signals 
+            imperfect signaling and transmissions
+
+        modulation
+            data must transmit on specific rate
+            this rate has huge differencees with noise
+
+            bits
+            1 > 5v
+            0 > 1v
+
+            *one bit on intervals
+
+            ---------------------------
+
+            bit     voltage
+            00      1v
+            01      2v
+            10      3v
+            11      5v
+
+            *faster and double data rate
+
+            frequency  (dynamic frequency) modulation 
+                must be little and specific scope
+
+            phase (dynamic phases) modulation
+            amplitute modulation (dynamic domain)
+
+            signals be on rate and data volume will be transmit need specific bandwidth
+
+            voice need narrow bandwidth
+
+            spread spectrum used for modulation and wide to cover all bands
+
+            frequency hopping spread spectrum (fhss)
+                frequence alternatives
+
+            direct sequence spread spectrum (dsss)
+
+            orthogonal frequency division multiplexing (ofdm)
+
+            signals in non vauum be like circular and spherical
+
+            free space path loss 
+            domain signals weakness
+            humidity is effective
+            in direct conection we have fspl
+
+            fspl > 20 log (distance) + 20 log (frequency) + 32.44
+
+            closer to tx more eaknes on signal 
+
+            dunamic rate shifting  (drs)
+                more snr if get far from transmiter
+                cause we have fspl and use complexe modulations and need more snr
+
+                unlike above if have less snr we can use simple modulations and lower data rate
+
+                persosn go further from tx source could use dsss and lower data rate nut get connect
+
+                tx checks snr and rssi and on noise flood get scan to change data rate to provide good quality
+
+                drs is not standard feture and use another title as adaptive modulation and coding (amc)
+
+                link adaptive
+  ****************************
+  signals and modulations
+    carring data on rf signals
+
+    frequency hopping spread spectrum (fhss)
+      wide spectrum and hopping
+
+      a trade off new modulation method and trade off and new modulation method also interferences noise
+      if transfer on x rate then converts to rate y 
+        we have many ranges and rules on each intervals we have some frequencies to received data with specific meanings
+
+        2.4 ghrz to 2.8 ghrz  have 79 channels split on 1 mhrz
+        in each frequencies use a single channel then hopping to different frequencies
+        use 1mhrz channel
+        narrow bandwidth used here and carry afew data 
+        collision and interference happen if use many tx at the same time
+        1-2 mbps
+        is not useful these days
+
+        from source to destination use synchronization to set intervals and frequencies
+
+    direct sequence spread spectrum (dsss)
+      base on phase shifting transmit data
+      on 2.4 ghrz has many channels with 22 mhrz distance and bandwidth
+      3 non overlapping channels 1,6,11
+      11mbps data rate
+      noise and interference is so important
+
+      modulation elements
+        data
+        scrumbler
+          encryption task on analog signals , encryption is another way for digital signals
+
+        coder
+        interleaving
+        modulator
+
+      converting long string  0 and 1 to randoom string of 0 1 
+      normal string > 0101
+      scrumbler string  > 0011 (randomization string)
+
+      *just source and destination could realize strings
+      provide a little protection and seurity
+
+      coder
+        burker code
+          for bit 0 use random string as 00100 and use 11011 for bit 1
+          each 00100 numbers called chip
+          less nois effect and changes for noise could be detect faster
+
+          11 chips create symbols
+
+          after checking by coder interleaving get start
+
+          11011 --- 00100 --- 11011
+                 |         |
+                 -----------
+                      |
+                      interleaving bits
+                        used for reduce noise effect
+
+          worried about data loss so from each string and first bit get samples
+          prediction posiblity 
+          reduce noise effect on data
+          each symbols contain 11 chips and a bit of data 
+          one bit of these symbols don't send 
+          in modulation we have chips and each chip and symbols with shifting phasescould be send
+
+          diffrential binary phase shifting keying (dbpsk)
+            0 is no change or shift 
+            1 means 180 degree change and shifts
+
+            in moment one bit modulate and send  11 bilions chips in seconds with steady state
+
+            11 chip get one symbols and one symbol menas one bit
+
+        complementany code leying (cck)
+
+      modulator
+        between set of changes base on threshold change ohases and aconvert signals to transfer data
+        higher data rate
+        on long time negotiate get better 
+        from 1-2 mbps reached to 11 mbps
+        if noise changes 9 bit could use data agian
+        scrumbler > bits get from converted > 11 bit goes to coder
+
+      before this we have 2 bit on voltage transmission so had noise effect
+        00 > no shape or change
+        01 > 90 degree changes
+        10 > 270 degree changes
+        11 > 180 degree changes
+
+        here we have noise but interleaving help us
+
+      in 5.5 mbps data rate we have same dbpsk mechanism but use coder cck
+
+      in burker coder we had 1 real data with 11 chips converts to one symbols but in cck we hvae 4 bit of real dataand use 6 chips which 2 of them used for phase shifting
+      toatly use 8 chips which include 4 bits
+
+      symbols and chips > 1 m symbols > 11 mbps and 8 chips > 1.3 * 4 > 5.5 mbps
+      more noise 
+      recommended wer closer to source
+      better have less nois enviroment
+
+       for 11 mbps beave like 5.5 mbps
+        use each symbor for 8 bit and setup 8 chips
+
+    orthogonal frequency division multiplexing (ofdm)
+      perpendicular and orthogonal
+      in dsss we had 22 mhrz channels and used 11 mbps data rate here use many signals on one channel to reach more data rate speed
+
+      diffrential
+        changes and shifts from source signal (bpsk)
+
+        chanegs and shifts from previous signal (dbpsk)
+
+      used 20mhrz
+      each channel get devidedd to 64 sub channel and named sub carrier or sub tone
+
+      non overlapping channels are 1,6,11
+
+      data subcarrier has 48 channels for data transmission
+        16 silet signal used as gaurd
+          12 channel  used for spaces and distances inside them
+            another 4 channels is pilot used for noise detection
+
+            48 * 312.5 khrz could be used for transmission
+
+            *means higher data rate
+
+            some documents say 52 sub channel
+
+      we have same elements like dsss (modulator , scrumbler, interleaving and coder) differencees is divisions and data transmission
+      modulator and coder is important base on main bit counts and repeated bit will be coding
+      we have special coder here 
+        1/2 data and information > bpsk (ofd use this)
+        if were 3/4 means you have higher rate
+
+        binary phase shifting keying
+
+        in modulations we have 3/4 bpsk
+
+        bps 0 and 180 degrees
+
+        ofdm use 6 to 9 mbps data rate
+
+        bpsk and qpsk
+          base on phase get modulate
+
+          qpsk models
+            3/4 has 18 mbps and 1/2 has 12 mbps
+
+          qaudrature amplitute modulation (qam)
+            combination of dbpsk and doamin modulation
+
+            has 16 different state
+              16 qam
+
+              1/2 > 24 mbps
+              3/4 > 36 mbps
+
+              64 qam 
+                8 phase shifting
+                8 amplitute
+                  1/2 > 48 mbps
+                  3/4 > 54 mbps
+
+              256 qam
+                3/4 >  78 mbps
+                5/6 > 86 mbps
+
+              *in no nois enviroment
+  ****************************
+  wireless conectivity condition
+    frequncy abnds 
+    modulation methods
+    coding methods
+    rf standards
+
+    international telecommunication union radio telecommunication sector (itur)
+      region 1 
+        north asia
+        europe
+        africa
+
+      region 2
+        north and south america
+
+      region 3
+        south asia
+        austrlia
+
+    ism
+      industrial 
+      mediacal
+      scientific
+        licensed bands
+        unlicensed bands
+          self sign ranges and interference
+
+    fcc
+      federal communication comission
+        set eirp and not more than 36 dbm
+
+        b1 > 23 dbm
+        b2 > 30 dbm
+        b3 > 30 dbm
+        b4 > 36 dbm
+
+        *all outgoings must be same these
+
+      add 4 bandd to ism
+        bands or anii
+          1
+            5.15 to 5.25 ghrz
+
+          2
+            5.25 to 5.35 ghrz
+
+          3
+            5.47 to 5.725 ghrz (extend of 2)
+
+          4
+            5.725 to 5.825 (same with ism)
+
+      *for eirp must use specific connector and antenna
+
+      threaded neill councellman (tnc)
+        male connector
+        standard
+
+      reverse polarity tnc
+        cisco side
+        female
+
+      transmiter max
+        b1 > 175 dbm and 50 mw indoor
+        b2 > 24 dbm and 250 mw any
+        b3 > 24 dbm and 250 mw any
+        b4 > 30 dbm and 1 w any
+
+        *if were point to multipoint must increase 1dbm from antenna gain and decrease 1 dbm from transmiter
+        totaly use 30 dbm
+
+        in point to pint unlike point to multipoint decrease 1 dbm of transmiter increase 3 dbm on antenna gain
+
+        eiro could be on 56 dbm
+
+       radio frequency signals of military forces and military equipment must carry on higher priorityand need free band
+        dynamic frequency selection (dfs)
+
+        another names   
+          a-nii-1
+          a-nii low
+          anii-1
+
+        europe telecommunication standard institue (esti)
+          itur is one of the main memebr of this
+          anii 4 must be licensed and don't used in europe
+          like fcc we have ism on 2.4 g and 5 g frequency abnd
+
+          bands or anii       eirp max
+          2.4 ism   any       20dbm
+          1         indoor    23 dbm
+          2         indoor    23 dbm
+          2e or 3   any       30 dbm
+          3  or 3   licensed  n/a
+
+          we have dfs here
+
+          requlatory bodies (organization of setting requlation)
+            we have many requlatory domainsmust define used them on where
+
+          standard body
+            we have ieee
+              study group (research)
+
+              task group (opertation and feature testing)
+
+          channels on 2.4 g in ism and 802.11 in fcc has 11 channels in esti we have 1 to 13 channels 
+          in japan we have 14 limited channels
+          channel 13 is not usefull in many places
+
+          1,6,11
+          1,5,9
+
+          in 5 ghr we have 20mhrz space between channels 
+            anii or bands
+              1
+                36
+                40
+                44
+                48
+
+              2
+                52
+                54
+                60
+                64
+
+              3
+                100
+                104
+                108
+                112
+                116
+                120
+                124
+                128
+                132
+                136
+                140
+
+              4
+                149
+                153
+                157
+                161
+
+
+          802.11b data rates 1 ,2 , 5.5 , 11 mbps
+            fhss and dsss
+            modulation
+              dbpsk
+              dqpsk
+              dqpsk + cck
+
+          802.11 g 
+            6 , 9
+            1/2 , 3/4
+            bpsk
+
+            12 , 18
+            1/2 , 3/4
+            qpsk
+
+            24 , 36
+            1/2 , 3/4
+            16 qam
+
+            48 , 54
+            2/3 , 3/4
+            64 qam
+
+            ofdm and extended rate phy (erp)
+            higher snr and better modulation
+
+            is not compatible with 802.11 b cause use 2 different model
+            devices has backward compatibility
+              protection mechanism
+                detect models in network
+                then make compatible
+                  reqeust to send (rs) + clear to send (cs)
+                    with these detect worked on dss or not
+
+            *our lower data rate cause is this and make combination of many models
+            *if detect were not b series don't send cr and rs
+
+          *anii 2 extended atemped on 2004 and create ism 
+
+          we have 15 dbm ib transmiter see limitations
+          stock in 3 not more
+
+        802.11 a
+          5 ghtz and ofdm
+
+          6 , 9
+          1/2 , 3/4
+          bpsk
+
+          12 , 18
+          1/2 , 3/4
+          qpsk
+
+          24 , 36
+          1/2 , 3/4
+          16 qam
+
+          48 , 54
+          2/3 , 3/4
+          64 qam
+
+          has the least interference
+          we have ism just on anii 1
+
+          has no backward compatibility
+
+          usually works on 300 mbps
+          has some techniques to reach high throughput 
+
+        802.11 n 
+          has backward compatibility (a and g)
+          ofdm base
+
+          we have one tx and one rx
+          single in single out (siso)
+          one radio chain
+          here we can add 2 chain or more
+            name multiple in multiple out
+
+          help us with channel aggregation
+            ofdm ahs 48 sub channel on 20 mhrz spaces bandwidth iat the moment
+            send one item cause we have one chain or antenna
+
+            in 802.11 n each channels devided to 52 sub carrier
+            combine with 2 channel  on 0mhrz and provide 40 mhrz
+            each of them has 52 sub channel and help us reach more bandwidth 
+
+            *aggregation channels must be adjacent to each other
+            antens must be seperated
+
+            spatial multiplexing
+              at the same time received different data in one channel and frequency bands 
+              if channel 40 mhrz get fill we can make shift on phases on another antenna and communicate 
+               must have digital signal process for each side 
+              recommended use 600 mbps
+
+              2 : 3*3
+              2 is spatial stream
+              3*3 means 3 tx and 3 rx
+
+              is not relative to tx or antenna mostly depends on tx and rx process
+
+              must have same spatial stream if were not negotiate on lowest value
+
+            mac layer effeciency 
+              block acknowlegement
+                each signals need acknowlegement to received another one if don't receive one of them waste our air times
+
+                here bypass acknowlegement receiving and use one burst packets as bulk frames then received acknowlegement
+
+              antenna count and capability of spatial steam will be define with this
+
+            gaurd intervals (gi)
+              in ofdm and symbol sending we have different ways to send and receive data to users but at the same time
+
+              casue this recommended wait 800 nano seconds then send 
+              here gi say wait 400 nano seconds
+
+              intersymbols interferences (isi)
+                after this might have 10% more speed
+
+
+          more throughput
+          has some reliability
+            trasnmit beamforming
+              useful in 802.11 n
+              many tx and rx has many angels and more quality to reach destination 
+              signals with shifted phases in spatial stream distroye each other so with this dynamic tools between rx and tx we can set some attributes which base on distances set some phases and each rx signals will be performed well
+              behave different with every one
+
+              cisco define client links and send blank signals without ack set some configs 
+              doesn't matter use 802.11 n just tx could detect this
+
+
+            maximal ratio combining (mrc)
+              many tx and rx with different quality received by clients
+              cause we have different path on rx between these checked which one is better and have better qualitythen use them
+
+              snr set on highest rate and worked on multiple in and out
+
+            modulation and coding scheme (mcs)
+              32 pattern
+              1-4 spatial stream more means higher rate
+
+              802.11 n  has 128 data rate
+
+        802.11 ac in 2013 has very high throughput
+          channel aggregation
+            4 or 8 20 mhrz 
+            80 / 180 mhrz
+
+            modulation 256 qam
+            higher mac effeciency
+            tx beam get better and faster feedbacks
+
+            has 8 spatial stream
+            multiuser mimo at the same time has many send and receive
+
+            7gbps transmission capability
+
+            robust channel aggregation
+              channels 20 / 40 / 80
+                160 mhrz
+                when we have wider bands could have more channels with no interference
+                useful just in 5 ghrz
+                more data rate and mobility
+
+                dynamic negotiation tools and set bandwidth base on each frame transmission
+
+                ap 1 > 80/ 160 mhrz 
+                  collision avoidance 
+                    csma\ca
+
+                ap 2 > 80 / 160 mhrz
+
+                *each ap send data as first device must have request to send and second ap if have no signals on second channel must send clear to send 
+                useful when you have higher chanenl width
+                with this method we have no interference
+
+            dense modulation
+              5/6 qam 256
+              msc 9
+              with each symbols use 8 bit and 5 part for data with 1 repeated part
+
+              802.11 ac is25% better than 802.11 n
+
+              need higher snr
+
+            mac layer effeciency
+              combination many frames and make a payload include another many payloads
+
+            mac service data unit
+              msdu
+                in one frame and one pkd data unit create bigger packets
+
+                frame size is 2304 bytes
+                in wired media we have mtu nad limited ranegs
+                here we have limitations again on airtimes
+                56 msec
+                in 802.11 n we have 64 kb
+                in 802.11 ac we have 4.5 mb per frames
+
+                always happend and subset of mac layer effeciency
+
+              use gaurd intervals as before
+
+              explicit transmit beamforming
+                in 802.11 n  distribute signals on al direction
+                use this and set power on specific clinets
+
+                many ways to send acknowlegement from clients to ap which had negotiation and we re not standard so has no compatibility for many devices
+
+                in 802.11 ac used new unique and special mechanism
+                  null data packet (ndp)
+                    when ap starts working send this ndp to all  802.11 ac clients
+                    these clients send acknowlegement base on this ndp packets
+                    ap create a matrix base on replied attributes for each client
+                    like distance
+
+                    rssi and snr from clinets acknowlegement send to ap
+
+                    customize transmit beamforming
+
+
+            scaleable mimo
+              5 to 8 spatial stream and send signals up to 8 path 
+              in destination check  power and signals to detect how many power needed
+              used when have many radion chains
+
+            multiuser mimo
+              if have many ap and negotiate with many systems base on different streams for each explicit beamforming  so need better cpu for ap
+
+              our clients must not be on same  upstream  direction 
+              also antennas direction is important
+              have 2 wave 
+
+                                          wave 1                 wave 2 (2010)
+                --------------------------------------------------------------
+                max channel width         80 mhrz               160 mhrz
+                --------------------------------------------------------------
+                max spatial stream        3                     4
+                --------------------------------------------------------------
+                max modulation            256 qam (optional)    256 qam
+                --------------------------------------------------------------
+                max mimo                  no                    yes
+                --------------------------------------------------------------
+                max typical               1.3 gbps               2.6 gbps
+                data speed tested             
+
+        802.11 ax or wifi 6
+          on each spatial stream could transfer 1.2 gbps
+          support 8 spatial stream
+
+          10 gbps transmission capability
+
+          channels width 20 40 80 160 
+
+          ofdma support
+            ofdm access
+              each window has many aitime 
+              highdensity 
+
+              timing and specific access control with schedules
+              better control on transmit power
+          
+          dsss  marking or coloring
+  ****************************
+  wireless infrastructure
+    wpan
+      like bluetooth or zigbee 802.15
+      1 meter or many rooms
+      personal area network
+      unlicensed bands in ism 
+      in 2.4 ghrz
+
+    wlan
+      like ap in home or office
+      as building
+      100 meter
+      licensed bands in 802.11 and 2.4 or 5 ghrz
+
+    wman
+      like wimax
+      802.16
+      licensed bands 
+
+    wwan 
+      like lte or 3g
+
+    in wireless connection we have halfduplex connection state
+    if use fullduplex have interference
+    could worked on different air times and fullduplex but on too many users connectino what should to do
+
+    (ma - mime) / wave2
+
+    in 802.11 ac we have too many antenna
+    not so general
+    need a method to assign air times
+
+    in wlan we have ap must used join mechanism and advertise the ssid
+
+    bss / cell
+
+    basic service area (bsa)
+      a area to responding ap and clients as coverage area
+      depens on radiation and types
+      each bss has it own ssid (wireless name to connect them) and bssid (mac address of wireless ap with unique value)
+
+      *join or association message is client joining ap event
+
+      802.11 or sta or station is name of clients wanna connect to ap
+
+      802.11 z is directly wifi connection and near me area network (nan)
+
+      cause frames in air are free need encryption and security
+
+      same resources for different ssids on one ap 
+      our ap coverege for different ssid is same
+      to extend coverage must use different ap
+
+      many bss on one ess (extended service set) need 15%  coverege
+
+      ess-1 
+        bss-1 > ssid x > bssid-1 > ap-1
+        bss-2 > ssid y > bssid-2 > ap-2
+
+      independent bss
+        adhoc
+          between 2 or many has limited wireless connection without ap    
+  ****************************
+  cisco wireless architecture
+    distribute system and ap work as bridges
+
+    autonomous ap
+      must config each ap as seperated devices cause we have no wlc
+
+      wlc help us config with web or console or meraki center
+      also could config with cisco prime 
+      we have management vlan and ip address with routed access
+      spanning tree must works as best
+
+    wireless lan controler (wlc)
+      spil mac architecture
+        ap just listen to wlc and do sosmething has no self decision and config
+        ap get convert to lightweight ap
+
+    wlc vs ap realtime function
+      wlc
+          rf management
+          association and roaming management
+          client authentication
+          security management
+          qos
+
+          ap
+            rf trasnmit or receive
+            mac management
+            encryption
+
+        with dhcp assigned ip address
+        bidirectional encryption on ap and capwap tunnels
+
+        capwap
+          controll and provisioning of wireless ap
+
+          udp 5246 > control plane
+            authentication and encryption
+            has specific tunnels
+
+          udp 5247 > data plane
+            dtls (datagram transport layer security)
+            users traffic without encryption
+
+        lightweight ap protocol 
+
+        *cause use tunnels just need layer 3 reachability
+        *we can use same ip for tunnels and management
+        *x.509 could authenticate ap and wlc on certificate base
+
+        pairing light ap and wlc
+          dicsover controlelr
+            ap must work as touch free device
+
+          ap boots ap
+            dicover wlc
+              capwap tunnel
+                wlc join
+                  download images
+                    run state
+                      restart
+
+          state machine
+            used for checking each above parts
+
+            wireless termination point (ap)
+            access control (wlc)
+
+          *admin just need setup poe and assign vlan on port
+
+          when see lap boots up means our mini ios get started 
+
+          in dhcp we can set wlc options and config wlc discovery
+
+          between wlc and ap we have capwap tunnel contain dtls and encryption  
+
+          light ap and wlc could authenticate each other base on certificates and send join request or respons together
+          here might  have 2 tunnels and need lap ios on latest versions
+          all configs will be loaded from wlc on lap with run state then ap works as normal ap and show us up state
+          restart state is wlc operation mode so don't see restatrt state at normal working state
+          after restart must pass all above steps
+
+          if see many wlc on network and lap need config what should to do?
+            base on special mechanism use one of them
+            send join request and response it
+
+            3 way to use them
+              we have one master wlc controller which help us to set broadcast ap requests
+              ap use wlc with lowest load 
+                this load points to ap remained count and joined ap counts
+
+              sometimes discard requests from wlc ?
+                upgrade license level and supported ap
+                if all ap wanna moved get trouble so need hafor wlc
+                we have some keep alive pacekts on every 30 seconds intervals
+                in ha need them
+                better use many capwap tunnel to many wlc 
+                recommended use many wlc with more capability
+
+                after each keepalive must check it is active or not
+
+                hello 30 seconds
+                dead 4*3 second used as escalated (means cehcking mode)
+                35 -40 second is not active detection
+
+                *if app detect has no connect with wlc purge all conenctions then try to connect one wlc
+                need enable fallback option on ap cause when primary wlc comes back could not change and switched between secondary and primary
+                by default is enable our fallback option
+
+                n+1 redundant > primary + secondary (idle wlc)
+                n+n redundant > in network load is asymetric and join messages for wlc is not symetric (cost intensive)
+                n+n+1 > combination of above modelson 3 level each ap could have priority  one of them is completely idle and another have percentage of useage n%
+
+            wlc must use ios and versions higher than 7.5 
+            sso redundancy could be ther for replacing at the minimum time (statefull switchover)
+            ha pairs 
+              1 is primary 
+              x is standby or secondary
+
+              like hsrp we can set many wlc in one group
+
+            *for license just need back or ha\standby mode our ap count is not important in wlc
+
+            in ha and redundancy we have no join messages so use fast convergence
+            all another mechanism are same as before
+            discover tunnels with active wlc
+            active wlc set standby wlc will be assigned to which ap
+            ap must use wlc switch over operations not self decision
+
+            *must use same ios images in sso 
+            use 100 msec in sso group 
+            if were not reachable standby ping actives
+            after 500 msec could recover them
+            on config have virtual mac and mobility mac ap used them also another wlc  in group use these to cover one name
+            called transparent action or operation
+            ap doesn't know connected to which wlc so transfer this virtual attributes to wlc groups and standby
+
+          lap has no ios or ios images so thes issues managed by wlc some updates on ap need paass again all above steps so wlc must manage the users conenction
+          here wlc upload new ios on ap and before reboots load all configs then restart them and force use new ios
+          must use same iios for wireless fabric
+          another issue is one of them had new ios and need restart but after rebooting mst works on new version and another ap did not get upgrade so fabric could not work as well
+          here wlc checks all ap received all ios and all of the fabric reboot at one time
+          also wlc must get reboot
+
+          discovery wlc
+            lap must known where is the wlc and detect ip address
+            define wlc in dhcp and use dhcp server with dns
+            access to broadcast 
+
+          lap when received ip from dhcp could use capwap discovery message for wlc discovery every one on udp 5246 must define it self to wlc
+          after this received discovery response in broadcast mode
+          wlc must manage arp 
+          if interfaces on wlc were shutdown could handle ap manger
+
+          *consider relay agents issues
+
+          in cli
+            ip helper-address dhcp
+            ip helper-address bootp
+
+            ip forward udp 5246
+
+          next model is our ap knows our wlc this model provided by cisco prime 
+          nvram could cache all informations
+
+          wlc could inform 32 ap and store 8 of them
+
+          dhcp option is 43 means wlc definition 
+
+          dns
+            need a fqdn 
+              cisco-capwapcontroller.localdomain
+
+              in dns server we have record which learned from dhcp 
+              if could not detect and find them must restart and load again all steps
+
+      ap 
+        local > lap works in normal and normal bss
+          when has no traffic forwarding start sniff another channels and detect rouge ap and devices 
+          behave as ids
+
+        monitor 
+          just check conditions do nothing
+          ids behavior and rouge ap and devices detection
+          detect system base on specific states and location base service (ibs)
+
+        flex connect
+          remote side 
+          use internal conenction without capwap tunnels 
+
+        sniffer
+          like wireshark
+          resource intensive just received 802.11 and capture them
+
+          wild packets
+          omni peak
+
+        rouge detector
+          checks all wire and wireless mac address if find some thing on 2 part could say this is rouge
+
+        bridge
+          point to point
+          point to multipoint
+          connect 2 network together
+
+        flex + bridge
+          combination of many network and create mesh
+
+        se connect
+          lap and spectrum analyzer
+          cisco spectrum expert
+
+          *some ap must be on same mode
+
+        radaiation patterns
+          leverage arsennus for wireless coverage (vibration pattern)
+
+        link budget
+          snr
+          rssi
+          gain
+          erip
+
+        isotropic antenna
+          distribute signals on all direction
+          use dpi unit
+
+          horizontal / h plane / azinuath plane
+          vertical / e plane / elevation plane
+          polar plae
+
+        gains is not set in v/h plane factories define them
+          passive effective
+
+        beam width
+          maximum width in v or h plane 
+
+        polarization
+          how electric waves propagate
+          we give alternating current to the antenna and it creates an electronic and magnetic field that will be perpendicular
+          depends on antenna 
+            front and rear
+            top and bottom
+
+            in mimo we have many directions 
+            recommended use perpendicular 
+
+    antenna types
+      omni directional 
+        cover all directions
+        must be on center of physical places
+
+        dbi +5 to +2
+
+        monopol
+           single mode
+           small and works on metal plate
+           used in outdoors
+
+        types               e plane   gain
+          dipole            65        2.4   5
+          monopole          50        2.2   3.5
+          integarted        150       2     5
+
+      directional
+        used outdoor
+        just one direction
+        10 - 14 dbi on 2.4 ghrz
+        yagioda
+        cisco patch antenna
+
+        parabolic dish
+          used for long distance
+          20 -30 dbi
+
+        types             e/h plane     gain
+          patch           50            2.4     5
+          yagi            25-30         6-8     7-10
+          parabolic       5             20-30   20-30
+
+      amplifiers is positive gain and works with specific power 
+      lightening arrestor
+
+    roaming
+      goes from one bss to another bss
+      has 3 model and 2 implement way
+        autonomous and wlc + lap
+
+      if used autonomous mode must check ap links on clinet wiress conenctions
+      if were weak must switch on another 
+      clients scan method
+        passive mode beacon
+        active mode probe
+
+      in mobility we have some data on ap 1 must forward to clients and moving to ap 2 could make some losts so oour networks must use cable fabric and interconnectivities to transfer all data
+      clients mac must be move from ap1 to ap 2
+
+      mobility and roaming happen on clients devices not ap or wlc
+
+      in networks might use many ap
+
+      clients roaming algorithem
+      base on signals power and quality
+
+      in roaming we have saem vision as simple ap 
+      in ap we have association table store all clients mac
+      is different on each ap
+      cause we have autonomous mode but in wlc and ap mode we store these association tables on wlc and unique database
+      manage and forward on capwap 
+      clients is not aware about these
+      we have reassociation on mobility
+      
+      *in roaming we nee maximum 10 msec interaction for controllers and roaming
+      it is important for voice and video conferences
+
+      in reassociation we have many actions
+        might have new ip address
+        new authentication from radius server 
+
+        *for capwap controll and cause slower roaming
+
+      cisco has faster mechanisms
+        for many wlc use on edatabase and make keys then advertise it to another wlc in roaming and mobility did not check and send request again to wlc 1 and radius 1
+
+        use cisco centralized key management (cckm)
+
+        users nic must support ccx (cisco compatible extention)
+
+        key caching
+          clients on roaming and mobility between aps must support thses
+          don't send repeated requests to ap 
+          when one time sent request toap just authenticate in database and create a table of aps on clients like a database
+          up to 8 ap store on this table on client side to make faster roaming
+
+          802.1 r or fast roaming
+            fast dss transition
+              clients must store authentication keyand send to ap 
+              ap doesn't authenticate users cause has key
+
+        clients must have driver
+
+        if had many wlc and inter roaming
+          roaming inter area or inter controller
+            layer 2 (local to local) and layer 3 (local to foreign)
+
+            must set many wlc in to the same mobility group 
+
+            when need many wlc as loadsharing and redundancy must use same license
+
+        target is forwarding users on vlan x on different ssid and make roaming on fabric
+        set same vlan tag on many ap
+        here we have layer2 roaming
+        cause users are on same vlan and don't need received new ip or ...
+        just need reassociation
+        just conenct to wlc 1 and wlc 3 ...
+
+        ssid staff -------- vlan 200 192.168.200.0/24
+            |
+            |
+            |
+            vlan 100
+            192.168.100.0/24
+
+        in layer 3 we have different methods and need more time
+          we have vlan change in layer3 also need new ip
+
+          in ssid we have different vlans on one ssid must changes them at the maximum 20 msec 
+
+          most nic doesn't support this type to request again new ip from dhcp cause use them before 
+          use new mechanism as local to foreign roaming
+            between wlcs has interconnectivity so detect that shared ssid is connected to which vlans so here findout layer3 
+            this called proactive
+            if see different vlans must mapped them but could not use new dhcp request and new ip 
+              on new bss used previous ip address but in new range
+                
+                *new capwap created between wlc to manage this
+
+                ap 2 worked another place and connected indirectly to wlc 1 (anchor action)
+
+                wlc-1 -------------- sw-1 --------------- wlc-2 (foreign controller)
+                |                                           |
+                |                                           |
+                |                                           |
+                ap-1                                        ap-2
+
+        in wlc-1 association table if received pacekts from clients forward to wlc2 and set tag vlan 100
+        in wlc-2 did not set vlans and did not chaneg anything cause use capwap tunne as forwarder 
+            need time not sensible
+
+            wlcc >>> monitor clients (802.11 mobile)
+
+            if clients joined to ap-1 and managed by wlc-1 called them 802.11 
+            if moved between wlc called 802.11 mobile with handling
+
+            on mac selection tell us anchor mechanism
+            mobility rule is foreign
+            peer mobility and ap name
+            and ap type is mobile 
+
+        sometimes get trouble on foreign controller detection and stock in anchor state so clients foes to another ap and wlc
+        better set anchor on static mode and define wlc and ap
+
+        recommended guest users use just one part of wlc and ap don't use whole fabric
+
+    mobility group
+        used for layer 3 and capwap tunnels between wlcs
+        if were too many groups could have tunnel on them
+        if don't use this group need full authentication and dhcp requests
+
+        one ssid deplyed on many vlans and wlc
+
+        72 wlc could be on one mobility domain
+        in each mobility group we have 24 groups
+        usually use on egroup
+
+        location services and devices
+            if one client wanna join the ap must set location
+            base on signals quality and power detect locations 
+            rssi (received signal strength th)
+
+            between many ap compare powers and detetc locations then set on wlc
+
+            rtls (real time location service)
+
+            cisco prime infrastructure and dna center
+
+            cisco mobility services engine ( mse)
+
+            cisco dna space
+
+        clients sent probe and ready for roaming
+        clients system define it self to ap and has wakeup mechanism
+
+        in organization if you have wireless phones or microwaves and .. get trouble all signals 
+        clear air
+
+    authentication wireless clients
+        end point (device)
+        end user (clients or users)
+
+        recommended set authentication mechanisms on users 
+
+        types
+            open
+                1997
+                open and wep
+
+                a user conencted to ap with some devices and use network 
+                had no authentication mechanism
+                if send probe and beacons could reach the resources
+                end point and end devices could access the network but user could not
+                users must verified on username and password (authentication)
+                after authentication request send association request
+
+                wlc > wlan > security
+                    alyer 2 > layer2 security
+                        non
+                            open authentication for devies
+
+                            in config set security policy on non or on wlan and general tab set this
+
+            psk
+                wlc > wlan > security > layer 2
+                    layer 2 security
+                        wpa / wpa 2
+                            personal mode (psk)
+
+                            enterprise mode (more complex)
+
+                        wpa / wpa2 parameters
+                            wpa 2 policy
+                                encryption
+                                    aes
+
+                            authentication key management
+                                psk
+                                    format > ascii
+                                    key
+
+                        *set key on wpa2 and client and ap must use same value to authenticate eachother  just part of key will be transfer
+                        *4 way handshake
+                            dictionary attack will be happen if use weak key
+
+                        *encryption and data integrity
+
+                        wpa3
+                            sae (simultanous authentication of equals)
+                                if guess true key values prevent access with forward secrecy
+                                more security on key transmission
+
+                            forward secrecy
+
+                    *wifi alliance define wifi protectin access (wpa)
+
+                *recommended use ise (identity service engine)
+                *better use simple and not complicated method cause all systems are not update
+                    offers use policies with limited access 
+
+                after setting security setting push configs on ap and ap will transfer all pacekts to wlc behave as bridge
+
+            web authenticate
+                used in public and general spaces
+
+                *just authenticate end users and same eap 
+                focus on users 
+
+                web base authentication
+                    database
+
+                    web pages
+
+                local web authenticate (lwa)
+                    database
+                        1-wlc
+                            local eap and authentication
+
+                        2-external
+                            ldap
+                            radius
+
+                        3-external web redirection
+
+                        4-splash pages
+                            wlc db and local
+
+                        5-passthrough
+                            need users confirmation 
+                            conenct to network and weak
+
+                central web authenticate (cwa)
+
+                wlc > wlan > security 
+                    layer 2 > non
+
+                    layer 3 >  web policy
+                        authentication
+                            local eap
+                                works on wlc and localy
+                                but in aaa server could define radius and ldap + loalc eap
+
+                                combination of model 1 and 3
+                                            
+                            passthrough
+                                a web page on eap after confirmation access the network
+                                    wlc > security > web authentication > web login pages
+                                        web authentication type > internal
+                                        messages
+                                        cisco logo
+                                        headlines
+
+                            web redirection
+                                external web redirection
+
+            eap 
+                extensible authentication protocol
+
+                802.1 x
+                a framwork without limitation 
+                has methodology
+
+                supplicant is users
+                authenticator is switch 
+                authentication server (as) is radius  handled by wlc or ap
+
+                between supplicant and switch we have eapol (extensible authentication protocol over lan)
+                between switch and radius server we use radius  protocol
+
+                eapol has no substitute
+                    wireless device
+                        open authentication
+
+                    wireless users
+                        leap
+                        eap tls
+                        eap fast
+                        peap
+                        eap sim
+                        eap ttls
+
+                wpa/wpa2/wpa3
+                    personal mode (psk)
+                    enterprise mode
+                        eap
+                            local eap
+                            external as or eap (point to radius)
+
+                wlc > security > aaa > radius > authentication
+                    server index 1
+                    ip 192.168.1.2 (must be reachable)
+                    shared secret 123
+                        between switch and radius server must use password and encryption
+
+                    port 1812 or 1645
+                    server status
+                    network uses 
+                    mgmt
+                    ipsec
+
+                wlc > wlan > security > layer 2
+                    layer2 security
+                        wpa/wpa2
+                            parameters > wpa2 policy
+                                aes
+
+                            authentication key management
+                                802.1x
+
+                            aaa servers
+
+                        *in this eap type just set mode between client and radius server between swithc and radius server just have forwarding mechanism
+
+                        *till here we have external mode better use internal mode to detectc chanegs
+                            wlc > security > local eap > profiles
+                                name >x 
+                                    set eap method
+
+                                    *again enter the profile and set parameters for eap authentication
+
+                            wlc  > wlan > security > layer 2 
+                                layer 2 security
+                                    wpa/wpa2
+                                        policy
+                                            aes
+
+                                        authentication key management
+                                            802.1x
+
+                                    aaa server 
+                                        local eap authentication
+                                            set profiles
+
+                                            *remove previous radius server
+
+                        we can use ldap 
+                            wlc > security > aaa
+                                local net users
+                                    define local uses and ldap
+
+                                    then set on wlan and limit to one wlan
+
+            same attributes             authentication      for
+            --------------------------------------------------------
+            open                        no                  devices
+            --------------------------------------------------------
+            eap                         802.1x              devices are open - users are on eap
+            --------------------------------------------------------
+            psk                         yes                 devices
+
+  ****************************
+  troubleshooting
+    better check steps from clients side
+        discovery beacon and probe
+            association request and response
+                authentication
+                    ip assignment (dhcp)
+
+    after these cehck from wlc
+
+    clients must be correct rf ranges of ap then pass all above steps
+
+    wlc > monitoring > network summary
+
+    wlc > advance
+        config
+        monitoring
+
+    first steps on troubleshooting
+        mac address checking
+            on main dashboard copy mac address and see attributes in clinets view
+                start
+                    means our procedures are get start
+
+                associate
+                    means received rf signals but need authenticate
+
+                authentication
+                    means our keys are not true or correct
+
+                dhcp
+                    trouble on ip assignment    
+                    might users set manual ip   
+                    transfer all states on capwap and monitor in wlc    
+    
+                online
+                    means are conencted and everything is okay
+
+                *steps for each wireless clients
+
+                green rings means good condition and black or gray is not okay
+
+                in this clients view page we ahve performance part which show us main informations
+                contain snr rssi .. to -70 db is ok and acceptable
+
+                connection score is important
+                    signals strength and signal quality
+                    connection speed
+                    channel width
+                    show rates
+                        ap
+                        client
+                        best practices
+
+                    capability
+                        802.11 n 2.4 ghrz 
+                        spatial stream 1
+
+                    tell us connected to which device (ap) and closest device is ap x
+
+                    *ccx version 5 is the highest version on cisco
+
+                in this client veiw we have mobility state show us ap attributes and information
+                    show us capwap tunnel attributes
+                    ap 
+                    clients
+
+                    show us policies qos security and network
+
+                connectivity test between clients and wlc
+                    client test
+                        ping
+                            icmp 5
+                                802.11 to 802.3 and 802.3 to 802.11
+
+                        connection
+                            monitor last 3 minutes
+                                association
+                                l2 psk
+                                membership
+                                ip assignment
+                                advance options
+
+                        event logs
+                            tac
+                                techniques assistance ciso
+
+                        packet capture
+                            store on ftp
+
+
+    troubleshooting from ap
+        might have trouble on ap direction and location
+        in one cell we have trouble for clients connectivity so detect our ap has problem
+
+        cause we have wlc and ap 
+            must check wlc and capwap tunnels 
+            then check power and poes and switch conenctions
+            in flex connect in braches we have no capwap tunnels
+
+            in main wlc dashboard must see ap attributes if were not exist must cehk switch and ap
+            then check ip from dhcp and capwap
+
+            accesspoint veiew
+                power status
+                max capability
+                groups
+                performance summary
+                    main state could find problems
+
+                interference is on 802.11
+                noise is on everything except 802.11
+                    -90 to -100
+
+                    air quality index (aqi)
+                        0 is worst
+                        100 is best
+
+            rf troubleshooting
+                rf interference
+                    rouge ap and clean air interference
+
+                    non wifi channel utilization
+
+                    data cycle 
+                        how many of time effects on frequence ranges
