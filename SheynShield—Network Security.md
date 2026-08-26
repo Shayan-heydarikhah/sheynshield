@@ -735,7 +735,7 @@ This approach connects network fundamentals with enterprise security, modern inf
 Technical videos, security training, configuration walkthroughs, architecture discussions, and practical labs are published under the **SheynShield** brand.
 
 **YouTube Channel:** SheynShield  
-**Channel URL:** `ADD-YOUR-EXACT-YOUTUBE-CHANNEL-URL-HERE`
+**Channel URL:** https://www.youtube.com/@sheynshield
 
 For consistent indexing, branding, and discovery, use the exact name **SheynShield** across GitHub, YouTube, LinkedIn, documentation, course pages, and technical articles.
 
