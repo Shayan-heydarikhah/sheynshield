@@ -1,4 +1,4 @@
-📘 Fortinet Knowledge Base — NSE1 to NSE7 (Handwritten Enterprise Notes)
+# Fortinet Knowledge Base — NSE1 to NSE7 (Handwritten Enterprise Notes)
 A comprehensive, scenario‑driven collection of real‑world Fortinet documentation, built from handwritten notes, enterprise troubleshooting cases, and deep‑dive analysis across the entire Fortinet NSE certification track.
 
 This section of the repository covers every major Fortinet domain, from foundational concepts (NSE1–NSE3) to professional administration (NSE4), advanced operations (NSE5–NSE6), and expert‑level troubleshooting (NSE7).
