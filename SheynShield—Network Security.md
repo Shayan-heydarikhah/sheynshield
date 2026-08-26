@@ -1,4 +1,4 @@
-#SheynShield — Network Security, Cybersecurity & Enterprise Infrastructure Knowledge Base
+# SheynShield — Network Security, Cybersecurity & Enterprise Infrastructure Knowledge Base
 
 **SheynShield** is a technical knowledge base for **network security, cybersecurity, enterprise networking, secure infrastructure, defensive engineering, troubleshooting, and hands-on command references**.
 
