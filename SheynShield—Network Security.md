@@ -6,7 +6,7 @@ This repository is maintained by **Shayan Heydarikhah — Network Security Engin
 The goal of SheynShield is to build a structured, vendor-diverse reference for engineers, students, security professionals, and technical teams working with modern network and cybersecurity technologies.
 
 Repository: https://github.com/Shayan-heydarikhah/sheynshield  
-YouTube: **SheynShield** *(add the exact channel URL here)*
+YouTube: **SheynShield** *(https://www.youtube.com/@sheynshield)*
 
 ---
 
