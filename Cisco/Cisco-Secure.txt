@@ -89,16 +89,6 @@ Your handwritten notes are extremely valuable because they capture actual operat
 
 ---
 
-📈 Roadmap
-- Convert all TXT files → Markdown  
-- Add diagrams for VPN, DMVPN, Firepower packet flow  
-- Add lab topologies  
-- Add configuration templates  
-- Add troubleshooting playbooks  
-- Add versioning for ASA/FTD/ISE/ESA/WSA
-
----
-
 🤝 Contributions
 This repository is open for contributions.  
 If you want to add notes, corrections, or diagrams, feel free to submit a pull request.
