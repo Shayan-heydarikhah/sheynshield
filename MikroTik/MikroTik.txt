@@ -1,0 +1,1936 @@
+MikroTik :
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Common :
+	router boards has router os also can make it wireless accesspoint and switch
+
+	name defination (mikrotik name standard) :
+		u > usb
+		p > power injection with controller
+		i > single port injection without controller
+		a > more memory (higher license level)
+		h > more cpu throughputs
+		l > light edition
+		s > sfp port
+		e > pcie extention
+		x name > cpu core count
+		r > mini pcie slot
+
+		rb450g :
+			rb > router board
+			4 > product series
+			5 > count of lan ports
+			0 > count of wireless interface
+			g > port type
+
+		power full series :
+			ccr > cloud core router
+			csr > cloud router switch
+
+	license :
+		0 > 24 hours free and based on uptime
+		1 > sign in on mikrotik website, give us 1 step or permission to use option
+		2 
+		3
+		4
+		5
+		6
+
+		\system > license	
+			software system id
+
+			if use direct access to licensing means lost license
+			we should goes to :
+				mikrotik.com
+					account
+						make akey from prepared key
+
+						paste code to terminal
+
+		chr (cloud host router) in unlicense mode use 1mb speed but after license :
+			p1 (1g > like lvl 4)
+			p10 (10g > like lvl 5)
+			pu (unlimite like lvl6) 
+
+	\system > identity (change host name)
+
+	after upgarede ios version and packages must reboot devie to commite them also :
+		\system > router board (when change ios version most upgrade frameware here)
+		\system > packages
+			better disble or unistall caiea package (spy)
+
+		in ios on mikrotik site we have rc term (release candidate > testing (like beta))
+
+			dedu is a monitoring package
+
+		we can use check for update but before this must check firewalls rule (better use offline mode)
+
+		we have ntp and usermanage on extra package
+		static route is in system package
+		advance tools 
+			wireless
+			sms
+			ping tools
+			netwatch
+
+		if upgarde to bad versison maybe get crash and can't connect to device sometimes must change jumbo packet on ncpa.cpl
+
+	\system > clock (ntp)
+	\system > users 
+		can define users with ip and mac to use winbox ..... with allow address
+		then disable all another connectivities type on each interfaces
+
+		we have types for groups (normal - manager - admin - audeting)(permissions : read, write, full)
+
+		in permission access we have many term sensetive means user can see passwords with show\hide passwords on winbox
+			sensetive informations :
+				advance package tools (sms)
+				system package (radius-snmp)
+				wireless setting (keys and secrets)
+				wireless test packge (keys and secrets)
+				usermanage package
+				hotspot packge
+				backups (mikrotik password recovery backup)
+
+	\files 
+		can backup and restore on this section 
+		if use backup option we can set password and encryption but must restore on same cpu arc (binary file, file.backup)
+		if goes to terminal and do this :
+			export file= a.cfg
+
+			give us .rsc file (editable and restore able on each device)
+
+	in brower we can connect to mikrotik ftp server :
+		ftp://router-ip-address
+
+		/ip > smb > share
+
+	in mikrotik we checked dst nat > routing > src nat
+
+	on version 6.41 and above we have bridge , below of yhis version we don't have it and have master port.
+
+	dos :
+		ip > settings > sync coockies tcp
+
+	ip > snmp
+
+	if see some words on mikrotik with italic font means not connected to any thing
+
+	ip > route 
+		we have types here :
+			blackhole (null0)
+			unreachable
+			unicast
+			prohibit
+
+	better don't use range 10.0.0.0/8 on lan
+
+	ip public dynamic (no new session has more secure)
+	ip public static(has new session and more problem)
+
+	tools > torch  (src > des > port (see usauge))
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TTL:
+	trace work like this :
+		first packet of pink use ttl =1
+			goes to first hop, ttl=0
+			reply ip address for last hop
+		then set ttl =2
+			goes to first hop, ttl=1
+			then next hop, ttl=0
+			reply ip address for last hop
+
+		repeat this procedure to reach specific route
+
+		we can use change ttl option in mikrotik to make our hops transparent
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+DHCP :
+	\ip > dhcp :
+		server
+			before set these options must set ip address on interface
+			in creating server we have a option (add arp for leases) for arp poisoning
+			we have static only option on this steps, give access to users who get static with this method no one can use dhcp and accessability
+			on dhcp we have always braodcast option if unchecked this we can convert to unicast
+
+			for arp method we must set interface arp mode on reply only (with this cant change ip or mac)
+				also we can do this :
+					ip  > firewall > mangle
+						general 
+							chain > prerouting
+							src address > ip of users
+						advnace
+							src mac address 
+						action
+							mark connecion > x-name
+							no passthrough
+					
+					ip  > firewall > filter rule
+						general 
+							chain > forward
+							connecion mark > x-name
+						action
+							accept
+					
+					ip  > firewall > filter rule
+						general 
+							chain > forward
+							connection mark > no-mark 
+						action
+							drop	
+
+					then must set arp mode for client side interface on reply only and set all ip > arp to static
+
+					some times after vpn runing we can't see lan :
+						must use supernet for dhcp range (netmask)
+						then set arp proxy on arp mode for interface
+						also set option 121 (splite tunnle) in dhcp
+							dhcp setup
+								dhcp option set
+									option 121
+										hex
+											0x18c0a864c0a80101 > mask network nethop > 24192.168.100192.168.1.1
+		client
+			on these options we have default route option and dns and ntp that can be peer of server
+
+		relay
+			can advertise dhcp packets to another router
+			if we have eoip tunnel and ping of dhcp server in other city and we cant get ip from serve
+			ho we can solve problem?
+
+				on mikrotik in other city (server):
+					dhcp server > ether1 
+					iprange > 192.168.1.0/24
+					ipgateway dhcp >192.168.1.0/24
+					ip dhcp relay > 192.168.1.0/24
+
+				on mikrotik in other city (client):
+					dhcp relay : ether 1 (on wich interface drop packets) 
+					dhcp server : ip pblic on edge(front view)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+DNS :
+	ip > dns
+		allow remote request
+
+	ip > firewall > nat 
+		general
+			chain > des nat
+			port > tcp + udp 53
+		action 
+			redirect 53
+
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	ip > firewall > filter rule 
+		general
+			chain > forward
+			src address > supernet of lan ip ranges
+			dst address > internal dns server ip address 
+			port > tcp + udp 53
+		action 
+			accept
+
+	ip > firewall > filter rule 
+		general
+			chain > forward
+			src address > supernet of lan ip ranges
+			port > tcp + udp 53
+		action 
+			drop \ tarpit
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Device Connection :
+	default ip : 192.168.88.1 /24
+	we can discover mac and ip  on mikrotik neighbor discovery protocol (mndp)
+	with mndp we can catch ios version, ip ....
+	mndp is cdp works on udp 5678
+		/tools > mac server > mac winbox server
+			if has mac of device can't connect to device
+			better disable all of them
+
+			cli :
+				system console disable
+
+		/ip > neighbors > discovery setting (mndp)
+	maybe lost connection on mac better use ip address
+
+	mikrotik support lldp
+
+	username : admin
+	password : 
+
+	winbox works on port 8291 tcp or use webfig on tcp 443 and 80
+		/ip > services > port
+
+	with safe mode button on winbox we can use live snapshot with 15 minute interval or restore point after stable connfig disable it to write on memory if crash on enable mode restore to last stable state
+
+	on cli we can (ctrl + x) > safe mode
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Reset Configuration :
+	/system > reset configuration
+		keep users config > user configs save on device
+		caps mode 
+		no default configuration > all configuration lost just restore mac (no config, ip, .....)
+		no backup > after reset take snapshot from last configs
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Arp Modes On Each Interface :
+	enable
+		garp and normal arp with arp table + arp proxy on external interface access + arp reply
+	disable
+		first enable arp to create arp table then for secure lan and .. must disable it
+	reply only
+		just reply answers must make learned macs to static mode (answer to macs who know them \ internals)
+	arp proxy
+		router must transfer packets and hande requests
+	local arp proxy only
+		if 2 pc be on same lan and broadcast domain can't reachable so must request to router for transmissions and connectivity
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Bridge :
+	we can use layer 2 and layer 3 options with this concept (layer 2.5)
+	in bridge we can create a blank interface then set ip address on /ip > interfaces (like loop back)
+
+	we have hardware offloading in mikrotik, with this mange ports on switch chip and switch modes on software mode or hardware mode
+	we can set some setting on bridge like use ip firewall to check layer 2 and 3 headers
+
+	altho we have cpu in mikrotik we have switch chip that seperate bridge trffics from other traffics
+	if we add some interface to bridge convert to slave and we can't run any thing on it
+	must run rules on bridge interface
+
+	on v6.41 to reduce load define bridge > master port
+		example > on ether 3 we said who is the master port of this interface 
+
+		with this we send process of this port to switch chips not main cpu
+
+	if see swith on winbox means switch chip
+		8227 > 100 mb
+		8327 > 1 gb
+
+	on each switch chip we have one switch port
+	if need to convert switch all ports must set master port then bridge the master ports togheter
+	if inject them directly to bridge take much loads
+
+	wireless has another and seperated master port, better don't add it to bridge
+
+	after v6.41 all of these do automaticaly
+
+	better take a backaup before master port setting
+	in manual master bridge we have dynamic term in bridge menu that run rstp (no loop)
+	in this version and higher we don't have masster port option
+	we have hardware offloading (switch chip)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Interface :
+	interface list 
+		we can define many list and groups in this steps
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Web Proxy :
+	with web proxy we can cache data and resolve them on higher speed
+	must set destination and source nat
+	don't work on https
+	cache admin (if we block some thing email admin)
+	cache on disk (move our ccaches from ram to hard)
+	max fresh time (how long stay on system)
+	max client connection (for attacks)
+	always from cache
+	serialize connection (make new connection and save that dont dispose that)
+	cache hit dscp (tos (mark and set tag))
+	802.1d 7,6 > voice 
+	802.1d 5,4 > video
+	802.1d 0,3 > best effort 
+	802.1d 1,2 > backgaurd and tos
+	filter and redirect on ftp and http.
+	
+	ip > web proxy
+		src address (gateway ip)
+
+	ip > firewall > nat
+		general
+			chain > des nat
+			port 80 tcp
+		action 
+			redirect 8080
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Block SSL And TLS :
+	ip > firewall > filter rule
+		general
+			chain > forward
+			port tcp
+		advance 
+			tls host > *facebook
+		action
+			drop \ tarpit
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Meta Router :
+	use kvm and meta files can add voip on mikrotik
+	like vmware use virtualizations
+	openwrt
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Netinstall :
+	must run as admin
+	disable all firewall antivirus and another nics on ncpa.cpl
+	define same ip range on nic and netinstall netbooting
+
+	then power off router and hold reset button on router board :
+		3 seconds : frame ware of router os (we have 2 router boot one of them is backup)
+		5 seconds : led falshing (reset router configs)
+		10 seconds : caps mode
+		15 seconds : netinstall	mode (led off)
+
+	after 15 seconds our device appear on netinstall must be carefull if reset (format) another device can't recovery data
+	browse packages then can upgarde or downgrade os version
+	if use keep old configuration can clear all passwords and users
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Firewall :
+	best practice is use address list to make our policie on summary mode
+
+	/ip > firewall :
+		filter rule
+			we can use layer 7 in advance tab
+		nat
+			source nat (with ppoe or one gateway) :
+				general 
+					chain (src nat)
+					src address (lan 1)
+					out interface x
+				action 
+					masquerade
+
+			source nat (with many gateway) :
+				general 
+					chain (src nat)
+					src address (lan 1)
+					out interface x
+				action 
+					source nat (static ips)
+		
+		mangle
+			has action like wire shark (sniff tzsp)
+		raw
+			raw don't save connection state and it is fast
+			prefix list in cisco
+			no connection tracking (dos attack)
+			by pass some tracks
+			its not loke fast track 
+			ping flood blocking
+			fast track disable all firewall but raw use some tracks
+
+			ip > firewall > raw
+				general 
+					chain > prerouting
+					port > icmp
+				action 
+					drop
+
+				drop works the best on this method
+				for lan\internal connectivity must use this 
+
+		service port
+			some features on network get truble must check ports and .. here like ftp + sip (5060) (nat helper + amg)
+		
+		connections
+			connection tracing (clear ip nat translation \ clear xlate)
+			all connections are here
+		
+		address list
+		layer7
+			can't work on https and ssl decryption
+			Regex :
+				(:) start and define 
+				(^) start with this
+				($) end of script
+				([]) if take ok with some thing goes with that
+				(\) means character
+				
+				^.+(instagram).*$
+
+		we have many actions :
+			filter rule :
+				reject (sounded drop)
+				drop (silent drop)
+				tarpit (tcp hold connections and drop them)
+				passthrough (just use for counter on mnay steps)
+				jump (redirect to specific step)
+				return
+				fast track (use for nat and firewall if enable this feature we can use 890mb throughput (better use for internal traffic shaper))
+				route action > if see src on lan send it to x nexthop
+				set priority > layer 3 tag to send qos parameters on higher level devices
+
+		passthrough mode {log , jump , add src/des to addresslist , passthrough , return , fasttrack}
+
+		in normal mode we use stateless firewall for state full mode (tcp state and connection state is different) :
+			in define rule we have connection state :
+				new
+				invalid
+				established
+				related
+					sites has many popups and ...
+
+			better block all input and outputs exept connections with these states
+			these parameters works with connection tracking so must set it on auto
+				ip > firewall > connections > tracking
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Better Seperate Lan And Wan :
+	ip > firewall > filter rule
+		general 
+			chain > forward
+			src address > lan ip range
+			dst address > wlan ip range
+		action 
+			drop \ tarpit
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+State Full FW :
+	use connection tracking
+
+	ip > firewall > filter rule
+		general
+			chain forward
+			dst address > router ip
+			port 443 + 80 + icmp
+			connection state > new + related
+			in interface > not internet interface 
+		action
+			accept
+
+	ip > firewall > filter rule
+		general
+			chain forward + input + output
+			dst address > router ip
+			connection state > new + established + related
+			in interface > not internet interface 
+		action
+			accept
+
+	ip > firewall > filter rule
+		general
+			chain input + forward + output
+			dst address > router ip \ any
+			connection state > invalid +untracket
+			in interface > internet interface 
+		action
+			drop \ tarpit
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Nat :
+	destination :
+		with port means port forward:
+			ip > firewall > nat
+				general	
+					chain > dst nat
+					port : 123
+				action 
+					dstnat > ip x + port 321
+					
+		just with ip means destination nat :
+			ip > firewall > nat
+				general	
+					chain > dst nat
+					dst address > wan
+				action 
+					dstnat > ip x
+
+	if use this rule our private ip goes to isp :
+		ip > firewall > nat
+			general
+				chain > srcnat
+			advance
+				src address lis > not privateblock  (this is a list of ip we don't want use internet)
+			action
+				masquerade
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Custom Rule :
+	ip > firewall > filter rule 
+		general 
+			chain > shayan
+			src > lan
+			des > black-list
+		action 
+			tarpit
+		
+	ip > firewall > filter rule 
+		general 
+			chain > forward 
+		action 
+			jump
+			name > shayan
+
+	on oldes versions of ros must set return rule but in latest versions do it by itself
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Port Knoking :
+	we have many methods like ping and tcp port...
+	if use ping for portknoking must set -20 from specific number
+
+	/ip > firewall > filter rule
+	add action=add-src-to-address-list address-list=port-knoking \
+    address-list-timeout=1d chain=input comment=portknoking disabled=yes log=\
+    yes log-prefix="icmp ort knoking" packet-size=77 protocol=icmp
+	add action=accept chain=input comment=port-knoking disabled=yes log=yes \
+    log-prefix="icmp port knoking" packet-size=88 protocol=icmp \
+    src-address-list=port-knoking
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Winbox Access :
+	ip > firewall > filter rule 
+		general	
+			chain > input
+			dst port > 8291
+		advance
+			not src address list x
+		action
+			drop\tarpit
+
+		we can do it dor ssh ....
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+If Some Body Ping, No Internet Access :
+	ip > firewall > filter rule
+		general	
+			chain > input
+			port > icmp
+		action
+			add src to address list > badha
+		
+	ip > firewall > filter rule
+		general	
+			chain > forward
+		advance
+			src address list > badha
+		action
+			drop \ tarpit
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Destination Nat And Port Forward :
+	on these rule types must set inbound\input interfaces
+
+	/ip > firewall > nat
+		general 
+			chain > dst nat
+			dst address > 1.2.3.4
+		action 
+			dst nat + port and address
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+RDP Access :
+	/ip > firewall > filter rule
+		general 
+			chain > forward
+			src address > lan
+			port > 3389 tcp
+		action 
+			drop \ tarpit
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Bet Sites Blocking :
+	ip > firewall > filter rule 
+		general
+			chain > forward
+			src address > lan
+		advance 
+			content > bet
+		action 
+			drop
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Block Some Sites :
+	ip > firewall > address list 
+		define many sites > x-list-sites
+
+	ip > firewall > filter rule
+		general
+			chain > forward
+			port > 80 tcp
+		advance
+			dst address > x-list-sites
+		action
+			add src to address list
+
+	
+	ip > firewall > filter rule
+		general
+			chain > forward
+		advance
+			src address list >  x-list-sites
+		action
+			drop \ tarpit
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Unequal Load Balance With Packet Mangement Problem (ecmp) :
+	ip > route > destination 0.0.0.0
+		gw > isp-1
+		gw > isp-1
+		gw > isp-2
+
+		we can also use distance to set priority of routes
+		check gate way help us to monitor link each 10 second
+		pref source means our desire out route or interface on specefic src and dest interface
+		route mark is a value to mange packets on internal management
+
+		if use distance on 255 value our route get deactive
+
+		if gw set on interface routes get deactive
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Policy Base Routing 1 :
+	static route is the best way :
+		ppp > interface (add l2tp and ipsec)
+		ip > firewall > nat (masqurade)
+		ip > route
+	
+	rules :
+		ppp > interface (add l2tp and ipsec)
+		ip > firewall > nat (masqurade)
+		ip > route > rules
+			if make rules , make a list of ips and must make default route in routing table.
+	
+	mangle :
+		ppp > interface (add l2tp and ipsec)
+		ip > firewall > mangle 
+			add address list of ip ranges
+			action route (vpn erver ip address)
+			mark routing > chain(input) > srcaddress > markrouting
+	
+	
+	dhcp over https (doh) :
+		https://cloudflaredns.com/dns-querry
+		ip > dns > servers (allow remote request)
+		ppp > interface (l2tp + ipsec)
+	
+		ip > firewall > mangle
+			chain (output)
+			advance > 	des add (dns (make address list))
+						protocol (udp 53)
+			action > 	mark-route (route dns)
+	
+		ip > route 
+			every one have vpn mark packet can access net.
+	
+		ip > firewall > nat (masqurade)
+		ip > firewall > mangle
+			chain(prerouting)
+			advance > 	des-address-list (make address list for youtube or ... ip range)
+			action > 	mark routing (vpn)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Policy Base Routing 2 :
+	sla + track + pbr
+
+	firs set 2 default route to each isp
+
+	ip > firewall > mangle
+		general
+			chain > prerouting
+			src address > lan-1
+			not des address > lan-2
+		action
+			mark routing > local-net
+
+	ip > route
+		on default route must set routing mark to change the flow
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PCC (Load Balancing) 1 :
+	ip > address
+	add address=192.168.0.1/24 network=192.168.0.0 broadcast=192.168.0.255 interface=LAN
+	add address=10.111.0.2/24 network=10.111.0.0 broadcast=10.111.0.255 interface=ISP1
+	add address=10.112.0.2/24 network=10.112.0.0 broadcast=10.112.0.255 interface=ISP2
+	
+	ip > firewall > mangle
+	add chain=prerouting dst-address=10.111.0.0/24  action=accept in-interface=LAN
+	add chain=prerouting dst-address=10.112.0.0/24  action=accept in-interface=LAN
+	add chain=prerouting in-interface=ISP1 connection-mark=no-mark action=mark-connection 
+	    new-connection-mark=ISP1_conn
+	add chain=prerouting in-interface=ISP2 connection-mark=no-mark action=mark-connection  
+	    new-connection-mark=ISP2_conn
+	add chain=prerouting  in-interface=LAN connection-mark=no-mark dst-address-type=!local 
+	    per-connection-classifier=both-addresses:2/0 action=mark-connection new-connection-mark=ISP1_conn 
+	add chain=prerouting  in-interface=LAN connection-mark=no-mark dst-address-type=!local  
+	    per-connection-classifier=both-addresses:2/1 action=mark-connection new-connection-mark=ISP2_conn
+	add chain=prerouting connection-mark=ISP1_conn in-interface=LAN action=mark-routing  
+	    new-routing-mark=to_ISP1
+	add chain=prerouting connection-mark=ISP2_conn in-interface=LAN action=mark-routing 
+	    new-routing-mark=to_ISP2
+	add chain=output connection-mark=ISP1_conn action=mark-routing new-routing-mark=to_ISP1     
+	add chain=output connection-mark=ISP2_conn action=mark-routing new-routing-mark=to_ISP2
+	
+	ip > route
+	add dst-address=0.0.0.0/0 gateway=10.111.0.1 routing-mark=to_ISP1 check-gateway=ping
+	add dst-address=0.0.0.0/0 gateway=10.112.0.1 routing-mark=to_ISP2 check-gateway=ping
+	add dst-address=0.0.0.0/0 gateway=10.111.0.1 distance=1 check-gateway=ping
+	add dst-address=0.0.0.0/0 gateway=10.112.0.1 distance=2 check-gateway=ping
+	
+	ip > firewall > nat 
+	add chain=srcnat out-interface=ISP1 action=masquerade
+	add chain=srcnat out-interface=ISP2 action=masquerade
+	
+	ECMP: 
+	
+	ip > address
+	add address=192.168.0.1/24 network=192.168.0.0 broadcast=192.168.0.255 interface=Local 
+	add address=10.111.0.2/24 network=10.111.0.0 broadcast=10.111.0.255 interface=wlan2
+	add address=10.112.0.2/24 network=10.112.0.0 broadcast=10.112.0.255 interface=wlan1
+	
+	ip > route
+	add dst-address=0.0.0.0/0 gateway=10.111.0.1,10.112.0.1 check-gateway=ping 
+	
+	ip > firewall > nat 
+	add chain=srcnat out-interface=wlan1 action=masquerade
+	add chain=srcnat out-interface=wlan2 action=masquerade
+	
+	ip > firewall > mangle
+	add chain=input in-interface=wlan1 action=mark-connection new-connection-mark=wlan1_conn
+	add chain=input in-interface=wlan2 action=mark-connection new-connection-mark=wlan2_conn
+	add chain=output connection-mark=wlan1_conn action=mark-routing new-routing-mark=to_wla1     
+	add chain=output connection-mark=wlan1_conn action=mark-routing new-routing-mark=to_wla2     
+	
+	ip > route
+	add dst-address=0.0.0.0/0 gateway=10.111.0.1 routing-mark=to_wla1 
+	add dst-address=0.0.0.0/0 gateway=10.112.0.1 routing-mark=to_wla2
+	
+	failover script: 
+	
+	:global host1 4.2.2.4;
+	:global s;
+	:global gw1ping [ping $host1 count=15];
+	:globalgw [/ip route get [find comment=A] gateway ];
+	/interface pppoe-client monitor “Shatel” once do={:set s $status}if ($s = “connected” ) do={ if ( $gw1ping >10) do={ if ($gw!=”Shatel”) do={/ip route set [find dst-address=”0.0.0.0/0″] 	gateway=Shatel}}} else={/ip route set [find dst-address=”0.0.0.0/0″] gateway=Parsonline};
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PCC (Load Balancing) 2 :
+	ip > firewall > nat 
+		general 
+			chain >src nat
+			out interface > shatel
+		action
+			masquerade
+
+	*do this for each isp		
+
+	ip > firewall > mangle
+		general 
+			chain > input
+			in interface > shatel 
+		action 
+			mark connection
+			no passthrough
+
+		general 
+			chain > output
+			in interface > shatel 
+		action 
+			mark routing
+			no passthrough
+	
+	*do this for each isp		
+
+	ip > firewal > mangle
+		general
+			chain > prerouting
+			in interface > shatel
+		advance
+			per connection classifier
+		extra
+			des address type > not local
+		action
+			mark connection > src - port 2/1
+				each service need in access must use 512 kb so 512/512 =1 + 1024/512=2 + 2048/512=4 =7 (aggreagate of service count)
+
+				port > 7/0
+
+	*do this for each isp	
+
+	ip > firewall > mangle
+		general 
+			chain > prerouting
+			connection mark > shatel
+			in interface > shatel
+		action 
+			mark routing
+			no passthrough
+
+	*do this for each isp	
+
+	ip > route
+		src > lan
+		des > 0.0.0.0
+		gw > satel
+		distance > 1
+		check gw (ping)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PCC (Load Balancing) 3 :
+	Ip > firwall > nat
+	add action=masquerade chain=srcnat out-interface=SabaNet
+	
+	Ip > firwall > mangle
+	add action=mark-connection chain=input in-interface=SabaNet new-connection-mark=SabaNet passthrough=no
+	add action=mark-routing chain=output connection-mark=SabaNet new-routing-mark=SabaNet passthrough=no
+	add action=mark-connection chain=prerouting dst-address-type=!local in-nterface= Ether9 new-connection-mark=SabaNet per-connection-classifier=src-port:2/0
+	
+	define prerouting mode :
+	add action=mark-routing chain=prerouting connection-mark=SabaNet
+	in-interface=Erher9 new-routing-mark=SabaNet passthrough=no
+	
+	ip > route
+	add check-gateway=ping distance=1 gateway=SabaNet routing-mark=SabaNet
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PCC (Load Balancing) 4 :
+	first set 2 default route to isps or use dhcp client options
+
+	ip > firewall > mangle
+		general
+			chain > input
+			in interface > isp1
+		action
+			mark connection > isp1-connection
+
+	* do thi for isp2
+
+	ip > firewall > mangle
+		general
+			chain > output
+			connection mark > isp1-connection
+		action
+			mark packet > isp1-packet
+			passthrough
+
+	* do thi for isp2
+	
+	ip > firewall > mangle
+		general
+			chain > preroute
+			dst add > ip isp1
+			in interface > lan
+		action
+			accept
+
+	* do thi for isp2
+
+	ip > firewall > mangle
+		general
+			chain > preroute
+			in interface > lan
+		advance
+			perconnection classifier
+				botch add&port 2/0
+		extra
+			ds address type > local invert
+		action
+			mark connection > isp1
+
+	* do thi for isp2 (in advance option must set 2/1)
+
+	ip > firewall > mangle
+		general
+			chain > prerouting
+			in interface > lan
+			connection mark > isp1
+		action
+			mark route > isp1
+			passthrough
+
+	* do thi for isp2
+
+	set masquerade for each isp
+
+	ip > route
+		destination 0.0.0.0
+		gw :
+			isp 1 > distance 1
+			isp 2 > distance 2
+		enable check gateway (ping)
+
+		duplicate these rules and set mark route on routes
+
+	better use same bw for each line
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+QOS :
+	10 m in head
+	in left > 6 m limit at, priority 1
+	in right > 4 m limit at, max 10 m
+		in left > limit at 2 m, max limit 10 m, priority 3
+		in right > limit at 12 m, max limit 15 m, priority 5
+
+	we divided limit at on 2
+
+		3
+		1
+		6
+
+		are bw and queue
+
+	How to distribute Internet bandwidth evenly among Mikrotik router board users? You need to move your router to the default Microtek settings for the following command to work properly. We connect to the router with mac, first we change the POOL range to the desired range, now we go to IP> DHCP Server> Networks and change the IP range specified in DHCP Server and DG and DNS according to the defined POOL .
+
+	Then go to IP> Address and change the IP of the Interface bridge according to the previous steps, and then go to IP> Firewall> Filter Rule and remove the Rule fasttrack. Finally, open the New Terminal and copy and paste the following commands into it, and the router must be restarted once.
+
+	/ip firewall mangle
+	add action=mark-connection chain=prerouting in-interface=bridge new-connection-mark=conn-upload passthrough=yes \
+	    src-address=192.168.5.0/24
+	add action=mark-packet chain=prerouting connection-mark= conn-upload in-interface=bridge new-packet-mark=mark-upload \
+	    passthrough=no
+	add action=mark-connection chain=prerouting in-interface=ether1 new-connection-mark=conn-download passthrough=yes
+	add action=mark-packet chain=prerouting connection-mark=conn-download in-interface=ether1 new-packet-mark=mark-download \
+	    passthrough=no
+	
+	
+	/queue tree
+	add name=Download packet-mark=mark-download parent=global
+	add name=Upload packet-mark=mark-upload parent=global
+	/queue type
+	add kind=pcq name=PCQ-Download pcq-burst-rate=4M pcq-burst-threshold=2M pcq-burst-time=16s pcq-classifier=dst-address \
+	    pcq-dst-address6-mask=64 pcq-rate=1M pcq-src-address6-mask=64
+	add kind=pcq name=PCQ-Upload pcq-burst-rate=500k pcq-burst-threshold=400k pcq-classifier=src-address \
+	    pcq-dst-address6-mask=64 pcq-rate=256k pcq-src-address6-mask=64
+	/queue tree
+	add name=PCQ-DL packet-mark=mark-download parent=Download queue=PCQ-Download
+	add name=PCQ-UP packet-mark=mark-upload parent=Upload queue=PCQ-Upload
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+QUEUE :
+	we have sequence
+	target means source
+	time range must sync with ntp 
+	better set unlimit bw for server zones
+	htb > use for advance queueing 
+	don't use range because assign all bw to range if somebody run idm all users disconnect (recommended)(we have this problem in pfifo)
+
+	commited information base (cir) > limit at means minimum bw must reserved for each client
+	maximum information base (mir) > max limit
+
+	priority > 0-8 (lower is better)
+		if set cir and have 2 client on network then need mir here we have problem must use priority
+
+	limtat > 1 mb
+	maxlimit > 2 mb
+	threshold (interval of burst) > 512 kb
+	burst limit (duration of boost) > 6 s (use 1/16 burst time to measure average of data) 
+
+
+	queue color :
+		red 75-100
+		amber 50-75
+		green 0-50
+
+	queue type :
+		pfifo (if set 100 mb for a range all throughputs are 100 mb means 250 cliens > 100 mb \ 250 client)
+		lifo
+		filo
+		pcq (mikrotik exclusive)(per user connection use seperated fifo)
+			pcq rate 0 \ 128 kb
+		none
+		red
+		sfq
+
+	for rules must set destination
+
+	/ip > firewall > mangle
+		general
+			src > lan
+			port > tcp 
+			dst port > 80
+		action
+			mark packet name-x
+	
+	/ip > firewall > mangle
+		general
+			src > lan
+			src port > tcp 80
+			dst port > 80
+		action
+			mark connection name-y
+
+	we make connection then route packets if set mark packet our cpu usage get higher (has load)
+
+	use these values on queue and general tab on connection mark
+
+	we can seperate traffic tpes and set qos on them (traffic classification) :	
+		ip > firewall > mangle
+			general 
+				chain > prerouting
+				src address > lan
+				port > icmp
+
+			action 
+				mark connection x-name
+
+		ip > firewall > mangle
+			general 
+				chain > prerouting
+				connection mark x-name
+
+			action 
+				mark packet y-name
+
+		then use y-name on queue :
+			advance 
+				packet mark > y-name
+
+	for upload must set src address in queue
+	for download must set des address iin queue
+
+	if see a traffic on specific mac take it to seperated que :
+		ip > firewall > mangle 
+			general :
+				chain > prerouting
+			advance 
+				src mac address
+			action
+				mark connection x-name
+				passthrough
+
+		ip > firewall > mangle 
+			general :
+				chain > prerouting
+				connection mark > x-name
+			action
+				mark packets y-name
+				no passthrough
+
+		then add to queue and set value of mark packet to advance tab of queue
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Ping Flood :
+	add action=accept chain=input comment="ping flood" limit=1,4:packet protocol=icmp
+	add action=drop chain=input comment="ping flood" protocol=icmp
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Port Scanner :
+	add action=add-src-to-address-list address-list=portscanner \address-list-timeout=1d chain=forward comment="port scanner" psd=\
+	    21,3s,3,1
+	add action=add-src-to-address-list address-list=portscanner \address-list-timeout=1d chain=input comment="port scanner" psd=21,3s,3,1
+	add action=drop chain=forward comment="port scanner" src-address-list=\ portscanner
+	add action=drop chain=input comment="port scanner" src-address-list=\  portscanner
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Sync Flood
+	/ip firewall filter add chain=input protocol=tcp connection-limit=LIMIT,32
+	 action=add-src-to-address-list address-list=blocked-addr address-list-timeout=1d
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+WireGaurd :
+	a newest vpn type
+	point to point
+	from version 7 add to mikrotik
+	use ppublic and private key on time generated
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Watch Dog :
+	if till 5 minuts can't access to internet can cahnge values on router
+	must use schedule
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Net Watch :
+	tools > net watch
+		host 8.8.8.8
+		internal 10 seconds
+
+	change gw for auto mode and scripted :
+		system > scheduler
+			on down\up tab
+				/ip route disable [find comment="isp1"]
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Point To Point Addressing :
+	wlan 1 :
+		address ; 10.10.10.1
+		network : 11.11.11.1
+	
+	wlan 2 :
+		address ; 11.11.11.1
+		network : 10.10.10.1
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+802.11 Versions :
+	a > 5 ghrz, 54 mbps
+	b > 2.4 ghrz, 11 mbps
+	e > qos enhances
+	f > add ups ineroperablitiy
+	g > 2.4 ghrz, 54 mbps (compatiable with b)
+	h > resolve interface issue
+	j > jump access regulatory extention
+	k > radio resource measurment
+	n > next generation 100-500 mbps
+	m > enhanced maintrance feature improvement (monitoring)
+	r > enhanced for roaming of wlan anttena
+	s > wireless mesh network
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Wireless :
+	by default wlan in mikrotik is disable
+
+	first of all plug the antena then connect it to router board for electricities on outdoor
+	we have outdoor and indoor antena
+
+	parobolic (standard antena)
+
+	sector 120 degree + omni 360 degree (invalid)
+
+	2.4 gig > use lower bandwidth + crossing obstacles (better) + slow (2191-2732 mhrz)
+	5 gig > use higher bandwidth + crossing obstacles (normal) +fast (4800-6100 mhrz)
+
+	channels :
+		usa > 11 
+		uk > 12
+		japan > 13
+
+		1-6-11 (non overlap)
+
+	cahnnel width :
+		ce (upper)
+		ec (lower)
+
+			e > extention
+			c > channel certain
+
+	better use spec analyzer like inssider
+
+	if use higher bandwidth we have more throughputs but have more noise
+	
+	its better don't use bridge becuase have much broadcasts
+
+	for point - point > license level 3
+	for point - multipoint > license level 4
+
+	nv2 is a protocol (nesteren nv2) :
+		use for point-point connectivity and management case
+		511 clients support
+		tdma
+		mikrotik exclusive
+		use for long distance
+		atheros 802.11
+		low latency
+		faster
+		no distance limit
+		no penallty for distance
+
+	tdma frame ( many packet aggregate to one enormous package)
+	fdma (rts (request to send) and cts (clear to send))
+
+	wireless mode :
+		bridge : 
+			connenct just one station to ap 
+			license level 3
+
+		ap bridge :
+			connect many stations to ap (can connect 2007 stations)
+			license level 4
+			works on layer 2 + 3
+
+		wdsslave :
+			like ap bridge but scan aps that has same ssid
+			create wds connectivity, if did'nt recieve a packets from specific ap connect to another one
+			like repeater
+			dfs mode on radar mode > hide hiden ssid
+
+		station : 
+			connect to one server or user (client) > layer 3
+			confilict with bridge
+			nv2 is suitable
+
+		station bridge :
+			connect many users (clients) > layer 2
+			no 802.11
+			compatiable with bridge and ap bridge
+			just works on mikrotik
+			nv2 is suitable \ ap on bridge mode
+
+		station psudo bridge : 
+			layer 2 connectivity between mikrotik and other vendors
+			like station bridge
+			conver to mac address for all traffics
+			no nv2
+
+		station psudo bridge clone : 
+			some providers deny mac , with this we can use connections
+			like above
+			layer 2
+			no nv2
+			statio bridge clone mac
+		
+		alignment only : 
+			like satelite finder.
+			/wireless > mode (alignment only) > alignment > alignment setting
+		
+		station wds : 
+			all aps are connect togheter but we see one ssid (means roaming for roaming in mikrotik we can use mesh)
+			have a one link on wds mode with ap (propriertary extention on ap side must give access)
+			don't use wds
+			layer 2
+			all protocols with the most compatiablity on 802.11 with mikcrotik
+
+		nestren deal :
+			if we have 2 wireless card in router board can use one to send and use another to recieve.
+			full duplex
+			just on mikrotik
+		
+	for transparent wireless link :
+		bridge <-> station psudo bridge
+		bridge <-> station with eoip
+		bridge <-> bridge
+		bridge <-> station wds
+		bridge <-> station bridge
+		ap bridge \ bridge <-> station
+
+	we can set same ssid and passwords for our aps but connection with lowest signal did'nt crash and connect still (instead of cap)(or use mesh)
+	for defination of acceptable range can do this :
+		run acl that define in signal strength range -120..-75
+		then uncheck authentication
+
+	ssid > system security identifier
+
+	wireless > security profile 
+		modes :
+			static key optional (open)
+			static key required (secure)
+			dynamic key
+				wpa2 eap (radius (active directory)) 
+				wpa2 psk (preshared key)
+
+				must enable group key update
+
+				management protection 
+					each device support this method show
+					manage frames to connect a ap (ap and station frames manager)
+
+				we have tkip for apple products (use powerfull encryption)
+
+	wireless > wireless interface > wireless tab
+		security (can define security profile to use passwords)
+
+	if need to connect an ap must goes to /wireless > host and add ap ssid to detect and connect
+
+	for universal ap must set same name on ssid (ap and clients or hosts or stations) then run dhcp server on ap and dhcp client on stations
+	
+	radio name in wireless setting is host name.
+	we can use scan list to connect ap more faster
+	for securing inside wlan registeration and hide neighbors we should uncheck default forward
+	
+	for mac-filtering :
+			in wireless > default authentication can help us
+			if we want use withe list > must register our trusted devices to wlan ssid with add them to access list then uncheck default authentication.
+			if we want use black list > must register our untrusted devices to wlan ssid then uncheck default authentication for that specific user.
+
+			first check authentication on acl for connectivity then if be valid can use general tab attributes
+
+			if copy src to access list means we have various type of clients need to connect
+			if copy to connection list means we have radio clients and connections
+
+	in wireless > wireless tab we have default forward (layer 2 limitation)
+
+	in wireless > advance 
+		max station count
+		area prefix (radio connection redundancy)
+
+	if somebody run same topology like us what should we do?
+		run vpn to make connectivity more secure
+		or can set connected list on stations and set mac filtering on ap
+
+	we can have many virtaul wlan on a wlan with virtaul wlan in wlan defination, works like repeater wireless > setup repeater
+		we can create a virtual wlan interface on stations and set the ssid or name like ap then copy security profile of ap on each staions
+
+		repeater must be on this signal range (rissi 50-65 dbm)
+
+		then create a bridge for virtuale wlan and main wlan
+	
+	dscp : defration service code point
+
+	must disable wps option on wireless >  wireless tab (wps)
+	we have wmm support (wireless multi media) 802.1d tag (qos tag) it's disable on isp  
+	
+	if run scan or any tools that run wlan interface our wlan get crash and off must use background in wlan tools
+
+	in frequency range on many contries and some time wecant use 67 , 72 
+
+	we have frequency mode (power) :
+		manaul (tx power) (lower is better)
+		regular
+		super channel (frequency + power on unlimit mode)
+
+	cli : interface wireless set antena-gain=x
+		better set on regular mode then set command
+		tx poer has effect on transfer rate
+
+		17 (basic tx power) + 25 (antena power need) -1 > 41 dbm
+			if set on iran our aggregation value get 30 (17 convert to 6)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Vlan In Mikrotik:
+	we don't have any vlan in mikrotik in router os but we can make it 
+		interfaces > interface list :
+			add vlan 
+				name of vlan 
+				vlan id (*)
+				interface is trunk port 
+
+		bridge 
+			vlan 1 + interface ether 1 (name this bridge-vlan1)
+
+		we can set ip address in ip > address 
+		can run dhcp 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Block Bogon Ip :
+	/ ip > firewall > filter rule :
+		add chain=forward src-address=0.0.0.0/8 action=drop  
+		add chain=forward dst-address=0.0.0.0/8 action=drop  
+		add chain=forward src-address=127.0.0.0/8 action=drop 
+		add chain=forward dst-address=127.0.0.0/8 action=drop 
+		add chain=forward src-address=224.0.0.0/3 action=drop 
+		add chain=forward dst-address=224.0.0.0/3 action=drop 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+UPNP : 
+	universal plug and play
+	connect devices in same networks and use their resources.(mntp)
+		ip > upnp (enable)
+			allow to disable ..... (its better don't enable)
+			show deny rules > show dynamic rules
+				add interfaces
+				type > set specefic add and interface
+			portmapper (works with java)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Syslog :
+	system > loging
+	actions ;
+		disk
+		echo (memory)
+		email
+
+	remote > syslog server
+
+	we have an application for mikrotic syslog
+		mikrotik syslog server
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Rommon :
+	router management overlay network
+	a feature that can mange another routers from behinde of a router
+	on version 6.28 and higher
+	must set mac on a interface of internet
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Caps Manager :
+	caps manager must run on central router with ca cert and certificate on aut mode
+	run on ios version 6 and higher
+	package wireless cm 2
+
+	cap server :
+		capsman 
+			config
+				router board controller
+
+			interface
+				on each cap we can set many configs (configs are profile)
+				sec profile (config)
+
+		wireless > wireless tab
+			mode > ap
+			ssid > set name
+
+	cap client (branchs) :
+		wireless > wireless interface > cap 
+			enable
+			interface cap ( wireless )
+			cert
+			discover interrface (switch side interface)
+
+	must set a bridge on wifinet name with first router board wireless card (ap + switch port interface) and caps client 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Usermanger :
+	smips can't run this feature
+	if after userman run hotspsot, userman crashed
+
+	router board ip address \ userman
+		username > admin
+		password > blank
+
+	we can set persian on userman > setting > template/ language 
+
+	ppp > secret 
+		aaa authentication + radius
+
+	radius > ppp (we can set pppoe or ...)+ set ip address on local (127.0.0.1) + incoming port 3799 accept 
+
+	on userman must define our router :
+		userman > router 
+			add new with ip address adn port
+			must unchecked all items just use aaa
+
+		must set profile firs 
+		then use users to set profile on them
+
+	tool usermanger database save
+	tool usermanger database load
+
+	list of users that  can access the configs:
+		/tools usermanager customer print
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Hotspot :
+	in haplite and smips we cant run hotspot
+	if run hotspot and usermanager togheter our usermange take crash
+	for enabling hotspot on wireless set ap and for lan we must set ip address
+	if we have public area network we must disable default forward on wlan 
+
+	must set ip address on interface first (interface need hotspot)
+
+	in hotspot if we want bypass some things :
+		for sites :
+			ip > hotspot 
+				walled garden (http + https)
+				ip walled garden (all services)
+		for global login :
+			ip > hotspot > active users > make binding (if do this the user can't reach hotspot login page)
+				in ip binding tab we can set type on (block \ regular (need authenticate) \ bypass (don't need login)) 
+
+				before login our clients are host  after login get active
+
+				ip binding has problem 
+					we can't control them so must use login as mac
+						some times we want make exception :
+							ip > hotspot > server profile :
+								hotspot1 
+									login tab > mac 
+										mac auth pass 123
+										mac auth mode > mac for users and pass
+				
+										http chap > md5 hash
+										http pap > clear text
+				
+										mac coockie timeout (max time can a session be active)
+				
+										always use chap + mac cockie
+				
+									radius tab (can define radius server for hotspot server)
+							
+							must disable and enable hotspot server to run this method
+
+	relogin force :
+		ip > hotspot > server profile > login tab
+			uncheck coockies
+
+	ip > hotspot > users
+		can define users on loacal device
+		in general tab we can set password and server and mac also can st limits
+		in users tab we have trial option (double click on counter and limits for trial users on above of users)
+
+		after set trial on users tab must define it on server profile
+			if change mac can use again our network
+			in active osts we can see t + 00:11:22:33:44:55:66 (trial mac)
+
+		ip > hotspot > user profile :
+			in this tab we can set shared profile or mac 
+
+	reset users for auto mode and scripted :
+		system > scheduler
+		ip hotspot user reset couters [find profile=daily]
+		/tools user-manager user reset-counter [/tool usermanager user find]
+
+		we can disable and enable login state :
+			must disable enable hotspot server with scheduler
+
+	if need connect usermanager to hotspot :
+		ip > hotspot > server profile > radius tab
+		radius option on mikrotik 
+			must select server hotspot + ppp + address
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+VPN:
+	we must set change tcp mss for l2tp and pppoe for optimization of packets
+	in ict we have an splitter
+		pstn and pppoe servers can seperate
+	tunnle means we have a another and more header
+	hdlc use for cisco devices and does'nt support encryption and compression
+	if need use vpns must install ppp package
+	on layer 2 vpns better set dns server (pppoe)
+
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	protocol per port (ppp) PPPOE :
+		works on serial port
+		use encryption and compression and authentication
+		layer  
+		don't have mac
+
+		we should set default route on server also check distance
+
+		use this for lan and ethernet (pppoe)
+			like vpn must be on same broad cast domain
+
+		ip > pool (isp set public ip)
+
+		ip > dhcp server
+
+		ppp > profile (define groups nad ip pools)
+			remote address must set on pool
+			local address must set a ip on same range of pool (can be on different value or range)(free)
+			bridge (connect to bridge <-> layer 2)
+			must set dns server
+			limits > only one user
+				default (if don't answer we set no)
+				yes (one user)
+				no (many users)
+
+		ppp > secret (users (in isp we have bras or radius server))
+			if set ip and password here our policies in profiles 
+				it is ignored and set with a higher priority in this step (overwrite)
+
+			we have caller id in this box means mac filtering
+
+		ppp > pppoe serrver (enable)
+			must set connectivity interface because works on layer 2 (client side interface)
+			must set name 
+			authentication must be on mschap v2 (encrypt every thing)
+
+			must on set on master port
+
+		ppp > active connections (logs)
+
+		ip > firewall > nat
+			general
+				chain > src nat
+				out interface > internet
+			action 
+				masquerade
+
+		ip > route
+
+		for pppoe clients :
+			broadcast user pass
+			create a virtual interface 
+			then set dynamic ip public on virtual interface 
+			ppp > add new pppoe client and set connectivity interface on general then set user passwords on dial out tab		
+	
+		better run pppoe vpn for each client to connect internet
+			must create nat and vpn
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	GRE :
+		in cisco must set ip adress on tunnel but in mikrotik can be use without ip 
+		*for gre must set ip
+		*uncheck allow fast path
+
+		generic routing encapsulation
+		works like nat
+		we don't change ip, we inject ip on l3 and l4 to create new ip
+
+		after create gre we see virtual interface
+		first run pppoe then gre
+
+		must have ping of each site
+
+		interface > gre tunnel
+			local address > public ip
+			remote address > public ip
+			ipsec secret
+			disable fastpath
+			better check keep alive time > 3,3
+
+		ip > address
+			set ip address on gre virtual interface
+
+		ip > route
+			route our ranges to gre tunnel
+			also set default route to isp
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	PPTP :
+		gre + pppoe
+		tcp port 1723
+		layer 3 
+		don't works on apple (iphone)
+		has encryption but is weak has speedy connection
+		use gre and solve encryption compression and authentication problems on ppp
+		before design must be reachable on layer 3 each side (jut need static ip address on server)
+		must set ip on virtual interface
+
+		ip > pool
+
+		ip > dhcp server
+			must set on vpn vlients side (we have these procedure for l2tp)
+
+		ppp > profile (define groups nad ip pools)
+			remote address must set on pool > 8.0.0.1 \ 10.10.10.1
+			local address must set a ip on same range of pool > 8.0.0.2 \ 10.10.10.2
+			bridge (connect to bridge <-> layer 2)
+			must set dns server
+			limits > only one user
+				default (if don't answer we set no)
+				yes (one user)
+				no (many users)
+
+		ppp > secret (users)
+			if set ip and password here our policies in profiles 
+				it is ignored and set with a higher priority in this step (overwrite)
+
+			we have caller id in this box means mac filtering
+
+		ppp > interface >  pptp server
+			enable
+			must change mtu on 1380 (router fragment our packets, if disable this option our packets drop so better set on bigger value)
+			just on remote and local ip address we need set ip public on server (jus static ip public on server)
+			we can set local address on logical ip range
+				local address : 10.10.10.2
+				remote address : 10.10.10.3
+
+			can set authentication with mschap v2 + ipsec :
+				on ipsec :
+					yes (if can't connect use in normal mode)
+					required (must use ipsec)
+
+		ip > firewall > nat
+			general
+				chain > src nat
+				out interface > internet
+			action 
+				masquerade
+
+		ip > route
+
+		if need to access lan must set arp mode for interface on arp proxy
+
+		on pptp client :
+			ppp > pptp client 
+				dial out tab 
+					connect to (server static ip address)
+				user passwords
+
+			better on client for vpn and dhcp clients uncheck ntp dns and default routes
+			because maybe have 2 tunnel and get confilict so better set manual with distance
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	L2TP :
+		udp 1701
+
+		ip > pool
+
+		ip > dhcp server
+			must set on vpn clients side
+
+		ppp > profile (define groups nad ip pools)
+			remote address must set on pool > 8.0.0.1 \ 10.10.10.1
+			local address must set a ip on same range of pool > 8.0.0.2 \ 10.10.10.2
+			bridge (connect to bridge <-> layer 2)
+			must set dns server
+			limits > only one user
+				default (if don't answer we set no)
+				yes (one user)
+				no (many users)
+
+		ppp > secret (users)
+			if set ip and password here our policies in profiles 
+				it is ignored and set with a higher priority in this step (overwrite)
+
+			we have caller id in this box means mac filtering
+
+		ppp > interface >  l2tp server
+			enable
+			just on remote and local ip address we need set ip public on server (jus static ip public on server)
+			we can set local address on logical ip range
+				local address : 10.10.10.2
+				remote address : 10.10.10.3
+
+			can set authentication with mschap v2 + ipsec :
+				on ipsec :
+					yes (if can't connect use in normal mode)
+					required (must use ipsec)
+
+		ip > route
+
+		if need to access lan must set arp mode for interface on arp proxy
+
+		on pptp client :
+			ppp > pptp client 
+				dial out tab 
+					connect to (server static ip address)
+				user passwords
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	IPIP :
+		ipip tunnel mut be secure by ipsec and preshared key (esp (encapsulate security protocol))
+		layer 3
+		must be reachable on internet
+		just use unicast
+		can't run routing protocols on this protocol
+		in cisco we must set ip for interface tunnel but in mikrotik we don't need this
+
+		ip > address
+			set public static ip on interface
+			then set ip for ipip interface (special range)
+
+		interface > ip tunnels
+			remote address (front side ip public)
+			local address (local ip public)
+
+			we have ip sec item (ipsec secret (must disable fastpath if enable ipsec))(convert to esp)
+
+		ip > route
+			first set default route to isp
+			then
+				destination > lan 2 (branch)
+				gw > better set /30 (ipip tunnel ip address)
+	
+		ip > firewall > nat (masqurade)
+		ip > dhcp server (lan side)
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	EoIP :
+		layer 2
+		use gre
+		bras are on this protocol
+		advertise broadcasts on ip (better not run this)
+		mikrotik exclusive
+		no gateway
+		branchs must use dcp server on head quarter
+		must use static ip public and be reachable
+
+		ip > route 
+			default route to isp
+
+		ip > interfaces > eoip tunnel
+			local address (ip public local)
+			remote address (ip public remote)
+			tunnle destination
+			tunnel id (1)(must be same on each side)(max 65536 \ 16 bit)
+
+			we have ipsec here
+
+		bridge 
+			lan tehran + eoip tunnel interface
+
+		run dhcp server on bridge
+
+		* do this for branch
+
+		broadcast goes to eoip nnot router
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	SSTP :
+		if need just one ip to run vpn must use this
+		many branchs with one ip can create vpn
+		use tcp 443
+		likke remote access vpn
+		better use this mode of vpn for each organization
+
+		ip > route
+			default route to isp
+			then set 
+				destination lan-x
+				gw sstp
+
+		ip > pool
+
+		ip > dhcp server
+			must set on vpn clients side
+
+		ppp > profile (define groups nad ip pools)
+			remote address must set on pool
+			local address must set a ip on same range of pool
+			bridge (connect to bridge <-> layer 2)
+			must set dns server
+			limits > only one user
+				default (if don't answer we set no)
+				yes (one user)
+				no (many users)
+
+		ppp > secret (users)
+			if set ip and password here our policies in profiles 
+				it is ignored and set with a higher priority in this step (overwrite)
+
+			we have caller id in this box means mac filtering
+
+			can set authentication with mschap v2 + ipsec :
+				on ipsec :
+					yes (if can't connect use in normal mode)
+					required (must use ipsec)
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	OVPN :
+		port 1194
+
+		certification: 	system > certificate >key size > 1024
+				    	then sign the certificate
+						key-usage > cert-sign , key-cert-sign
+						ca crl host : 127.0.0.1
+				
+		client :	system > certificate >key size > 1024
+					then sign the certificate
+					key-usage > tls-client
+
+			sign agian without url host
+					 
+		server :	system > certificate >key size > 1024
+					then sign the certificate
+					key-usage > tls-server , key-enciphement , digital-signature
+		
+					 ip > pool 
+					 ppp > profile > local-address  (lan ip server \ip public)
+					 				 remote-address 
+					 	   secret > username and passwords
+					 	   			protocols > use encryption : yes
+
+					 ppp > interface > vpn-server > enable
+					 			 netmask : 24
+					 			 keepalive : 100
+					 			 required client cert
+					 			 sha1 + aes 256
+		
+		now set vpn to our computers.
+		then export our certs and transfer them to pc. (system > certs (ca and client cert))
+		should use passphrase.
+		system > cert
+		files > certs (download on pc)
+		
+		we have a file with name secret (no extention need)
+			secret (for authentication in connecting)
+				admin
+				123
+
+		config.ovpn : c\users\ovpn\config
+			delete all configs or replace them
+
+		config.ovpn > remote(ovpn server address)
+					  port 1194
+					  paste certificate for each part from files u exported
+		
+		opensl.exe rsa -in client.key -out client.key
+		move our mikrotik-exports-cas to openvpn folder and delete ld files.
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+OSPF :
+	package 
+		routing
+			ospf v2 > ipv4
+			ospf v3 > ipv6
+
+	must run on ccr 1036
+
+	ip > route :
+		area id > 32 bit 
+			0 > 0.0.0.0 (backbone)
+			1 > 0.0.0.1
+
+		each area use 50 routers
+
+	routing > ospf > 
+		area
+			name > area1
+			areaid > 0.0.0.1
+		network
+			10.0.0.0/30
+			area > area1
+
+	when ospf is running we can't set authentication but can make a copy from this then change values on md5 then set
+	we must do it for passive interface
+
+	routing > ospf
+		neighbors
+		route
+			interarea
+			interarea
+
+	cost value is 10 on default value
+		must change this has bug nd works like rip
+
+	ospf default route
+		routing > ospf > instance (metric)
+			general	
+				redistribute default route
+					always type 2 (oe2 with always)(use for bgp)
+					if always type 2 (oe2 without always)
+
+	routing . ospf > area range
+		summary for another areas
+		better summary on cicdr
+
+	on abr :
+		routing > ospf > area
+			type stub
+				uncheck inject summary lsa
+
+			must convert all routers on area to stub
+
+			we can't stub backbone because it's transite area
+
+			after stub we have a default route for a specific range on abr and said every where you want go must send to abr
+
+	routing > ospf >area
+		type nssa (must convert all routers in nssa)
+			in stub area we have another ospf process or routing protocol 
+			advertise it with lsa type 5
+
+	virtual link :
+		on abr must do it 
+
+		routing > ospf > virtual link
+			neighbor id >  newest router wants to access  backbone and abr
+			transite area > area x
+
+			we must do it for abr and newest router
+
+		routing > ospf > nbma neighbor
+			convert unicast our packets
+			add our front view ip address
+
+		dr and bdr
+			if set dr and bdr
+			we cant preemt that
+			so must reset or change priority
+
+			priority is 0 -255
+			or router id (bigger is better)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
