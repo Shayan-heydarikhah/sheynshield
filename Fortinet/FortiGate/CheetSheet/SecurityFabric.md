@@ -1,4 +1,3 @@
-```markdown
 # 🛡️ FortiGate Security Fabric, Automation & External Connectors — Cheat Sheet
 
 A production-grade operational reference for **Fortinet Security Fabric**, **Automation Stitches**, **External Threat Feeds**, **Purdue / OT (ICS) Security Models**, and **SAML SSO / IdP Integration**.
