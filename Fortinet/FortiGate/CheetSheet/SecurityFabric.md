@@ -1,7 +1,3 @@
-برای اینکه فایل کاملاً آمادهٔ کپی و پیست در گیت‌هاب باشد و **هیچ نیازی به ادیت، تغییر فونت یا اصلاح مارک‌داون نداشته باشی**، کل داکیومنت را داخل یک Block Code یکپارچه قرار داده‌ام.
-
-تمامی استانداردهای پیشرفتهٔ گیت‌هاب (مانند **GitHub Alert Callouts**، **Tables**، **Syntax Highlighting**، و **Diagrams**) کاملاً رعایت شده‌اند. کافی است یک فایل جدید به اسم `fortigate-security-fabric-cheat-sheet.md` در ریپازیتوری ایجاد کنی و کل محتوای داخل باکس زیر را مستقیم در آن کپی کنی:
-
 ```markdown
 # 🛡️ FortiGate Security Fabric, Automation & External Connectors — Cheat Sheet
 
