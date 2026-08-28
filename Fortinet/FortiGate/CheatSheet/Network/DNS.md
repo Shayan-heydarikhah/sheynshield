@@ -1,4 +1,4 @@
-# FortiGate DNS — Part 2
+# FortiGate DNS 
 
 > **Scope:** FortiOS DNS, DNS Proxy, Local Domain, DDNS & DNS Troubleshooting
 > **Reference:** FortiOS 7.2.x
