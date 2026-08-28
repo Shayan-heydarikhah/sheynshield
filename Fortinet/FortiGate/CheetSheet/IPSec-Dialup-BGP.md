@@ -243,5 +243,3 @@ get router info bgp network
 get router info routing-table bgp
 
 ```
-
-```
