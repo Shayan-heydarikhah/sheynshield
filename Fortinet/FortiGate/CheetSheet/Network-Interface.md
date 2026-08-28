@@ -1,331 +1,719 @@
-# FortiGate Architecture & Interface Management Cheat Sheet
+# FortiGate Interfaces — Cheat Sheet
 
-This comprehensive reference guide consolidates enterprise FortiGate Layer 2/Layer 3 interface configurations, ASIC hardware optimizations, packet acceleration techniques, and network encapsulation standards.
-
----
-
-## Table of Contents
-- [Interface Architecture](#interface-architecture)
-- [Administrative Access Protocols](#administrative-access-protocols)
-- [Transceivers & Forward Error Correction (FEC)](#transceivers--forward-error-correction-fec)
-- [IP Address Management (IPAM)](#ip-address-management-ipam)
-- [External Captive Portal Architecture](#external-captive-portal-architecture)
-- [Interface Parameters (MTU & 802.1X)](#interface-parameters-mtu--8021x)
-- [Traffic Sniffing (One-Arm SPAN)](#traffic-sniffing-one-arm-span)
-- [VLANs & Hardware Virtual Switches](#vlans--hardware-virtual-switches)
-- [Link Aggregation (LAG) & Redundancy](#link-aggregation-lag--redundancy)
-- [Virtual Wire Pair (VWP) & PRP](#virtual-wire-pair-vwp--prp)
-- [Enhanced MAC (EMAC) VLAN](#enhanced-mac-emac-vlan)
-- [VXLAN Architecture & Encapsulation](#vxlan-architecture--encapsulation)
+> **Scope:** Software/Hardware Switch, VLAN, FEC, IPAM, Captive Portal, MTU/MSS, Sniffer, LAG, Redundant Interface, VWP, PRP, EMAC, VXLAN
 
 ---
 
-## Interface Architecture
+# 1. Interface Types
 
-* **Software Switches:** Traffic is switched in software and processed via the main system CPU.
-* **Hardware Switches:** Virtual switches operating at the hardware layer utilizing ASICs and co-processors. Supports optimized Spanning Tree Protocol (STP) processing.
-* **Physical Interfaces:** SFP/SFP+ ports are hardware-sensitive and require verified vendor modules. Verify diagnostics via CLI:
+## Software Switch
+
+* Processing is primarily handled by the **FortiGate CPU**.
+* Provides Layer-2 switching functionality in software.
+* Flexible and suitable for many general configurations.
+
+```text
+Client
+  │
+  ▼
+Software Switch
+  │
+  ▼
+CPU
+  │
+  ▼
+FortiGate Processing
+```
+
+---
+
+## Hardware Switch
+
+* Virtual switch implemented at the **ASIC/hardware level**.
+* Uses hardware switching resources such as ASICs/co-processors.
+* Can provide optimized Layer-2 forwarding.
+* Supports **Spanning Tree** with hardware-optimized processing on supported platforms.
+
+```text
+Port1 ─┐
+Port2 ─┼──► Hardware Switch / ASIC ───► PortX
+Port3 ─┘
+```
+
+### Quick Comparison
+
+| Feature     | Software Switch      | Hardware Switch         |
+| ----------- | -------------------- | ----------------------- |
+| Processing  | CPU                  | ASIC / Hardware         |
+| Performance | Lower                | Higher                  |
+| Flexibility | High                 | Platform dependent      |
+| STP         | Software processing  | Hardware optimized      |
+| Best use    | General L2 scenarios | High-performance L2/STP |
+
+---
+
+# 2. Enhanced MAC VLAN — EMAC VLAN
+
+**EMAC = Enhanced MAC**
+
+Allows VLAN interfaces on the same physical interface to use **different MAC addresses**.
+
+```text
+                Physical Interface
+                       │
+              ┌────────┴────────┐
+              │                 │
+           VLAN 10           VLAN 20
+              │                 │
+          MAC-A             MAC-B
+```
+
+### Key Points
+
+* Generates a new MAC address over the parent interface.
+* EMAC interfaces are treated similarly to physical interfaces.
+* EMAC interfaces can be advertised/synchronized in an HA cluster.
+* Avoid using EMAC for:
+
+  * HA heartbeat interfaces
+  * Reserved management interfaces
+  * Transparent VDOM scenarios
+
+### Important
+
+EMAC requires **NAT mode** for supported operation.
+
+Be careful with DHCP when using EMAC interfaces.
+
+---
+
+## EMAC VLAN ID Rule
+
+When an EMAC interface uses a VLAN ID:
+
+> **VLAN ID + underlying physical interface must form a unique pair.**
+
+This uniqueness applies even across different VDOMs because the underlying physical interface uses the VLAN ID to dispatch traffic.
+
+---
+
+## EMAC on VDOM/NPU Links
+
+EMAC can also be used with:
+
+* VLAN interfaces
+* VDOM links
+* NPU links
+
+The relevant interface must be configured as an EMAC-type interface where supported.
+
+---
+
+# 3. Interface Administration Options
+
+Under:
+
+```text
+System
+ └── Network
+      └── Interfaces
+```
+
+Common administrative access options include:
+
+| Option          | Purpose                                 |
+| --------------- | --------------------------------------- |
+| HTTPS           | GUI management                          |
+| SSH             | CLI management                          |
+| PING            | ICMP testing                            |
+| SNMP            | Monitoring                              |
+| FMG-Access      | FortiManager communication              |
+| FTM             | FortiToken Mobile / push authentication |
+| Security Fabric | FortiTelemetry / Fabric communication   |
+| CAPWAP          | Wireless/AP communication               |
+| Speedtest       | Interface/network testing               |
+
+### FMG-Access
+
+Allows FortiManager-related authorization/communication between:
+
+```text
+FortiGate ◄────────► FortiManager
+```
+
+---
+
+# 4. FEC — Forward Error Correction
+
+Supported on certain high-speed interfaces/transceivers.
+
+Example:
+
+```bash
+config system interface
+    edit sfp10
+        set speed 40000full
+        set media-type cr4
+        set forward-error-correction cl91-rs-fec
+    end
+end
+```
+
+### Common Speeds
+
+| Speed | FEC Notes                         |
+| ----- | --------------------------------- |
+| 1G    | FEC not supported                 |
+| 10G   | FEC not supported in this context |
+| 25G   | CL91-RS-FEC commonly automatic    |
+| 40G   | Depends on interface/transceiver  |
+| 100G  | CL91-RS-FEC commonly automatic    |
+
+> Always verify the exact FortiGate model, transceiver and FortiOS release before forcing FEC.
+
+---
+
+## Optical Module Naming
+
+### SR4 — Short Range 4
+
+```text
+SR = Short Range
+4  = 4 lanes
+```
+
+* Designed for short-distance MMF.
+* Commonly around **100 m**, depending on optics/fiber.
+* Uses multiple parallel lanes.
+* Common in data-center environments.
+* Used with 40G/100G applications.
+
+---
+
+### LR4 — Long Range 4
+
+```text
+LR = Long Range
+4  = 4 lanes
+```
+
+* Designed for longer-distance SMF.
+* Typical reach can be around **10 km**, depending on optic.
+* Common for 40G/100G applications.
+
+---
+
+### CR4 — Copper 4
+
+```text
+CR = Copper
+4  = 4 lanes
+```
+
+* Short-distance copper/Twinax connection.
+* Commonly around **5 m**, depending on DAC.
+* Common in data centers/rack-to-rack connections.
+* Commonly associated with 40G applications.
+
+---
+
+# 5. IPAM
+
+**IPAM = IP Address Management**
+
+FortiGate can integrate with FortiIPAM for automatic subnet management.
+
+### Enable IPAM
+
+```bash
+config system ipam
+    set pool-subnet 172.16.0.0/16
+    set status enable
+end
+```
+
+### Enable Interface Management
+
+```bash
+config system interface
+    set managed-subnetwork-size 512
+
+    edit port8
+        set ip-managed-by-fortiipam enable
+    end
+end
+```
+
+---
+
+## IPAM Troubleshooting
+
+### Find Largest Available Subnet
+
+```bash
+diagnose sys ipam largest-available-subnet
+```
+
+### Check Reservation Status
+
+```bash
+diagnose sys ipam reservation-status
+```
+
+### Confirm Reservation
+
+```bash
+diagnose sys ipam confirm-reserv
+```
+
+### Delete Device from IPAM
+
+```bash
+diagnose sys ipam delete-device-from-ipam
+```
+
+### Show Free Subnets
+
+```bash
+diagnose sys ipam dump-ipams-free-subnets
+```
+
+### Dump IPAM Entries
+
+```bash
+diagnose sys ipam dump-ipams-entreis
+```
+
+---
+
+# 6. Captive Portal
+
+Captive Portal is mainly useful for **user authentication at the network edge**.
+
+```text
+Client
+  │
+  ▼
+FortiGate
+  │
+  ├── Authentication
+  │
+  ▼
+Internet
+```
+
+### Key Points
+
+* Uses HTTP/HTTPS-based authentication/redirection.
+* Useful for local users.
+* For larger environments, consider:
+
+  * SSO
+  * RADIUS
+  * External authentication
+
+Authenticated users can be monitored through:
+
+```text
+FortiView
+   └── Sources
+
+Firewall Users
+```
+
+---
+
+# 7. External Captive Portal Authentication
+
+Example topology:
+
+```text
+LAN
+192.168.101.0/24
+       │
+       ▼
+     FGT-1
+       │
+192.168.12.0/30
+       │
+       ▼
+     FGT-2
+       │
+192.168.254.0/24
+       │
+       ▼
+     Edge
+       │
+       ▼
+    Internet
+    8.8.8.8
+```
+
+### FGT-1
+
+Configure the external captive portal to point toward:
+
+```text
+FGT-2 = 192.168.12.2
+```
+
+### FGT-2
+
+On the interface facing FGT-1:
+
+```text
+192.168.12.0/30
+```
+
+Enable Captive Portal and specify the required user groups.
+
+---
+
+## ⚠️ External Captive Portal Important Points
+
+### Exempt FGT-1
+
+FGT-1 must be able to communicate with FGT-2 for authentication.
+
+Therefore, avoid forcing FGT-1's own authentication traffic through the captive portal.
+
+Example exemption:
+
+```text
+FGT-1 = 192.168.12.1
+```
+
+### NAT
+
+Avoid unnecessary NAT between:
+
+```text
+LAN → FGT-1 → FGT-2
+```
+
+Improper NAT can bypass or interfere with captive-portal behavior.
+
+---
+
+# 8. MTU / TCP MSS
+
+### Configure MTU
+
+```bash
+config system interface
+    edit port8
+        set mtu-override enable
+        set mtu 1234
+        set tcp-mss 1448
+    end
+end
+```
+
+### Concepts
+
+| Setting      | Purpose                     |
+| ------------ | --------------------------- |
+| MTU          | Maximum Layer-3 packet size |
+| TCP MSS      | Maximum TCP payload size    |
+| MTU Override | Allows custom interface MTU |
+
+Useful in scenarios involving:
+
+* Tunnels
+* VPN
+* Encapsulation
+* Fragmentation problems
+* Path MTU issues
+
+---
+
+# 9. One-Arm Sniffer
+
+A **one-arm sniffer** allows packet capture without placing the FortiGate inline in the traffic path.
+
+### Switch SPAN Example
+
+```bash
+conf t
+
+monitor session 1 source interface gig0/0 both
+
+monitor session 1 destination interface gig0/2
+```
+
+Then:
+
+```text
+SPAN Port
+   │
+   ▼
+FortiGate Sniffer
+   │
+   ▼
+Wireshark
+```
+
+---
+
+## FortiGate Sniffer
+
+Configure the FortiGate interface as a one-arm sniffer and start capture from:
+
+```text
+Network
+ └── Diagnostics
+      └── Packet Capture
+```
+
+---
+
+## Things That Can Prevent One-Arm Sniffer Activation
+
+Examples include:
+
+* WAN interface configuration
+* Firewall policies
+* VIP / DNAT dependencies
+* Other interface dependencies
+* Existing references to the interface
+
+---
+
+## One-Arm Sniffer Warning
+
+One-arm sniffing can have more processing overhead than inline hardware-accelerated inspection because traffic may require additional processing.
+
+Potential effects:
+
+* Higher CPU utilization
+* Packet loss
+* Kernel buffer pressure
+
+> Use packet capture for a **short troubleshooting window**, not as a permanent traffic-processing design.
+
+---
+
+## Log Commands
+
+```bash
+execute log filter category 19
+execute log display
+```
+
+---
+
+# 10. Physical Interfaces & Transceivers
+
+FortiGate SFP/SFP+ interfaces can be sensitive to:
+
+* Transceiver type
+* Vendor compatibility
+* Optical characteristics
+* Speed
+* Media type
+
+### Check Transceiver
 
 ```bash
 get system interface transceiver
 ```
 
-* **Migration Limits:** The built-in FortiOS interface migration tool operates exclusively on physical interfaces.
-
-### Administrative Access Protocols
-
-| Access Flag | Purpose & Functionality |
-| --- | --- |
-| `fmg-access` | Automatically grants FortiManager authorization during device communication exchanges. |
-| `ftm` | Enables FortiToken Mobile push authentication handling. |
-| `security-fabric` | Enables FortiTelemetry and CAPWAP tunnel management across fabric nodes. |
-| `speedtest` | Permits on-demand bandwidth testing requests from FortiManager/CLI. |
-
 ---
 
-## ⚡ Transceivers & Forward Error Correction (FEC)
+# 11. VLAN
 
-Forward Error Correction (FEC) maintains payload integrity across high-speed data paths (10G, 25G, 40G, 100G).
+### 802.1Q
 
-* **1G / 10G / 40G:** FEC is disabled or unsupported natively on these transceiver speeds.
-* **25G / 100G:** Automatically negotiates and applies the `cl91-rs-fec` profile.
-
-### Coding Terminology
-
-* **SR (Short Range):** Reduces information bits to shorten total code length.
-* **LR (Long Range):** Lifts the parity-check matrix to expand code length over distance.
-* **CR (Copper Range):** Represents code efficiency (ratio of payload information bits to total transmitted bits).
-
-### Transceiver Specification Matrix
-
-| Type | Full Name | Reach / Cable Type | Architectural Design & Use Cases |
-| --- | --- | --- | --- |
-| **SR4** | Short Range 4-Lane | $\le$ 100m / Multimode Fiber (MMF) | Employs 4 parallel Tx and 4 parallel Rx lanes. Ideal for high-density data center access (40G/100G). |
-| **LR4** | Long Range 4-Lane | $\le$ 10km+ / Singlemode Fiber (SMF) | Uses 4 optical lanes optimized for long-haul enterprise backbones (40G/100G). |
-| **CR4** | Copper 4-Lane | $\le$ 5m / Twinaxial Copper | Employs 4 twinax copper channels for intra-rack or top-of-rack interconnects (40G). |
-
-### Interface Speed & FEC Configuration
-
-```bash
-config system interface
-    edit "sfp10"
-        set speed 40000full
-        set media-type cr4
-        set forward-error-correction cl91-rs-fec
-    next
-end
-
-```
-
----
-
-## 🏷️ IP Address Management (IPAM)
-
-Automates subnet distribution and centralized tracking for internal interface networks.
-
-```bash
-# Global IPAM Pool Setup
-config system ipam
-    set status enable
-    set pool-subnet 172.16.0.0/16
-end
-
-# Interface-level IPAM Allocation
-config system interface
-    edit "port8"
-        set ip-managed-by-fortiipam enable
-        set managed-subnetwork-size 512
-    next
-end
-
-```
-
-### IPAM Diagnostics & Management Commands
-
-```bash
-# Display the largest available contiguous block
-diagnose sys ipam largest-available-subnet
-
-# Display current IP allocation status and entries
-diagnose sys ipam reservation-status
-diagnose sys ipam dump-ipams-entreis
-diagnose sys ipam dump-ipams-free-subnets
-
-# Administrative Operations
-diagnose sys ipam confirm-reserv
-diagnose sys ipam delete-device-from-ipam
-
-```
-
----
-
-## 🔐 External Captive Portal Architecture
-
-Captive portals use HTTP redirection for local user authentication. Enterprise environments should prefer 802.1X, SSO, or RADIUS where feasible.
-
-```
-[ LAN Clients ] ---> ( LAN: 192.168.101.0/24 )
-                          │
-                     [ FGT-1 ] ( Forwarder )
-                          │ ( Transit: 192.168.12.0/30 )
-                          ▼
-                     [ FGT-2 ] ( Authentication Server: 192.168.12.2 )
-                          │ ( Edge: 192.168.254.0/24 )
-                          ▼
-                     [ Internet / 8.8.8.8 ]
-
-```
-
-### Deployment Guidelines & Constraints
-
-1. **FGT-1 Configuration:** Configure the ingress LAN interface to point its external captive portal authentication URI to FGT-2 (`192.168.12.2`). Ensure FGT-1's default route points to FGT-2.
-2. **FGT-2 Configuration:** Enable captive portal enforcement on the transit interface (`192.168.12.0/30`) and map the required user authorization groups.
-3. **Critical Dependencies:**
-* **Exempt Forwarder Address:** The upstream interface address of FGT-1 (`192.168.12.1`) **must** be exempted from captive portal enforcement on FGT-2. Blocking this address halts all client authentication flow.
-* **Disable NAT on Transit:** Do **not** apply Source NAT on FGT-1 for LAN traffic traversing the `192.168.12.0/30` transit link. NATing obfuscates source IPs, causing authentication bypasses or session mapping failures.
-
-
-
----
-
-## ⚙️ Interface Parameters (MTU & 802.1X)
-
-### Custom MTU and TCP MSS Override
-
-Adjust system MTU and TCP Maximum Segment Size (MSS) to prevent fragmentation over encapsulated links:
-
-```bash
-config system interface
-    edit "port8"
-        set mtu-override enable
-        set mtu 1234
-        set tcp-mss 1448
-    next
-end
-
-```
-
-### Port-Based 802.1X Authentication (Hardware Switch)
-
-Hardware-enforced 802.1X is supported on select NP6-accelerated hardware switch platforms (e.g., FortiGate 30xE, 40xE, 110xE).
-
-```bash
-config system interface
-    edit "port8"
-        set security-mode 802.1x
-        set security-group "Corporate-802.1X-Group"
-    next
-end
-
-```
-
-*Verification:*
-
-```bash
-diagnose sys 802-1x status
-
-```
-
----
-
-## 🔍 Traffic Sniffing (One-Arm SPAN)
-
-Used for passive packet monitoring by mirror port ingest.
-
-```
-[ Switch Port Gig0/0 ] ──( Monitored Traffic )──► [ Switch Port Gig0/2 ]
-                                                          │
-                                                    ( SPAN Feed )
-                                                          │
-                                                          ▼
-                                             [ FortiGate One-Arm Interface ]
-
-```
-
-### Switch Mirroring Configuration (Cisco IOS Example)
+Standard VLAN tagging.
 
 ```text
-monitor session 1 source interface gig0/0 both
-monitor session 1 destination interface gig0/2
-
+Ethernet Frame
+┌──────────────┬─────────┬──────────────┐
+│ Ethernet     │ 802.1Q  │ Data         │
+└──────────────┴─────────┴──────────────┘
 ```
 
-### Operational Considerations & Limitations
-
-* **Hardware Offload Bypass:** One-Arm sniffing completely disables ASIC offload (NP/nTurbo/CP engines) for processed packets, shifting handling to CPU software path.
-* **Performance Impact:** High packet volumes can cause CPU spikes, packet dropping, and kernel buffer exhaustion. Limit usage to targeted troubleshooting.
-* **Configuration Incompatibilities:** One-arm sniffing cannot be enabled on interfaces bound to:
-* WAN roles
-* Active Firewall Policies
-* Virtual IPs (Destination NAT)
-* Active Interface Dependencies
-
-
-
-### Logging Diagnostic Filters
-
-```bash
-execute log filter category 19
-execute log display
-
-```
+* Single VLAN tag
+* EtherType: `0x8100`
+* 12-bit VLAN ID
+* Common enterprise VLAN technology
 
 ---
 
-## 🔀 VLANs & Hardware Virtual Switches
+# 12. 802.1ad / QinQ
 
-VLAN processing delivers optimal throughput under NAT operational mode.
+802.1ad allows **VLAN stacking / double tagging**.
 
-### 802.1Q vs. 802.1ad (QinQ) Standard Comparison
+```text
+┌────────┬────────┬────────┬────────────┐
+│ Outer  │ Inner  │ VLAN   │ Payload    │
+│ S-Tag  │ C-Tag  │ Data   │            │
+└────────┴────────┴────────┴────────────┘
+```
 
-| Feature | IEEE 802.1Q (Standard VLAN) | IEEE 802.1ad (QinQ / VLAN Stacking) |
-| --- | --- | --- |
-| **Tagging Structure** | Single 802.1Q Tag | Double Tagged (Outer S-Tag + Inner C-Tag) |
-| **EtherType Field** | `0x8100` | Outer: `0x88A8`, Inner: `0x8100` |
-| **VLAN ID Space** | Max 4096 unique IDs | Nested tagging (up to $4096 \times 4096$ theoretical isolation) |
-| **Primary Use Cases** | Enterprise VLAN segmentation | Service Provider Metro Ethernet, Carrier Bridges |
-| **Class of Service** | Uses Canonical Format Indicator (CFI) | Replaces CFI with Drop Eligibility Indicator (DEI) |
+### EtherTypes
 
-### Virtual VLAN Switch Configuration (FortiOS 7.2)
+```text
+Outer S-Tag = 0x88A8
+Inner C-Tag = 0x8100
+```
 
-*Supported Hardware:* FortiGate 60F, 80F, 100E, 100F, 140E, 200F, 300E, 400E, 1100E.
+### Typical Use Cases
+
+* Service Provider networks
+* Metro Ethernet
+* Customer VLAN aggregation
+* VLAN stacking
+
+---
+
+## 802.1Q vs 802.1ad
+
+| Feature         | 802.1Q            | 802.1ad              |
+| --------------- | ----------------- | -------------------- |
+| Tagging         | Single            | Double               |
+| Outer EtherType | `0x8100`          | `0x88A8`             |
+| Inner EtherType | —                 | `0x8100`             |
+| Main purpose    | VLAN segmentation | VLAN stacking        |
+| Common use      | Enterprise LAN    | ISP / Metro Ethernet |
+
+---
+
+# 13. Virtual VLAN Switch
+
+Supported hardware switch ports can operate as a Layer-2 switch with VLAN assignment.
+
+### Enable
 
 ```bash
-# Enable Virtual Switch Global Mode
 config system global
     set virtual-switch-vlan enable
 end
+```
 
-# Define Hardware Virtual Switch Entry
+### Create Virtual Switch
+
+```bash
 config system virtual-switch
-    edit "vlan10"
-        set physical-switch "sw0"
+    edit vlan10
+        set physical-switch sw0
         set vlan 10
+
         config port
-            edit "port10"
+            edit port10
             next
-            edit "port11"
-            next
+            edit port11
         end
-    next
+    end
 end
+```
 
-# Provision Logical Hard-Switch Interface
+### Create Interface
+
+```bash
 config system interface
-    edit "vlan10"
+    edit vlan10
         set type hard-switch
-        set ip 192.168.100.1 255.255.255.0
-        set allowaccess ping http ssh
-    next
+        set ip 192.168.100.1/24
+        set allow ping http ssh
+    end
 end
-
 ```
 
 ---
 
-## 🔗 Link Aggregation (LAG) & Redundancy
+## When to Use Virtual VLAN Switch
 
-### Interface Aggregation vs. Redundant Interfaces
+Useful for specific Layer-2 designs where you need:
 
-* **Aggregated (LACP):** Combines throughput across physical links using active load balancing.
-* **Redundant Interfaces:** Provides active-backup link failover without throughput aggregation. *Never use switch channel-groups for redundant interface configurations.*
+* Hardware switching
+* VLAN-aware switching
+* STP
+* Multiple VLANs
+* Better hardware-level processing
 
-### LACP Configuration Example
+Especially useful when the network has complex:
 
-**Cisco Switch Side:**
+* STP
+* Multiple spanning-tree instances
+* VLAN trunking
 
-```text
-interface range gig0/0 - 1
- channel-group 1 mode on
-!
-interface range gig1/0 - 1
- channel-group 2 mode on
+> Exact support is platform/FortiOS dependent. Verify the target FortiGate model before deployment.
 
+---
+
+# 14. Link Aggregation — LAG
+
+### Switch Side
+
+Example static EtherChannel:
+
+```bash
+conf t
+
+interface range gig0/0-1
+channel-group 1 mode on
+
+interface range gig1/0-1
+channel-group 2 mode on
 ```
 
-**FortiGate Side:**
+---
+
+## FortiGate
 
 ```bash
 config system interface
-    edit "agg-1"
-        set type aggregate
-        set member "port1" "port2"
+    edit agg-1
         set lacp-mode static
         set lldp-transmission enable
-    next
+    end
 end
-
 ```
 
-### Enhanced Hardware LAG Hashing Algorithms
+---
 
-Enhances load-balancing entropy by tuning hash calculation methods across NPU links:
+## MikroTik
 
-* **Computation Engines:** `xor16` (Low CPU overhead; data center default), `xor8`, `xor4`, `crc16` (High distribution precision; resource intensive).
+Typical approach:
+
+```text
+Interfaces
+   └── Bonding
+        └── Mode: 802.3ad
+```
+
+Then assign the IP address to the bonding interface.
+
+---
+
+# 15. Enhanced LAG Hashing
+
+FortiGate can use enhanced hashing to select LAG members.
+
+Possible algorithms:
+
+```text
+XOR16  → lighter
+XOR8
+XOR4
+CRC16  → more resource intensive
+```
+
+Hash inputs can include:
+
+* IP protocol
+* Source IP
+* Destination IP
+* Source port
+* Destination port
+
+### Example
 
 ```bash
 config system npu
-    set lag-out-port-select enable
+    set lag-out-pport-select enable
+
     config sw-eh-hash
         set computation xor16
         set ip-protocol include
@@ -336,138 +724,632 @@ config system npu
         set netmask-length 32
     end
 end
-
 ```
 
-### Link Failure Detection Configuration
+> Exact available hash fields depend on the FortiOS release/platform.
 
-Triggers immediate failure isolation actions when member interfaces drop:
+---
+
+# 16. Redundant Interface
+
+A redundant interface provides interface-level redundancy.
+
+```text
+        ┌── Port3 ──► Switch-A
+FGT ────┤
+        └── Port4 ──► Switch-B
+```
+
+### Important
+
+> **Do NOT configure channel-group/LAG on redundant members.**
+
+Common use:
+
+* Full-mesh connectivity
+* Dual physical paths
+* Link redundancy
+
+---
+
+# 17. Fail Detection — Aggregate / Redundant
+
+Example:
 
 ```bash
 config system interface
-    edit "agg-1"
+    edit agg-1
         set fail-detect enable
         set fail-alert-method link-down
-        set fail-alert-interface "port4"
-    next
+        set fail-alert-interface port4
+    end
 end
+```
 
+### Meaning
+
+```text
+agg-1 failure
+     │
+     ▼
+Failure Detection
+     │
+     ▼
+fail-alert-method
+     │
+     ▼
+Specified interface action
 ```
 
 ---
 
-## 🌉 Virtual Wire Pair (VWP) & PRP
+# 18. 802.1X
 
-Virtual Wire Pairs bind two interfaces at Layer 2, allowing transparent pass-through filtering without requiring routing changes or MAC modification.
+802.1X can be supported on specific hardware-switch platforms.
 
-### Key Rules
+Example:
 
-* Member interfaces **must** have zero logical dependencies, active IP addresses, or existing references.
-* Widely implemented for Internal Segmentation Firewalls (ISFW) and Direct Server Return (DSR) designs.
-* NAT within VWPs requires **Overload IP Pools**.
+```bash
+config system interface
+    edit port8
+        set security-mode 802.1x
+        set security-group test
+    end
+end
+```
+
+### Troubleshooting
+
+```bash
+diagnose sys 802-1x status
+```
+
+> 802.1X support is hardware/platform dependent. Verify the FortiGate model and FortiOS version.
+
+---
+
+# 19. Virtual Wire Pair — VWP
+
+Virtual Wire Pair connects two interfaces at **Layer 2** and allows security inspection between them.
+
+```text
+Client
+  │
+  ▼
+[ Port3 ]
+   │
+   │ VWP
+   │
+[ Port4 ]
+  │
+  ▼
+Server
+```
+
+### Main Characteristics
+
+* Layer-2 operation
+* No traditional routed interface required
+* Security inspection between two interfaces
+* Useful for internal segmentation
+* Can be used with **Direct Server Return (DSR)** designs
+* Can reduce routing complexity in certain designs
+
+---
+
+## Configure VWP
 
 ```bash
 config system virtual-wire-pair
-    edit "vwp-1"
-        set member "port3" "port4"
+    edit vwp-1
+        set member port3 port4
         set wildcard-vlan disable
-    next
+    end
 end
-
 ```
 
-> **Policy Enforcement:** Managed separately under `Policy & Objects > Firewall Virtual Wire Pair Policy`. Supports both Flow and Proxy inspection engines.
+> VWP member interfaces should be unused and should not have conflicting references.
 
-### Parallel Redundancy Protocol (PRP - IEC 62439-3)
+---
 
-Provides zero-failover-time Layer 2 redundancy for mission-critical industrial networks (SCADA, substations) by transmitting duplicate frames concurrently across two isolated networks (LAN A & LAN B).
+## VWP Firewall Policy
+
+Navigate to:
+
+```text
+Policy & Objects
+ └── Firewall Virtual Wire Pair Policy
+```
+
+Traffic direction can be controlled through VWP policies.
+
+Inspection can use:
+
+* Flow-based inspection
+* Proxy-based inspection
+
+---
+
+## NAT with VWP
+
+When NAT is required:
+
+```text
+VWP
+ │
+ └── Firewall Policy
+       │
+       └── IP Pool / SNAT
+```
+
+Use an appropriate overload/IP-pool NAT design.
+
+---
+
+# 20. PRP — Parallel Redundancy Protocol
+
+**PRP = Parallel Redundancy Protocol**
+
+Standardized under:
+
+```text
+IEC 62439-3
+```
+
+Designed for high-availability Ethernet networks.
+
+Common in:
+
+* Industrial networks
+* Substation automation
+* Critical infrastructure
+* Industrial control systems
+* High-power systems
+
+---
+
+## PRP Architecture
+
+```text
+                 ┌──────── LAN A ────────┐
+                 │                       │
+Node A ──────────┤                       ├──────── Node B
+                 │                       │
+                 └──────── LAN B ────────┘
+```
+
+The source sends duplicate frames over both networks.
+
+```text
+Frame
+ ├──► LAN A
+ └──► LAN B
+
+Destination:
+First frame  → ACCEPT
+Duplicate    → DROP
+```
+
+### Benefits
+
+* Zero/near-zero recovery time
+* No traditional failover convergence
+* Layer-2 operation
+* Application transparent
+* Independent LAN paths
+
+### Trade-off
+
+Requires duplicated network infrastructure.
+
+---
+
+## PRP Configuration
 
 ```bash
-# Enable PRP Trailer Processing
-config system settings
+config system setting
     set prp-trailer-action enable
 end
-
-# Assign Hardware Acceleration Ports
-config system npu
-    set prp-port-in "port15"
-    set prp-port-out "port16"
-end
-
-# Bind PRP Members into Virtual Wire Pair
-config system virtual-wire-pair
-    edit "vwp-prp"
-        set member "port15" "port16"
-    next
-end
-
 ```
 
----
-
-## 🎭 Enhanced MAC (EMAC) VLAN
-
-EMAC VLANs allow creating logical interfaces with **unique MAC addresses** on top of a single physical parent interface.
-
-```
-                 ┌── EMAC 1 (MAC: 00:09:0F:AA:00:01)
-[ Physical Port ]┼── EMAC 2 (MAC: 00:09:0F:AA:00:02)
-                 └── EMAC 3 (MAC: 00:09:0F:AA:00:03)
-
-```
-
-### Key Considerations & Restrictions
-
-* **Operational Mode:** Must run in **NAT Mode**.
-* **DHCP Limitations:** DHCP relay or server configurations may experience anomalous behavior on EMAC interfaces due to MAC binding constraints.
-* **Unique Pair Requirement:** A VLAN ID paired with a physical interface must remain unique across the entire chassis, including across different VDOMs.
-* **HA Behavior:** Synchronizes and fails over identically to physical interfaces across High Availability clusters.
-* **Restrictions:** Do **not** use EMAC on dedicated HA Heartbeat links, global Out-of-Band Management interfaces, or Transparent VDOM links.
-
----
-
-## 🌐 VXLAN Architecture & Encapsulation
-
-VXLAN encapsulates Layer 2 Ethernet frames inside Layer 3 UDP datagrams (port `4789`) to establish overlay networks over Layer 3 infrastructure.
+### NPU Ports
 
 ```bash
-# Define Core VXLAN Overlay Tunnel
+config system npu
+    set prp-port-in port15
+    set prp-port-out port16
+end
+```
+
+### Virtual Wire Pair
+
+```bash
+config system virtual-wire-pair
+    edit vwp-1
+        set member port15 port16
+    end
+end
+```
+
+---
+
+# 21. VXLAN
+
+**VXLAN = Virtual Extensible LAN**
+
+Provides Layer-2 overlay connectivity over an IP network.
+
+```text
+Site A                                Site B
+
+Client                                Client
+  │                                     │
+VLAN 10                               VLAN 10
+  │                                     │
+FGT ─────── IP Underlay ───────────── FGT
+              VXLAN
+             VNI 1000
+```
+
+---
+
+## VXLAN Configuration
+
+```bash
 config system vxlan
-    edit "vx10"
-        set interface "port2"
+    edit vx10
+        set interface port2
         set remote-ip 22.22.22.2
         set vni 1000
-    next
+    end
 end
-
 ```
 
-### Implementation Patterns & Best Practices
+### Important Parameters
 
-1. **Dialup / Hub-and-Spoke IPsec Overlays:**
-* Disable automatic device creation.
-* On spoke nodes, align Phase 2 IPsec subnets with local tunnel interface IPs (e.g., `12.23.34.2`) to establish deterministic reverse routing paths without creating unnecessary dynamic interfaces.
+| Parameter   | Meaning                  |
+| ----------- | ------------------------ |
+| `interface` | Underlay interface       |
+| `remote-ip` | VXLAN peer               |
+| `vni`       | VXLAN Network Identifier |
 
+---
 
-2. **VLAN Tagging over VXLAN:**
-* Create standard VLAN sub-interfaces underneath the parent VXLAN tunnel object using unique VLAN IDs to enable multi-tenant frame encapsulation.
+# 22. VLAN over VXLAN
 
+Create a VLAN interface **on top of the VXLAN interface**.
 
-3. **L2 Switching Integration:**
-* Bind client physical VLAN ports (e.g., `vlan10` on `port3`) and overlay VLAN ports (`vlan10` on `vx10`) into a common **Software Switch**.
-* ⚠️ **Never** add the base VXLAN tunnel object directly into a software switch.
-
-
-4. **Intra-Switch Policy Modes:**
-* **Implicit:** Traffic routes automatically between member ports without explicit policy checks.
-* **Explicit:** Enforces firewall inspection policies between ports within the software switch.
-
-
-5. **DHCP Services over VXLAN:**
-* Add the base VXLAN interface and local target ingress port into a dedicated software switch, assign an IP address to the switch interface, and attach the system DHCP Server service directly to that switch.
-
-
-
+```text
+Physical Interface
+       │
+       ▼
+    Underlay
+       │
+       ▼
+     VXLAN
+       │
+       ▼
+    VLAN 10
 ```
 
+Example concept:
+
+```text
+VLAN 10
+   │
+ VXLAN
+   │
+ IP Underlay
 ```
+
+---
+
+## VXLAN + Software Switch
+
+Example:
+
+```text
+Client Port
+    │
+ VLAN 10
+    │
+Software Switch
+    │
+ VLAN 10
+    │
+VXLAN
+```
+
+Add:
+
+* Client-side VLAN interface
+* VXLAN-side VLAN interface
+
+> Do **not** add the main VXLAN interface itself to the software switch when the design requires the VLAN interfaces.
+
+---
+
+# 23. Software Switch Intra-Switch Traffic
+
+Depending on configuration, traffic inside a software switch can be:
+
+### Implicit
+
+```text
+Port/VLAN
+   │
+Software Switch
+   │
+Forward
+```
+
+Traffic can be forwarded by default without a separate firewall policy.
+
+### Explicit
+
+A dedicated firewall policy is required for traffic between switch members.
+
+```text
+VLAN-A
+  │
+  ▼
+Software Switch
+  │
+Firewall Policy
+  │
+  ▼
+VLAN-B
+```
+
+---
+
+# 24. VXLAN + VWP
+
+The VXLAN main interface can also participate in a VWP design where supported.
+
+```text
+Client
+  │
+Physical Interface
+  │
+  ├──── VWP ──── VXLAN
+  │
+  ▼
+Remote Network
+```
+
+Policies then control traffic between the VWP members.
+
+---
+
+# 25. VXLAN + DHCP Design
+
+If DHCP is required around the VXLAN environment, a practical design is to use:
+
+```text
+Client Interface
+       │
+       ▼
+Software Switch
+       │
+       ├── Client-side VLAN
+       │
+       └── VXLAN-side VLAN
+       │
+       ▼
+     Gateway
+       │
+      DHCP
+```
+
+The IP address and DHCP server can be associated with the appropriate software-switch interface.
+
+---
+
+# 26. Interface Troubleshooting Commands
+
+## Switch Interfaces
+
+```bash
+show system switch-interface
+```
+
+Shows software-switch information.
+
+---
+
+## Transceiver
+
+```bash
+get system interface transceiver
+```
+
+Check SFP/SFP+ and transceiver information.
+
+---
+
+## 802.1X
+
+```bash
+diagnose sys 802-1x status
+```
+
+---
+
+# 27. Design Decision Matrix
+
+| Requirement                          | Recommended Interface/Feature             |
+| ------------------------------------ | ----------------------------------------- |
+| CPU-based L2 switching               | Software Switch                           |
+| ASIC-based L2 switching              | Hardware Switch                           |
+| Multiple VLANs over physical port    | VLAN                                      |
+| Double VLAN tagging                  | QinQ / 802.1ad                            |
+| Different MAC per VLAN               | EMAC VLAN                                 |
+| IP address allocation                | IPAM                                      |
+| User web authentication              | Captive Portal                            |
+| Packet capture                       | One-Arm Sniffer                           |
+| Custom packet size                   | MTU Override                              |
+| TCP fragmentation control            | TCP MSS                                   |
+| Multiple physical links              | LAG                                       |
+| Physical path redundancy             | Redundant Interface                       |
+| Layer-2 security bridge              | VWP                                       |
+| Industrial zero-time redundancy      | PRP                                       |
+| L2 overlay across IP                 | VXLAN                                     |
+| VLAN over VXLAN                      | VLAN interface on VXLAN                   |
+| High-speed optical links             | SFP/SFP+/SFP28/QSFP depending on platform |
+| Error correction on high-speed links | FEC                                       |
+
+---
+
+# 🧠 High-Value Exam Notes
+
+```text
+Software Switch
+    ↓
+CPU processing
+
+Hardware Switch
+    ↓
+ASIC processing
+
+EMAC VLAN
+    ↓
+Different MAC per VLAN on same parent interface
+
+802.1Q
+    ↓
+Single VLAN tag
+    ↓
+0x8100
+
+802.1ad / QinQ
+    ↓
+Double VLAN tag
+    ↓
+Outer 0x88A8
+    ↓
+Inner 0x8100
+
+LAG
+    ↓
+Multiple links
+    ↓
+Load balancing + redundancy
+
+Redundant Interface
+    ↓
+Multiple physical paths
+    ↓
+NO channel-group
+
+VWP
+    ↓
+Layer-2 security bridge
+
+PRP
+    ↓
+Duplicate traffic over LAN-A + LAN-B
+
+VXLAN
+    ↓
+L2 overlay over IP
+
+IPAM
+    ↓
+Automatic subnet/address management
+
+One-Arm Sniffer
+    ↓
+Passive/monitoring capture
+    ↓
+Short troubleshooting windows
+```
+
+---
+
+# ⚠️ Common Design Mistakes
+
+### ❌ Don't confuse LAG and Redundant
+
+```text
+LAG
+    → bandwidth + redundancy
+
+Redundant
+    → path redundancy
+    → no channel-group
+```
+
+### ❌ Don't treat EMAC as a normal VLAN
+
+```text
+Normal VLAN
+    → usually inherits/uses parent MAC behavior
+
+EMAC VLAN
+    → creates a distinct MAC identity
+```
+
+### ❌ Don't forget platform dependencies
+
+Many features depend on:
+
+* FortiGate model
+* ASIC generation
+* FortiOS version
+* Interface type
+* Transceiver
+* NPU availability
+
+### ❌ Don't use One-Arm Sniffer permanently
+
+```text
+Capture
+  ↓
+CPU / buffer pressure
+  ↓
+Possible packet loss
+```
+
+Use it for focused troubleshooting.
+
+### ❌ Don't add the VXLAN parent unnecessarily
+
+When building VLAN-over-VXLAN:
+
+```text
+VXLAN
+  └── VLAN 10
+```
+
+Usually work with the VLAN interface for the software-switch design rather than blindly adding the VXLAN parent.
+
+---
+
+# 🔥 Fast Revision
+
+| Topic           | Remember                        |
+| --------------- | ------------------------------- |
+| Software Switch | CPU                             |
+| Hardware Switch | ASIC                            |
+| EMAC            | Different MAC per VLAN          |
+| FEC             | High-speed physical links       |
+| SR4             | Short-range, 4 lanes            |
+| LR4             | Long-range, 4 lanes             |
+| CR4             | Copper, 4 lanes                 |
+| IPAM            | IP Address Management           |
+| Captive Portal  | User authentication             |
+| MTU             | Maximum packet size             |
+| MSS             | TCP payload size                |
+| SPAN            | Switch-side packet mirroring    |
+| LAG             | Aggregate multiple links        |
+| XOR16           | Lightweight LAG hashing         |
+| Redundant       | Path redundancy, no LAG         |
+| 802.1X          | Port-based access control       |
+| VWP             | L2 security bridge              |
+| PRP             | Duplicate packets over two LANs |
+| VXLAN           | L2 over IP                      |
+| VNI             | VXLAN Network Identifier        |
+| QinQ            | Double VLAN tagging             |
+| 802.1Q          | Single VLAN tagging             |
+| 802.1ad         | VLAN stacking                   |
