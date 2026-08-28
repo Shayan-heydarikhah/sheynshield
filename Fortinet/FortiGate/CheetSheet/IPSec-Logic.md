@@ -1,239 +1,459 @@
-# 🔐 FortiGate IPsec VPN — Cheat Sheet
+# 🔐 IPSec / IKE / VPN — CCNP & FortiGate Cheat Sheet
 
-> **Scope:** IPsec concepts, CIA, IKEv1/v2, Phase 1/2, NAT-T, DPD, QCD, fragmentation, XAuth, ADVPN, mesh, local-in protection, troubleshooting and Cisco examples.
-
----
-
-# 1. IPsec Security Concept
-
-## CIA Triad
-
-### Confidentiality
-
-- Ensures information is accessible only to authorized parties.
-- Protects data:
-  - At rest
-  - In transit
-  - In process
-- Example:
-
-```text
-X1 --------------------> X2
-
-Only X1 and X2 should be able to understand the information.
-Unauthorized users must not be able to read it.
-```
-
-### Integrity
-
-- Ensures data is not modified during transmission or processing.
-- Receiver should see the same packet/data sent by the sender.
-- Provides detection of:
-  - Modification
-  - Manipulation
-  - Corruption
-
-```text
-X1 ---- Original Packet ----> X2
-
-X1 == X2
-      |
-      +-- If different -> Integrity violation
-```
-
-### Availability
-
-- Authorized users must have access to information and services when required.
-- Important concepts:
-
-  - Acceptable performance
-  - Fault tolerance
-  - Prevention of data loss
-  - Prevention of destruction
-  - Reliable backups
-  - Redundancy
-
-> **CIA = Base of trust for a secure connection**
+> Comprehensive study notes for IPSec, IKEv1/v2, NAT-T, DPD, QCD, ADVPN, XAuth, FortiGate and Cisco configuration.
 
 ---
 
-# 2. IPsec Cryptographic Components
+# 1. 🔺 CIA Triad
 
-IPsec normally combines several security mechanisms.
+The CIA triad is the foundation of information security and secure communications.
+
+| Component | Meaning | Goal |
+|---|---|---|
+| **C** | Confidentiality | Prevent unauthorized access to information |
+| **I** | Integrity | Ensure data is not modified |
+| **A** | Availability | Ensure authorized access when required |
+
+## Confidentiality
+
+> Information should be accessible only to authorized entities.
+
+Example:
 
 ```text
-Encryption
-    +
-Integrity / Authentication
-    +
-Key Exchange
-    +
-Security Association
-    =
-Secure IPsec Tunnel
+X1  -------------------->  X2
+
+Only X1 and X2 should understand the information.
+Other devices/users should not be able to read it.
+````
+
+### Protects against
+
+* Unauthorized access
+* Unauthorized use
+* Data disclosure
+* Data exposure
+
+### Applies to
+
+* Data at rest
+* Data in transit
+* Data in process
+
+---
+
+## Integrity
+
+> Data received by X2 must be the same data sent by X1.
+
+```text
+X1
+ |
+ | Original Packet
+ v
+-------------------------
+Network
+-------------------------
+ |
+ v
+X2
+ |
+ +--> Packet must not be modified
+```
+
+Integrity provides:
+
+* Accuracy
+* Completeness
+* Detection of modification
+* Protection during:
+
+  * Storage
+  * Transit
+  * Processing
+
+---
+
+## Availability
+
+> Authorized users must be able to access information and services when required.
+
+Important concepts:
+
+* Acceptable level of performance
+* Fault tolerance / fault clearance
+* Prevention of data loss
+* Prevention of destruction
+* Reliable backups
+* Redundancy
+* High availability
+
+---
+
+## CIA = Security Foundation
+
+```text
+             SECURITY
+                 |
+        +--------+--------+
+        |        |        |
+     Confidentiality  Integrity  Availability
+        |        |        |
+     secrecy   accuracy  access
+```
+
+> Confidentiality + Integrity + Availability form the basic trust model for secure communication.
+
+---
+
+# 2. 🔐 IPSec Overview
+
+IPSec is not a single protocol.
+
+It is a framework that combines multiple protocols and mechanisms.
+
+```text
+IPSec
+ |
+ +-- Encryption
+ |
+ +-- Integrity
+ |
+ +-- Authentication
+ |
+ +-- Key Exchange
+ |
+ +-- Security Associations
+ |
+ +-- Anti-Replay
+ |
+ +-- IKE
+ |
+ +-- AH / ESP
 ```
 
 ---
 
-## 2.1 Encryption
+# 3. 🔒 Encryption
 
-Common encryption algorithms:
+Encryption provides **Confidentiality**.
 
-- DES
-- 3DES
-- AES
-
-> Encryption provides confidentiality.
+### Common algorithms
 
 ```text
-Plain Data
-    |
-    v
-Encryption
-    |
-    v
-Encrypted Data
+DES
+3DES
+AES
+```
+
+### DES
+
+* Data Encryption Standard
+* Old
+* Weak by modern standards
+* Should not be used in new deployments
+
+### 3DES
+
+* Triple DES
+* More secure than DES
+* Legacy
+* Slow compared with AES
+
+### AES
+
+* Advanced Encryption Standard
+* Modern
+* Fast
+* Commonly used in IPSec
+
+Common variants:
+
+```text
+AES-128
+AES-192
+AES-256
+```
+
+> Encryption alone is not enough. We also need integrity and authentication.
+
+---
+
+# 4. 🧮 Integrity / Hashing
+
+Integrity mechanisms detect modification.
+
+Common historical algorithms:
+
+```text
+MD5
+SHA-1
+SHA-256
+SHA-512
+```
+
+### SHA
+
+Secure Hash Algorithm.
+
+Examples:
+
+```text
+SHA-1     -> 160 bits
+SHA-256   -> 256 bits
+SHA-512   -> 512 bits
+```
+
+> SHA-1 and MD5 are considered obsolete for modern cryptographic authentication.
+
+### Important distinction
+
+```text
+Encryption  --> Confidentiality
+Hash/HMAC   --> Integrity / Authentication
 ```
 
 ---
 
-## 2.2 Integrity / Hash
-
-Common algorithms:
-
-- MD5
-- SHA
-
-SHA family examples:
-
-- SHA-1 / 160-bit
-- SHA-224
-- SHA-256
-- SHA-384
-- SHA-512
-
-> Integrity mechanisms are used to detect data manipulation.
-
-Conceptually:
-
-```text
-Data
-  |
-  +----> Hash
-  |
-  v
-Authentication / Integrity Verification
-```
-
-> **Note:** Modern deployments should avoid obsolete algorithms such as MD5, SHA-1, DES and 3DES when stronger options are available.
-
----
-
-## 2.3 Authentication
+# 5. 🔑 Authentication
 
 Authentication verifies the identity of the peer.
 
 Common methods:
 
-### Pre-Shared Key
-
 ```text
-Peer A
-   |
-   | Shared Secret
-   |
-Peer B
+Pre-Shared Key (PSK)
+RSA / Digital Certificates
 ```
 
-Both peers know the same secret.
+## Pre-Shared Key
 
-### RSA / Certificates
-
-Uses asymmetric cryptography:
+A secret value is configured on both sides.
 
 ```text
-Private Key + Public Key
+Router-A
+   |
+   | shared secret
+   |
+Router-B
 ```
 
-Certificate-based authentication is generally preferred for scalable environments.
+Both sides must know the same secret.
 
 ---
 
-# 3. Diffie-Hellman
+## RSA / Certificate Authentication
 
-DH is used to establish shared key material without directly sending the final secret across the network.
-
-Examples:
-
-- DH Group 1 → 768-bit
-- DH Group 2 → 1024-bit
-- DH Group 5 → 1536-bit
-- DH Group 14 → 2048-bit
-- Higher groups are also available depending on FortiOS/version.
+Uses asymmetric cryptography.
 
 ```text
-Peer A                         Peer B
-  |                              |
-  |------ DH Parameters -------->|
-  |<----- DH Parameters ---------|
-  |                              |
-  +---- Shared Secret ----------+
+Private Key
+Public Key
+Certificate
+CA
 ```
 
-> Both peers must use compatible DH groups.
+Conceptually:
+
+```text
+Private Key  <---->  Public Key
+```
+
+Certificates provide scalable identity validation.
 
 ---
 
-# 4. IPsec Protocols
+# 6. 🔄 Combining Encryption + Integrity + Authentication
 
-## AH — Authentication Header
+A simplified IPSec process:
 
-AH provides authentication/integrity for IP packets but does **not** provide encryption.
+```text
+Original Data
+     |
+     v
+Integrity / Authentication
+     |
+     v
+Encryption
+     |
+     v
+Encrypted Packet
+     |
+     v
+================ NETWORK ================
+     |
+     v
+Decrypt
+     |
+     v
+Verify Integrity / Authentication
+     |
+     v
+Original Data
+```
 
-### AH Transport Mode
+If authentication/integrity verification succeeds:
+
+```text
+Trusted + Unmodified
+```
+
+If verification fails:
+
+```text
+Packet rejected
+```
+
+---
+
+# 7. 🔑 Diffie-Hellman
+
+Diffie-Hellman (DH) is used for secure key agreement.
+
+It allows two peers to establish shared secret material without directly sending the secret over the network.
+
+Example historical groups:
+
+```text
+DH Group 1  -> 768-bit
+DH Group 2  -> 1024-bit
+DH Group 5  -> 1536-bit
+DH Group 14 -> 2048-bit
+```
+
+> Modern deployments should prefer stronger groups such as DH14+ or elliptic-curve groups, depending on platform support and security requirements.
+
+Conceptually:
+
+```text
+Peer A                          Peer B
+  |                               |
+  |------ DH public values ------>|
+  |<----- DH public values -------|
+  |                               |
+  +------ Shared Secret ----------+
+```
+
+The shared secret is not directly transmitted.
+
+---
+
+# 8. 🧱 Security Association (SA)
+
+A Security Association defines the security parameters used by IPSec.
+
+Conceptually:
+
+```text
+IPSec
+  |
+  +-- Security Association
+        |
+        +-- Encryption
+        +-- Integrity
+        +-- Authentication
+        +-- Lifetime
+        +-- SPI
+        +-- Traffic selectors
+```
+
+### SPI
+
+SPI = Security Parameter Index
+
+Used to identify the appropriate Security Association.
+
+---
+
+# 9. 🧩 IPSec Protocols
+
+IPSec mainly uses:
+
+```text
+AH
+ESP
+```
+
+---
+
+# 10. 🛡️ AH — Authentication Header
+
+AH = Authentication Header
+
+AH provides:
+
+* Integrity
+* Authentication of packet origin
+* Anti-replay protection
+
+AH does **not** provide encryption.
+
+Therefore:
+
+```text
+AH != Confidentiality
+```
+
+---
+
+## AH Transport Mode
 
 ```text
 +----------------+
-| IP Header      |
+| Original IP    |
 +----------------+
 | AH Header      |
 +----------------+
-| TCP            |
+| TCP / UDP      |
 +----------------+
 | Data           |
 +----------------+
 ```
 
-### AH Tunnel Mode
+---
+
+## AH Tunnel Mode
 
 ```text
 +------------------------+
-| New IP Header          |
+| New External IP Header |
 +------------------------+
-| AH Header              |
+| AH Header               |
 +------------------------+
-| Original IP Header     |
+| Original IP Header      |
 +------------------------+
-| TCP                    |
+| TCP / UDP               |
 +------------------------+
-| Data                   |
+| Data                    |
 +------------------------+
 ```
 
-> AH is rarely used in modern deployments because NAT compatibility and encryption requirements generally favor ESP.
+> AH authenticates protected IP information but does not encrypt the payload.
 
 ---
 
-# 5. ESP — Encapsulating Security Payload
+# 11. 🔐 ESP — Encapsulating Security Payload
 
-ESP can provide:
+ESP provides:
 
-- Confidentiality
-- Integrity
-- Authentication
-- Anti-replay protection
+* Confidentiality
+* Integrity
+* Authentication
+* Anti-replay protection
 
-## ESP Transport Mode
+ESP is the most commonly used IPSec protocol.
+
+### ESP Protocol Number
+
+```text
+IP protocol 50
+```
+
+---
+
+# 12. ESP Transport Mode
+
+Transport mode keeps the original IP header.
 
 ```text
 +----------------+
@@ -241,44 +461,36 @@ ESP can provide:
 +----------------+
 | ESP Header     |
 +----------------+
-| TCP*           |
+| TCP / UDP      | *
 +----------------+
-| Data*          |
+| Data           | *
 +----------------+
-| ESP Trailer*   |
+| ESP Trailer    | *
 +----------------+
 | ESP Auth       |
 +----------------+
 ```
 
-### ESP Encryption
+`*` = protected/encrypted portion depending on ESP configuration.
+
+Conceptually:
 
 ```text
-ESP Trailer + Data
+Original IP Header
         |
-        v
-    Encrypted
-```
-
-### ESP Authentication
-
-Conceptually covers:
-
-```text
-ESP Header + Encrypted Payload
-```
-
-### Protocol
-
-```text
-ESP = IP Protocol 50
+        +-- ESP Header
+        +-- Encrypted Payload
+        +-- ESP Trailer
+        +-- Authentication Data
 ```
 
 ---
 
-## ESP Tunnel Mode
+# 13. ESP Tunnel Mode
 
-Most common mode for site-to-site VPN.
+Tunnel mode adds a new external IP header.
+
+The original IP header is encapsulated inside ESP.
 
 ```text
 +------------------------+
@@ -286,209 +498,211 @@ Most common mode for site-to-site VPN.
 +------------------------+
 | ESP Header             |
 +------------------------+
-| Original IP Header*    |
+| Original IP Header   * |
 +------------------------+
-| TCP*                   |
+| TCP / UDP            * |
 +------------------------+
-| Data*                  |
+| Data                  *|
 +------------------------+
-| ESP Trailer*           |
+| ESP Trailer           *|
 +------------------------+
-| ESP Authentication     |
+| ESP Auth                |
 +------------------------+
 ```
 
-### ESP Encryption
+### Main advantage
+
+The original/internal IP header is hidden from the outside network.
 
 ```text
-Original IP Header
-      +
-TCP
-      +
-Data
-      +
-ESP Trailer
-      |
-      v
-Encrypted
-```
+Before:
 
-### ESP Authentication
+Original Source ---> Original Destination
 
-```text
-ESP Header
-     +
-Encrypted Payload
-```
 
-### Protocol
+After:
 
-```text
-ESP = IP Protocol 50
+Public/External Source ---> Public/External Destination
+                              |
+                              +-- encrypted internal packet
 ```
 
 ---
 
-# 6. ESP + AH
+# 14. AH vs ESP
 
-Possible combination:
+| Feature         |   AH |          ESP |
+| --------------- | ---: | -----------: |
+| Confidentiality |    ❌ |            ✅ |
+| Integrity       |    ✅ |            ✅ |
+| Authentication  |    ✅ |            ✅ |
+| Encryption      |    ❌ |            ✅ |
+| Anti-Replay     |    ✅ |            ✅ |
+| NAT Friendly    |    ❌ | ✅ with NAT-T |
+| Common Today    | Rare |  Very common |
+
+---
+
+# 15. 🔄 ESP + AH
+
+AH and ESP can technically be combined.
+
+However:
 
 ```text
-ESP + AH
+ESP is normally preferred.
 ```
 
-However, ESP with strong encryption and integrity is normally sufficient for modern deployments.
+Reasons:
+
+* ESP already supports encryption
+* ESP can provide integrity/authentication
+* NAT-T works with ESP
+* Better interoperability
 
 ---
 
-# 7. IPsec Tunnel Hierarchy
+# 16. 🔑 IKE
 
-Think about IPsec in layers:
+IKE = Internet Key Exchange
+
+IKE is responsible for:
+
+* Negotiating security parameters
+* Authentication
+* Diffie-Hellman exchange
+* Creating IKE SA
+* Creating Child/IPSec SAs
+* Rekeying
+* Peer liveness mechanisms
+
+Versions:
 
 ```text
-IPsec
- |
- +-- IKE
- |    |
- |    +-- IKE SA
- |         |
- |         +-- Authentication
- |         +-- Key Exchange
- |         +-- Crypto Negotiation
- |
- +-- IPsec SA
-      |
-      +-- SPI
-      +-- Encryption
-      +-- Integrity
-      +-- Traffic Selectors
+IKEv1
+IKEv2
 ```
 
 ---
 
-# 8. IKEv1 vs IKEv2
+# 17. IKEv1
 
-| Feature | IKEv1 | IKEv2 |
-|---|---|---|
-| Complexity | Higher | Lower |
-| Initial exchange | Main/Aggressive | IKE_SA_INIT + IKE_AUTH |
-| Main mode | Yes | No |
-| Aggressive mode | Yes | No |
-| NAT-T | Supported | Supported |
-| EAP | Limited/implementation dependent | Native support |
-| Exchange efficiency | Lower | Higher |
-| Child SAs | Limited compared with IKEv2 | Multiple Child SAs |
-| Recommended | Legacy compatibility | Preferred |
-
----
-
-# 9. IKEv1
-
-## Phase 1
-
-Purpose:
-
-> Build the IKE/ISAKMP control channel.
-
-Negotiates:
-
-- Encryption
-- Integrity
-- Authentication
-- DH group
-- Peer identity
+IKEv1 uses:
 
 ```text
 Phase 1
-   |
-   +-- IKE Policy
-   +-- Encryption
-   +-- Integrity
-   +-- DH
-   +-- Authentication
-   |
-   v
-IKE / ISAKMP SA
+Phase 2
 ```
 
 ---
 
-# 10. IKEv1 Main Mode
+# 18. IKEv1 Phase 1
+
+Purpose:
+
+```text
+Create the IKE / ISAKMP Security Association
+```
+
+Phase 1 establishes the secure control channel used for negotiating IPSec.
+
+### Phase 1 contains
+
+```text
+Encryption
+Integrity / Hash
+Authentication
+Diffie-Hellman Group
+Lifetime
+```
+
+Example:
+
+```text
+Encryption: AES
+Hash: SHA-256
+Authentication: Pre-Shared Key
+DH: Group 14
+```
+
+---
+
+# 19. IKEv1 Main Mode
 
 Main Mode uses **6 messages**.
 
 ```text
-Initiator                         Responder
-
-MM1  -------------------------->
-
-      <-------------------------- MM2
-
-MM3  -------------------------->
-
-      <-------------------------- MM4
-
-MM5  -------------------------->
-
-      <-------------------------- MM6
+MM1
+MM2
+MM3
+MM4
+MM5
+MM6
 ```
 
 ---
 
 ## MM1
 
+Initiator -> Responder
+
 Negotiation of security parameters.
 
 Contains concepts such as:
 
-- SA
-- Encryption
-- Integrity
-- DH
-- Vendor ID
+```text
+SA
+VID
+```
 
 ---
 
 ## MM2
 
-Responder sends the accepted security parameters.
+Responder -> Initiator
+
+Responder selects a matching proposal.
 
 ```text
 SA
-Vendor ID
+VID
 ```
 
 ---
 
 ## MM3
 
-Key exchange / nonce information.
+Initiator -> Responder
+
+DH exchange and nonce exchange.
 
 ```text
 KE
 Nonce
-Vendor ID
+VID
 ```
 
 ---
 
 ## MM4
 
-Responder sends:
+Responder -> Initiator
+
+Responder sends its DH/nonce information.
 
 ```text
 KE
 Nonce
-Vendor ID
+VID
 ```
-
-The shared key material is established.
 
 ---
 
 ## MM5
 
-Encrypted identity/authentication.
+Initiator -> Responder
+
+Identity/authentication information.
 
 ```text
 ID
@@ -501,7 +715,9 @@ Certificate Request
 
 ## MM6
 
-Responder authentication.
+Responder -> Initiator
+
+Identity/authentication information.
 
 ```text
 ID
@@ -511,32 +727,61 @@ Certificate
 
 ---
 
-## Main Mode Security Sequence
+# 20. IKEv1 Main Mode Security Sequence
+
+Simplified:
 
 ```text
 MM1 + MM2
     |
-    +-- Crypto negotiation
-    |   Unencrypted / unauthenticated
+    +--> Negotiate crypto parameters
     |
 MM3 + MM4
     |
-    +-- DH / Key exchange
+    +--> DH / key exchange
     |
 MM5 + MM6
     |
-    +-- Identity / Authentication
-    |   Encrypted
+    +--> Identity + authentication
+```
+
+### Security state
+
+```text
+MM1/MM2
     |
-    v
-IKE SA Established
+    +--> Negotiation
+    |    Unencrypted
+    |    Unauthenticated
+    |
+MM3/MM4
+    |
+    +--> DH / Key exchange
+    |
+MM5/MM6
+    |
+    +--> Identity + Authentication
+         Protected by negotiated keys
 ```
 
 ---
 
-# 11. IKEv1 State Troubleshooting
+# 21. IKEv1 Main Mode States
 
-## mm_wait_msg2
+Common troubleshooting states:
+
+```text
+MM_WAIT_MSG2
+MM_WAIT_MSG3
+MM_WAIT_MSG4
+MM_WAIT_MSG5
+MM_WAIT_MSG6
+MM_ACTIVE
+```
+
+---
+
+## MM_WAIT_MSG2
 
 Initiator sent:
 
@@ -544,346 +789,582 @@ Initiator sent:
 Encryption
 Hash / Integrity
 DH
-IKE Policy
+IKE policy
 ```
 
-and is waiting for the responder.
+and waits for the responder.
 
 ---
 
-## mm_wait_msg3
+## MM_WAIT_MSG3
 
-Responder is waiting for the next message.
+Responder received the initial proposal.
+
+It checks whether it has a matching IKE policy.
+
+If stuck here, investigate:
+
+* Routing
+* Peer reachability
+* IKE policy mismatch
+* Crypto map
+* Interface
+* Firewall filtering
+
+---
+
+## MM_WAIT_MSG4
+
+Initiator sends authentication-related material.
+
+Possible causes of getting stuck:
+
+* Missing PSK
+* Wrong PSK
+* Missing tunnel-group
+* Identity mismatch
+
+---
+
+## MM_WAIT_MSG5
+
+Responder is processing peer authentication.
+
+If PSKs do not match, the responder may remain in this state.
+
+---
+
+## MM_WAIT_MSG6
+
+Initiator waits for final authentication.
 
 Possible issue:
 
 ```text
-No return route
-Incorrect peer configuration
-IKE policy mismatch
-```
-
----
-
-## mm_wait_msg4
-
-Initiator sent authentication information and waits for the peer.
-
-Common causes:
-
-```text
-Missing PSK
-Wrong PSK
-Missing tunnel group / identity
-```
-
----
-
-## mm_wait_msg5
-
-Responder has not completed PSK validation.
-
-Possible cause:
-
-```text
 PSK mismatch
+Authentication mismatch
+Identity mismatch
 ```
 
 ---
 
-## mm_wait_msg6
+## MM_ACTIVE
 
-Initiator is waiting for final authentication confirmation.
-
----
-
-## mm_active
-
-IKE Phase 1 is established.
-
----
-
-# 12. IKEv1 Aggressive Mode
-
-Aggressive Mode uses 3 messages.
+IKEv1 Phase 1 is established.
 
 ```text
-Initiator                         Responder
-
-AM1  -------------------------->
-
-      <-------------------------- AM2
-
-AM3  -------------------------->
+IKE SA = UP
 ```
 
-### AM1
-
-Contains:
-
-- ISAKMP header
-- SA
-- Key exchange
-- Nonce
-- Initiator ID
-
-### AM2
-
-Contains:
-
-- ISAKMP header
-- SA
-- Key exchange
-- Nonce
-- Responder ID
-- Responder authentication/hash
-
-### AM3
-
-Contains:
-
-- Hash
-- Authentication
-
-> Aggressive Mode exposes more identity information during negotiation and is generally less desirable than Main Mode/IKEv2.
+Then Phase 2 can be negotiated.
 
 ---
 
-# 13. IKEv1 Phase 2
+# 22. IKEv1 Aggressive Mode
+
+Aggressive Mode uses **3 messages**.
+
+```text
+AM1
+AM2
+AM3
+```
+
+---
+
+## AM1
+
+Initiator sends:
+
+```text
+SA
+KE
+Nonce
+ID
+```
+
+---
+
+## AM2
+
+Responder sends:
+
+```text
+SA
+KE
+Nonce
+ID
+Authentication
+```
+
+---
+
+## AM3
+
+Initiator sends:
+
+```text
+Hash / Authentication
+```
+
+---
+
+## Aggressive Mode Summary
+
+```text
+AM1
+ |
+ +-- SA
+ +-- KE
+ +-- Nonce
+ +-- ID
+
+AM2
+ |
+ +-- SA
+ +-- KE
+ +-- Nonce
+ +-- ID
+ +-- Authentication
+
+AM3
+ |
+ +-- Hash
+ +-- Authentication
+```
+
+> Aggressive Mode is faster but exposes identity information earlier and is generally less desirable than Main Mode.
+
+---
+
+# 23. IKEv1 Phase 2
 
 Purpose:
 
-> Establish the IPsec data-plane SAs.
-
-Also called:
-
 ```text
-Quick Mode
+Create IPSec SAs
 ```
 
-### Quick Mode
+Phase 2 negotiates:
+
+* IPSec encryption
+* IPSec integrity
+* Traffic selectors
+* Lifetime
+* PFS if configured
+* IPSec SA parameters
+
+---
+
+# 24. IKEv1 Quick Mode
+
+Quick Mode commonly uses 3 messages:
 
 ```text
 QM1
- |
- +-- Proposal / peer information
- |
 QM2
- |
- +-- SA approval
- |
 QM3
- |
- +-- Final confirmation
-```
-
-Creates unidirectional IPsec SAs.
-
-```text
-SA A -> B
-SA B -> A
-```
-
----
-
-# 14. IKEv2
-
-IKEv2 is simpler and more efficient than IKEv1.
-
-The initial exchange uses:
-
-```text
-IKE_SA_INIT
-IKE_AUTH
-```
-
----
-
-# 15. IKEv2 Phase 1 — IKE_SA_INIT
-
-### Initiator
-
-```text
-IKE_SA_INIT Request
-```
-
-Contains:
-
-- SA
-- KE
-- Nonce
-- Vendor ID
-
-### Responder
-
-```text
-IKE_SA_INIT Response
-```
-
-Contains:
-
-- SA
-- KE
-- Nonce
-- Vendor ID
-
-This combines:
-
-```text
-Crypto negotiation
-+
-DH key exchange
-```
-
----
-
-# 16. IKEv2 Phase 2 — IKE_AUTH
-
-### Initiator
-
-```text
-IKE_AUTH Request
-```
-
-Contains:
-
-- ID
-- AUTH
-- Certificate
-- SA
-- Traffic Selectors
-- NAT detection
-- SPI
-
-### Responder
-
-```text
-IKE_AUTH Response
-```
-
-Contains:
-
-- ID
-- AUTH
-- Certificate
-- SA
-- Traffic Selectors
-- NAT detection
-- SPI
-
-This provides:
-
-```text
-Identity
-+
-Authentication
-+
-Child SA creation
-```
-
----
-
-# 17. IKEv2 Message Flow
-
-```text
-Message 1
-IKE_SA_INIT Request
-       +
-IKE_SA_INIT Response
-
-Message 2
-IKE_AUTH Request
-       +
-IKE_AUTH Response
-
-Message 3+
-CREATE_CHILD_SA / INFORMATIONAL
 ```
 
 Conceptually:
 
 ```text
-IKEv1:
-MM1
-MM2
-MM3
-MM4
-MM5
-MM6
-   |
-   v
-Quick Mode
+QM1 --> Proposal / negotiation
+QM2 <-- Response / approval
+QM3 --> Final confirmation
+```
 
-IKEv2:
+The result is IPSec SA establishment.
+
+---
+
+# 25. IKEv1 Phase 1 vs Phase 2
+
+|             | Phase 1         | Phase 2           |
+| ----------- | --------------- | ----------------- |
+| Purpose     | IKE SA          | IPSec SA          |
+| Plane       | Control plane   | Data plane        |
+| Protocol    | IKE/ISAKMP      | IPSec             |
+| Negotiates  | IKE parameters  | ESP/AH parameters |
+| Common mode | Main/Aggressive | Quick Mode        |
+
+---
+
+# 26. IKEv2
+
+IKEv2 is the newer IKE protocol.
+
+Advantages:
+
+* Fewer messages
+* Simpler architecture
+* Better mobility support
+* Better NAT traversal behavior
+* Built-in liveness mechanisms
+* EAP support
+* Better scalability
+* Multiple Child SAs
+* More efficient rekeying
+
+---
+
+# 27. IKEv2 Initial Exchange
+
+IKEv2 uses:
+
+```text
 IKE_SA_INIT
-   |
-IKE_AUTH
-   |
-Child SA
+```
+
+Two messages:
+
+```text
+IKE_SA_INIT Request
+IKE_SA_INIT Response
 ```
 
 ---
 
-# 18. IKEv2 Features
+## IKE_SA_INIT Request
 
-## EAP
-
-Extensible Authentication Protocol.
-
-Useful for authentication using:
-
-- Certificates
-- External authentication systems
-- Remote-access scenarios
-
----
-
-## Lower Bandwidth
-
-IKEv2 requires fewer exchanges than IKEv1.
-
----
-
-## NAT Traversal
-
-Built-in NAT-T support.
-
----
-
-## Built-in Keepalive / Liveness
-
-IKEv2 has stronger built-in mechanisms for peer liveness.
-
----
-
-# 19. Child SA
-
-IKEv2 can create multiple Child SAs under one IKE SA.
+Contains concepts such as:
 
 ```text
-IKE SA
- |
- +-- Child SA 1
- |
- +-- Child SA 2
- |
- +-- Child SA 3
- |
- +-- Child SA N
+SA
+KE
+Nonce
+Vendor ID
+```
+
+---
+
+## IKE_SA_INIT Response
+
+Contains:
+
+```text
+SA
+KE
+Nonce
+Vendor ID
+```
+
+---
+
+## IKEv2 SA_INIT Purpose
+
+Negotiates:
+
+```text
+Cryptographic algorithms
+DH exchange
+Nonces
+```
+
+Simplified:
+
+```text
+IKE_SA_INIT
+      |
+      +--> Crypto negotiation
+      |
+      +--> DH exchange
+      |
+      +--> Nonce exchange
+```
+
+---
+
+# 28. IKEv2 Authentication Exchange
+
+After SA_INIT:
+
+```text
+IKE_AUTH Request
+IKE_AUTH Response
+```
+
+---
+
+## IKE_AUTH Request
+
+Can contain:
+
+```text
+ID
+AUTH
+Certificate
+SA
+Traffic Selectors
+NAT detection
+SPI
+```
+
+---
+
+## IKE_AUTH Response
+
+Can contain:
+
+```text
+ID
+AUTH
+Certificate
+SA
+Traffic Selectors
+NAT detection
+SPI
+```
+
+---
+
+# 29. IKEv2 Message Flow
+
+```text
+Message 1
+Initiator
+    |
+    | IKE_SA_INIT Request
+    v
+Responder
+    |
+    | IKE_SA_INIT Response
+    v
+Message 2
+
+        ↓
+
+Message 3
+Initiator
+    |
+    | IKE_AUTH Request
+    v
+Responder
+    |
+    | IKE_AUTH Response
+    v
+Message 4
+```
+
+Therefore:
+
+```text
+IKEv2 Initial Exchange = 2 messages
+IKEv2 Authentication = 2 messages
+
+Total = 4 messages
+```
+
+---
+
+# 30. IKEv1 vs IKEv2
+
+| Feature             | IKEv1               | IKEv2              |
+| ------------------- | ------------------- | ------------------ |
+| Initial negotiation | More messages       | Fewer messages     |
+| Main Mode           | 6 messages          | N/A                |
+| Aggressive Mode     | 3 messages          | N/A                |
+| Initial exchange    | 6-message Main Mode | 4-message exchange |
+| EAP                 | Limited             | Built-in           |
+| NAT-T               | Supported           | Built-in design    |
+| Child SAs           | Less flexible       | Native             |
+| Mobility            | Limited             | Better             |
+| Scalability         | Lower               | Better             |
+| Complexity          | Higher              | Lower              |
+
+---
+
+# 31. IKEv2 Child SA
+
+IKEv2 uses:
+
+```text
+Child SA
+```
+
+A single IKE SA can protect multiple Child SAs.
+
+Conceptually:
+
+```text
+             IKE SA
+                |
+       +--------+--------+
+       |        |        |
+    Child SA  Child SA  Child SA
+       |        |        |
+      VPN1     VPN2     VPN3
+```
+
+This is one reason IKEv2 is more flexible for large deployments.
+
+---
+
+# 32. EAP in IKEv2
+
+EAP = Extensible Authentication Protocol
+
+Used to support additional authentication methods.
+
+Example:
+
+```text
+IKEv2
+  |
+  +-- EAP
+       |
+       +-- Authentication Server
+       |
+       +-- User Authentication
 ```
 
 Useful for:
 
-- Multiple traffic selectors
-- Multiple IPsec policies
-- Rekeying
-- Dynamic VPN architectures
+* Remote access
+* User authentication
+* Certificate-based environments
+* Enterprise authentication
 
 ---
 
-# 20. Cisco IPsec — Classic Crypto Map
+# 33. IPSec Tunnel Hierarchy
 
-## Phase 1
+A useful conceptual hierarchy:
+
+```text
+IKE
+ |
+ +-- IKE SA
+      |
+      +-- Child / IPSec SA
+            |
+            +-- SPI
+            |
+            +-- ESP
+            |
+            +-- Encrypted Traffic
+```
+
+For IKEv1:
+
+```text
+ISAKMP/IKE Phase 1
+        |
+        v
+IPSec Phase 2
+        |
+        v
+IPSec SA
+        |
+        v
+SPI
+```
+
+---
+
+# 34. Site-to-Site VPN vs Remote Access
+
+### Site-to-Site
+
+Usually:
+
+```text
+IPSec VPN
+```
+
+Example:
+
+```text
+LAN-A
+ |
+Router-A
+ |
+==== Internet ====
+ |
+Router-B
+ |
+LAN-B
+```
+
+### Remote Access
+
+Common approaches:
+
+```text
+SSL VPN
+IKEv2/IPSec
+```
+
+> The exact technology depends on platform and deployment requirements.
+
+---
+
+# 35. GRE + IPSec
+
+GRE provides tunneling features such as:
+
+* Multicast
+* Dynamic routing protocols
+* Broadcast
+* Flexible encapsulation
+
+IPSec provides:
+
+* Encryption
+* Integrity
+* Authentication
+
+Conceptually:
+
+```text
+Routing Protocol
+       |
+      GRE
+       |
+     IPSec
+       |
+   Internet
+```
+
+Cisco commonly uses:
+
+```text
+Tunnel Interface
++
+GRE
++
+IPSec protection
+```
+
+---
+
+# 36. Cisco GRE Keepalive
+
+Example:
+
+```cisco
+interface Tunnel0
+ keepalive 3 3
+```
+
+Conceptually:
+
+```text
+keepalive <number-of-probes> <interval>
+```
+
+Example:
+
+```text
+3 probes
+3 seconds interval
+```
+
+---
+
+# 37. Cisco IPSec Site-to-Site Configuration
+
+## IKEv1 Phase 1
 
 ```cisco
 crypto isakmp policy 10
@@ -891,6 +1372,12 @@ crypto isakmp policy 10
  hash sha256
  authentication pre-share
  group 14
+```
+
+Purpose:
+
+```text
+Create IKEv1 Phase 1 policy.
 ```
 
 ---
@@ -901,57 +1388,85 @@ crypto isakmp policy 10
 crypto isakmp key vpnuser address 10.0.0.2
 ```
 
----
+Defines:
 
-## Phase 2 Transform Set
-
-```cisco
-crypto ipsec transform-set myset esp-aes esp-sha256-hmac
+```text
+PSK
++
+Remote Peer
 ```
 
 ---
 
-## Interesting Traffic
+# 38. Cisco IPSec Phase 2
 
 ```cisco
-access-list 100 permit ip \
-192.168.101.0 0.0.0.255 \
-192.168.102.0 0.0.0.255
+crypto ipsec transform-set MYSET esp-aes esp-sha256-hmac
+```
+
+Defines:
+
+```text
+ESP Encryption
++
+ESP Integrity
 ```
 
 ---
 
-## Crypto Map
+# 39. Interesting Traffic
 
 ```cisco
-crypto map mymap 10 ipsec-isakmp
+access-list 100 permit ip 192.168.101.0 0.0.0.255 192.168.102.0 0.0.0.255
+```
+
+This identifies traffic that should be protected by IPSec.
+
+```text
+192.168.101.0/24
+        |
+       VPN
+        |
+192.168.102.0/24
+```
+
+---
+
+# 40. Cisco Crypto Map
+
+```cisco
+crypto map MYMAP 10 ipsec-isakmp
  set peer 10.0.0.2
- set transform-set myset
+ set transform-set MYSET
  match address 100
 ```
 
 ---
 
-## Apply Crypto Map
+# 41. Apply Crypto Map
 
 ```cisco
 interface GigabitEthernet0/0
  ip address 192.168.102.1 255.255.255.0
- crypto map mymap
+ crypto map MYMAP
 ```
+
+The crypto map must be applied to the appropriate external interface.
 
 ---
 
-# 21. Cisco Route-Based IPsec Example
+# 42. Cisco Tunnel-Protected IPSec Example
 
 ## Keyring
 
 ```cisco
-crypto keyring preshare
+crypto keyring PRESHARE
  pre-shared-key address 11.12.13.2 key secret
 ```
 
-## ISAKMP Policy
+---
+
+## IKE Policy
 
 ```cisco
 crypto isakmp policy 1
@@ -960,30 +1475,40 @@ crypto isakmp policy 1
  group 5
 ```
 
-## ISAKMP Profile
+> 3DES and DH5 are legacy choices and should normally be replaced with stronger algorithms/groups in new deployments.
+
+---
+
+## IKE Profile
 
 ```cisco
-crypto isakmp profile preshare
- keyring preshare
+crypto isakmp profile PRESHARE
+ keyring PRESHARE
  match identity address 11.12.13.2 255.255.255.255
 ```
 
-## Transform Set
+---
+
+## IPSec Transform Set
 
 ```cisco
-crypto ipsec transform-set aes-sha1 esp-aes esp-sha-hmac
+crypto ipsec transform-set AES-SHA1 esp-aes esp-sha-hmac
  mode tunnel
 ```
 
-## IPsec Profile
+---
+
+## IPSec Profile
 
 ```cisco
-crypto ipsec profile ipsec-preshare
- set transform-set aes-sha1
- set isakmp-profile preshare
+crypto ipsec profile IPSEC-PRESHARE
+ set transform-set AES-SHA1
+ set isakmp-profile PRESHARE
 ```
 
-## Tunnel
+---
+
+## Tunnel Interface
 
 ```cisco
 interface Tunnel111
@@ -991,8 +1516,10 @@ interface Tunnel111
  tunnel source 11.12.13.1
  tunnel mode ipsec ipv4
  tunnel destination 11.12.13.2
- tunnel protection ipsec profile ipsec-preshare
+ tunnel protection ipsec profile IPSEC-PRESHARE
 ```
+
+---
 
 ## Route
 
@@ -1002,193 +1529,329 @@ ip route 192.168.102.0 255.255.255.0 Tunnel111
 
 ---
 
-# 22. FortiGate Phase 1
+# 43. 🛰️ Auto Discovery VPN / ADVPN
 
-Important Phase 1 concepts:
+ADVPN = Auto Discovery VPN
 
-- Security Association
-- Encryption
-- Authentication
-- DH
-- Auto negotiation
-- Negotiation timeout
-- NAT Traversal
-- DPD
-- Mode Config
-- XAuth
-- Device Creation
-- Network ID
-- Auto Discovery
-- Exchange Interface IP
+Used to dynamically establish VPN connectivity.
+
+Useful for:
+
+```text
+Hub-and-Spoke
+Spoke-to-Spoke
+Dynamic Mesh
+Large-scale VPN
+SD-WAN
+```
+
+Concept:
+
+```text
+             HUB
+           /     \
+        Spoke1  Spoke2
+          \       /
+           \     /
+        Dynamic
+       Spoke-to-Spoke
+```
+
+Without dynamic shortcut:
+
+```text
+Spoke1 --> Hub --> Spoke2
+```
+
+With ADVPN:
+
+```text
+Spoke1 ---------> Spoke2
+       shortcut
+```
 
 ---
 
-# 23. NAT Traversal — NAT-T
+# 44. ADVPN + SD-WAN
 
-NAT-T encapsulates IPsec traffic inside UDP.
+ADVPN can be combined with SD-WAN to dynamically manage:
+
+* Hub-and-spoke connectivity
+* Spoke-to-spoke connectivity
+* Dynamic shortcuts
+* Route advertisement
+* Link selection
+* Large-scale VPN topology
+
+---
+
+# 45. IPSec Phase 1 Advanced Features
+
+Important Phase 1 features include:
+
+```text
+Security Association
+Profiles
+Automatic negotiation
+Negotiation timeout
+Mode Config
+NAT Traversal
+Keepalive
+Dead Peer Detection
+XAuth
+Auto Discovery
+Dynamic routes
+Network ID
+```
+
+---
+
+# 46. Mode Config
+
+Mode Config can provide dynamic parameters to clients.
+
+Examples:
+
+```text
+IP Address
+DNS
+Routes
+Other client parameters
+```
+
+Useful for:
+
+```text
+Dial-up VPN
+Remote Access
+Dynamic VPN clients
+```
+
+---
+
+# 47. NAT Traversal — NAT-T
+
+NAT-T = NAT Traversal
+
+IPSec ESP uses:
+
+```text
+IP protocol 50
+```
+
+NAT devices cannot normally translate ESP like TCP/UDP.
+
+NAT-T encapsulates IPSec traffic in UDP.
 
 Common ports:
 
 ```text
-UDP/500
-UDP/4500
-```
-
-Normally:
-
-```text
-IKE
 UDP 500
+UDP 4500
 ```
 
 When NAT is detected:
 
 ```text
-IPsec / IKE
+ESP
+  ↓
+UDP 4500
+  ↓
+NAT
+  ↓
+Internet
+```
+
+---
+
+# 48. NAT Detection
+
+IKE peers exchange NAT-D payloads.
+
+Simplified process:
+
+```text
+Peer A
+IP:Port
+   |
+   | Hash(IP + Port)
+   v
+Peer B
+```
+
+Both peers calculate hashes.
+
+If calculated values differ:
+
+```text
+NAT detected
+```
+
+Then traffic moves to:
+
+```text
 UDP 4500
 ```
 
 ---
 
-# 24. NAT Detection
+# 49. NAT-T IKEv2 Flow
 
-Conceptually:
-
-```text
-1. Peer A:500
-       |
-       v
-2. Peer B:500
-       |
-       v
-3. NAT-D payload
-       |
-       v
-4. Hash comparison
-       |
-       +-- Same hash -> No NAT
-       |
-       +-- Different -> NAT detected
-```
-
-Example:
+Simplified:
 
 ```text
-192.168.1.1:500
+1. Source IP:500
         |
         v
-      Hash
-```
+   Destination:500
 
-Responder calculates the expected value.
+2. Response
+        |
+        v
+   UDP 500
 
-If values differ:
+3. NAT-D payload
+        |
+        v
+   Hash(IP + Port)
 
-```text
-NAT exists
+4. Compare hashes
+        |
+        +---- Same ----> No NAT
+        |
+        +---- Different -> NAT detected
+                              |
+                              v
+                         UDP 4500
 ```
 
 ---
 
-# 25. NAT-T Modes
+# 50. NAT-T Modes
 
-## Enable
-
-Preferred in most environments.
+Common concepts:
 
 ```text
-NAT-T enabled
+Enable
+Force
 ```
 
-## Force
+### Enable
+
+Allows NAT-T when NAT is detected.
+
+### Force
 
 Forces NAT-T behavior.
 
-Useful when NAT-T must be used regardless of normal detection.
+> Use the mode appropriate to the actual topology and platform requirements.
 
 ---
 
-# 26. NAT Keepalive
+# 51. Keepalive
 
 NAT devices may remove idle UDP mappings.
 
-NAT keepalive sends periodic traffic to keep the mapping alive.
+Therefore keepalive traffic can maintain the NAT mapping.
 
 ```text
 Peer A
   |
   | Keepalive
   v
-NAT Device
+NAT
   |
   v
 Peer B
 ```
 
----
-
-# 27. Dead Peer Detection — DPD
-
-DPD detects whether the remote peer is alive.
-
-Concept:
+Purpose:
 
 ```text
-Peer A
-  |
-  | R-U-THERE
-  v
-Peer B
-  |
-  | R-U-THERE-ACK
-  v
-Peer A
+Prevent idle NAT mapping expiration
+```
+
+---
+
+# 52. Dead Peer Detection — DPD
+
+DPD determines whether the remote peer is alive.
+
+Conceptually similar to:
+
+```text
+Are you alive?
+     |
+     v
+R-U-THERE
+     |
+     v
+R-U-THERE-ACK
 ```
 
 If the peer does not respond:
 
 ```text
-IKE / IPsec SA
-       |
-       v
-Considered dead
-       |
-       v
-Tunnel cleanup / renegotiation
+IKE SA
+   |
+   +--> Consider peer dead
+   |
+   +--> Remove / renegotiate VPN
 ```
 
 ---
 
-# 28. DPD Modes
+# 53. DPD Modes
+
+Common modes:
+
+```text
+on-idle
+on-demand
+```
+
+---
 
 ## on-idle
+
+DPD is triggered when the VPN is idle.
 
 Useful for:
 
 ```text
 Dial-up VPN
-Large-scale VPN environments
+Large VPN deployments
+Resource optimization
 ```
-
-Only checks when the connection is idle.
 
 ---
 
 ## on-demand
 
-Useful for:
+DPD is triggered based on demand/traffic conditions.
+
+Commonly useful for:
 
 ```text
 Site-to-site VPN
 ```
 
-DPD behavior is triggered based on traffic / liveness requirements.
+> Exact behavior depends on FortiOS version and configuration.
 
 ---
 
-# 29. FortiGate DPD Configuration
+# 54. DPD Timers
 
-```bash
+Example:
+
+```cisco
+dpd-retrycount
+dpd-retryinterval
+```
+
+FortiGate example:
+
+```fortigate
 config vpn ipsec phase1-interface
     edit "link-1"
         set dpd-retryinterval 15
@@ -1200,36 +1863,64 @@ end
 Conceptually:
 
 ```text
-Retry interval = 15 sec
+Retry interval = 15 seconds
 Retry count    = 3
 ```
 
 ---
 
-# 30. DPD Troubleshooting
+# 55. DPD Scalability
+
+For large dial-up deployments:
+
+```text
+Thousands of peers
+       |
+       v
+Aggressive probing
+       |
+       v
+CPU / bandwidth overhead
+```
+
+Therefore optimize DPD behavior.
+
+Useful approach:
+
+```text
+Dial-up  --> on-idle
+Site-to-site --> on-demand
+```
+
+Always validate against the FortiOS version and topology.
+
+---
+
+# 56. FortiGate DPD Verification
 
 ```bash
 diagnose vpn ike gateway list
 ```
 
-Useful for checking:
+Useful information can include:
 
-- IKE SA
-- HMAC
-- Authentication
-- Proposals
-- Peer address
-- Tunnel state
-
-> If DPD ACKs are not received, the peer may be considered unreachable and the IKE/IPsec session may be terminated.
+* IKE gateway
+* SA state
+* Peer address
+* Proposal
+* Authentication
+* Hash/HMAC information
+* Negotiated parameters
 
 ---
 
-# 31. IKEv2 Reauthentication
+# 57. IKEv2 Reauthentication
 
-IKEv2 can periodically reauthenticate the peer.
+IKEv2 supports reauthentication.
 
-```bash
+Example:
+
+```fortigate
 config vpn ipsec phase1-interface
     edit "link-1"
         set reauth enable
@@ -1237,62 +1928,129 @@ config vpn ipsec phase1-interface
 end
 ```
 
-The Phase 1 key lifetime controls when reauthentication/rekey behavior occurs depending on configuration.
+The key lifetime / authentication lifetime can determine when reauthentication occurs.
 
----
-
-# 32. Quick Crash Detection — QCD
-
-QCD provides faster detection of peer failures.
-
-Conceptually similar to DPD:
+Conceptually:
 
 ```text
-Peer A
+IKE SA
   |
-  | Liveness information
+  | lifetime
   v
-Peer B
+Reauthentication
+  |
+  v
+New authenticated state
 ```
-
-IKEv2 provides built-in mechanisms for liveness and invalid SPI handling.
 
 ---
 
-## Enable QCD
+# 58. Quick Crash Detection — QCD
 
-```bash
-config system setting
+QCD = Quick Crash Detection
+
+Purpose:
+
+```text
+Fast detection of peer failure
+```
+
+Similar goal to DPD, but designed for faster crash/failure detection.
+
+---
+
+## IKEv1 QCD
+
+Some implementations use vendor-specific extensions such as:
+
+```text
+R-U-THERE
+R-U-THERE-ACK
+```
+
+---
+
+## IKEv2 QCD
+
+IKEv2 provides improved built-in mechanisms.
+
+It can use:
+
+```text
+Notify messages
+Invalid IKE SPI
+Invalid Child SA SPI
+```
+
+---
+
+# 59. Invalid SPI
+
+When an IKE message is received for an unknown SPI, a notification can indicate:
+
+```text
+INVALID_IKE_SPI
+```
+
+Similarly, IPSec can use:
+
+```text
+INVALID_SPI
+```
+
+These notifications help peers recover from stale or mismatched security associations.
+
+---
+
+# 60. QCD Tokens
+
+QCD tokens can be derived using information associated with the IKE SA/SPI and authentication exchange.
+
+Purpose:
+
+```text
+Fast peer-state validation
++
+Failure detection
+```
+
+---
+
+# 61. FortiGate QCD
+
+Example:
+
+```fortigate
+config system settings
     set ike-quick-crash-detect enable
 end
 ```
 
-> IKEv1 can use vendor-specific QCD extensions; behavior depends on FortiOS/version and configuration.
+> Verify exact command syntax for the FortiOS version in use.
 
 ---
 
-# 33. IKE Fragmentation
+# 62. IKE Fragmentation
 
-IKE packets can become large because of:
+IKE messages can become large.
 
-- Certificates
-- Large proposals
-- Authentication payloads
-- Multiple attributes
-
-Fragmentation helps prevent problems with:
+Examples:
 
 ```text
-UDP packet size
-ISP MTU
-Intermediate network devices
+Certificates
+Large authentication payloads
+Large identity payloads
 ```
+
+Large UDP packets can cause fragmentation problems.
 
 ---
 
-# 34. IKEv1 Fragmentation
+# 63. IKEv1 Fragmentation
 
-```bash
+Example:
+
+```fortigate
 config vpn ipsec phase1-interface
     edit "link-1"
         set fragmentation enable
@@ -1300,13 +2058,15 @@ config vpn ipsec phase1-interface
 end
 ```
 
-> Default behavior may depend on FortiOS version/configuration.
+> FortiOS defaults and behavior can vary by release; verify before changing the default.
 
 ---
 
-# 35. IKEv2 Fragmentation
+# 64. IKEv2 Fragmentation
 
-```bash
+Example:
+
+```fortigate
 config vpn ipsec phase1-interface
     edit "link-1"
         set ike-version 2
@@ -1318,130 +2078,177 @@ end
 
 ---
 
-# 36. Embryonic Limit
+# 65. MTU / Fragmentation
 
-Protects IPsec/IKE against excessive connection attempts.
+IPv4 and IPv6 have different fragmentation considerations.
 
-Useful against:
+Large IKE packets may be fragmented by the network.
+
+Symptoms:
 
 ```text
-DoS
-DDoS
-IKE connection exhaustion
+IKE negotiation stuck
+Retransmissions
+MM_WAIT states
+IKE_AUTH failure
+Certificate authentication failure
+```
+
+Troubleshooting:
+
+```text
+Check MTU
+Check ISP
+Check firewall
+Check NAT
+Enable IKE fragmentation
+```
+
+---
+
+# 66. Embryonic Limit
+
+Embryonic limit protects the device against excessive connection attempts.
+
+Concept:
+
+```text
+Internet
+   |
+   | many IKE/IPSec requests
+   v
+FortiGate
+   |
+   +--> Embryonic limit
+            |
+            +--> Limit incomplete negotiations
 ```
 
 Example:
 
-```bash
-config system setting
+```fortigate
+config system settings
     set embryonic-limit 50
 end
 ```
 
-> Supported limits depend on FortiGate model and FortiOS version.
+> Exact platform support and limits depend on FortiOS model/version.
 
 ---
 
-# 37. Mode Config
+# 67. XAuth
 
-Mode Config can assign configuration parameters to dynamic/dial-up clients.
+XAuth = Extended Authentication
 
-Examples:
-
-- IP address
-- DNS
-- Routes
-- Other client parameters
-
-Useful for:
+Often used with:
 
 ```text
+IKEv1
 Dial-up VPN
 Remote Access
-Dynamic peers
+User authentication
 ```
 
----
-
-# 38. Device Creation
-
-For dynamic/dial-up IPsec peers, FortiGate can dynamically create interfaces/objects associated with connected peers.
-
-Conceptually:
+Authentication can integrate with:
 
 ```text
-Dial-up Peer
-     |
-     v
-IPsec Connection
-     |
-     v
-Dynamic Interface
-     |
-     +-- IP
-     +-- Tunnel ID
-     +-- Routing
-     +-- Policies
+Local users
+LDAP
+RADIUS
+CHAP
+PAP
+User groups
 ```
 
 ---
 
-# 39. XAuth
+# 68. XAuth Modes
 
-XAuth provides additional user authentication for IPsec.
-
-Possible modes:
+Common concepts:
 
 ```text
 PAP
 CHAP
-Auto
-Client
+AUTO
 ```
+
+### PAP
+
+Password Authentication Protocol.
+
+Simple authentication method.
+
+### CHAP
+
+Challenge Handshake Authentication Protocol.
+
+Uses challenge/response rather than sending the password directly.
+
+### Auto Server
+
+Can negotiate based on server capabilities.
+
+> Exact FortiGate behavior depends on the configured authentication server and FortiOS version.
 
 ---
 
-## PAP
+# 69. XAuth Client vs Server
+
+### XAuth Server
+
+FortiGate authenticates remote users.
 
 ```text
-FortiGate <---- authentication negotiation ----> Client
+Remote User
+    |
+    v
+FortiGate
+    |
+    +--> User Group
+    |
+    +--> Authentication Server
 ```
 
----
+### XAuth Client
 
-## CHAP
-
-Authentication negotiation with the authentication server.
+FortiGate acts as a client and authenticates toward a remote VPN gateway.
 
 ---
 
-## Auto Server
+# 70. Dynamic Routes + Mode Config
 
-Can combine authentication behavior.
-
-> In the described auto-server configuration, only one user group is assigned directly, while multiple user containers may exist on the authentication backend.
-
----
-
-# 40. XAuth Client Mode
-
-Useful when FortiGate acts as the client toward a remote VPN gateway.
+Dynamic VPN clients can receive:
 
 ```text
-FortiGate Client
-       |
-       | XAuth
-       v
-Remote VPN Gateway
+IP address
+Routes
+DNS
+Other parameters
 ```
+
+For large VPN fabrics:
+
+```text
+Mode Config
++
+Dynamic Routing
++
+IPSec
++
+ADVPN
+```
+
+can provide scalable connectivity.
 
 ---
 
-# 41. Network ID
+# 71. Network ID
 
-Network ID can distinguish multiple IPsec behaviors/segments over the same public interface.
+FortiGate supports Network ID to distinguish different VPN behaviors over the same public interface.
 
-```bash
+Example:
+
+```fortigate
 config vpn ipsec phase1-interface
     edit "link-1"
         set network-id 2
@@ -1452,102 +2259,91 @@ end
 Concept:
 
 ```text
-Same Physical Interface
+Same Public Interface
         |
-        +-- Network-ID 1
+        +-- Network ID 1
         |
-        +-- Network-ID 2
+        +-- Network ID 2
         |
-        +-- Network-ID 3
+        +-- Network ID 3
 ```
+
+Useful for segmentation and distinguishing multiple IPsec relationships.
 
 ---
 
-# 42. Auto Discovery VPN / ADVPN
+# 72. Auto Discovery Sender / Receiver
 
-ADVPN is useful for large hub-and-spoke networks.
-
-It can help establish:
-
-```text
-Hub <----> Spoke
-Hub <----> Spoke
-Spoke <----> Spoke
-```
-
-Instead of forcing all spoke-to-spoke traffic through the hub.
-
----
-
-# 43. ADVPN + SD-WAN
-
-Common architecture:
-
-```text
-                HUB
-                 |
-        +--------+--------+
-        |                 |
-      Spoke1            Spoke2
-        |                 |
-        +------SD-WAN-----+
-```
-
-Useful for:
-
-- Hub-and-spoke
-- Dynamic spoke-to-spoke connectivity
-- Large-scale VPN deployments
-- SD-WAN overlays
-
----
-
-# 44. Auto Discovery Sender / Receiver
-
-Used when dynamic VPN peers need discovery information.
-
-Useful for:
+Used in dynamic VPN environments such as:
 
 ```text
 ADVPN
-Mesh
-Dynamic routing over IPsec
-Spoke-to-spoke shortcuts
+Dynamic Mesh
+Large Hub-and-Spoke
+SD-WAN
 ```
 
-If routing protocols need to advertise routes/hello information through the IPsec overlay, auto-discovery mechanisms may be required depending on topology.
+Can help advertise:
+
+```text
+Routes
+Discovery information
+Hello messages
+Spoke information
+```
 
 ---
 
-# 45. Exchange Interface IP
+# 73. Exchange Interface IP
 
-Useful in hub-and-spoke scenarios when spokes need to establish direct logical connectivity.
+In hub-and-spoke designs, spokes may need to know the interface IP of other spokes.
 
 Concept:
 
 ```text
-Spoke A
-   |
-   +----------+
-              |
-             HUB
-              |
-   +----------+
-   |
-Spoke B
+Hub
+ |
+ +---- Spoke A
+ |
+ +---- Spoke B
 
-After shortcut:
+Spoke A <--------> Spoke B
+```
 
-Spoke A <--------------> Spoke B
+The hub can help exchange information needed for direct connectivity.
+
+---
+
+# 74. Aggregate Members
+
+Multiple IPSec interfaces can be combined into an aggregate design.
+
+Purpose:
+
+```text
+Redundancy
+Load sharing
+High availability
+Multiple links
+```
+
+Conceptually:
+
+```text
+             Aggregate
+             /       \
+        IPSec-1     IPSec-2
 ```
 
 ---
 
-# 46. Mesh Selector
+# 75. Mesh Selector Network
 
-Can help build full-mesh behavior with dynamic IPsec.
+Mesh selectors can help create dynamic spoke-to-spoke connectivity.
 
-```bash
+Example:
+
+```fortigate
 config vpn ipsec phase1-interface
     edit "link-1"
         set mesh-selector-type enable
@@ -1555,192 +2351,90 @@ config vpn ipsec phase1-interface
 end
 ```
 
-Typically used together with:
+Typically used together with relevant:
 
 ```text
-Auto Discovery
-+
-Exchange Interface IP
+Auto-discovery
+Exchange interface IP
+Phase 2 selectors
 ```
-
----
-
-# 47. Aggregate IPsec Interfaces
-
-IPsec interfaces can participate in aggregation in supported configurations.
 
 Concept:
 
 ```text
-IPsec-1 ----\
-             +---- Aggregate ---- Network
-IPsec-2 ----/
-```
-
-Provides redundancy / multiple members where supported.
-
----
-
-# 48. IPsec Dial-up Address Release
-
-A released dynamic IPsec address may remain reserved for a period.
-
-Example:
-
-```bash
-config vpn ipsec phase1-interface
-    edit "link-1"
-        set ip-delay-interval 200
-    next
-end
-```
-
-To flush IKE gateways:
-
-```bash
-diagnose vpn ike gateway flush
+Hub
+ |
+ +--- Spoke A
+ |      \
+ |       \
+ +--- Spoke B
+          \
+           Spoke-to-Spoke
 ```
 
 ---
 
-# 49. IPsec MSS / MTU
+# 76. Phase 2 Selectors and Full Mesh
 
-IPsec adds overhead.
+Phase 2 selectors determine which traffic is protected.
 
-This can cause:
+For dynamic full-mesh environments:
 
 ```text
-Fragmentation
-PMTUD problems
-Application issues
-TCP retransmissions
+Too restrictive selectors
+        |
+        v
+Limited connectivity
 ```
 
-One approach is to adjust TCP MSS.
+More flexible selectors can support:
 
-```bash
-config firewall policy
-    edit 1
-        set tcp-mss-sender 1350
-        set tcp-mss-receiver 1350
-    next
-end
+```text
+Spoke-to-Spoke
+Dynamic routes
+ADVPN
+Full mesh behavior
 ```
 
 ---
 
-# 50. Route Advertisement for Dial-up IPsec
+# 77. DHCP over VPN
 
-Dynamic/dial-up peers may require additional routes.
+DHCP relay can be used in VPN designs.
 
 Concept:
 
 ```text
-Dial-up Peer
-     |
-     v
-IPsec Tunnel
-     |
-     +-- Dynamic Route
-     |
-     +-- Remote Network
-```
-
-Mode Config and dynamic routing can be useful when advertising multiple services/routes across the fabric.
-
----
-
-# 51. UDP Hole Punching
-
-Useful for spoke-to-spoke connections when peers are behind NAT.
-
-Concept:
-
-```text
-Spoke A
+Client
   |
- NAT A
+  v
+DHCP Relay
   |
-  +---------------- Internet ----------------+
-                                             |
-                                            NAT B
-                                             |
-                                           Spoke B
+  v
+IPSec VPN
+  |
+  v
+DHCP Server
 ```
 
-The hub can help the spokes discover each other's reachable NAT mappings.
+Some VPN architectures can use relay/proxy mechanisms to forward DHCP requests.
 
 ---
 
-## Example Debug
+# 78. 🔥 Local-In Policy for Blocking IKE / IPSec
 
-```bash
-diagnose debug enable
-diagnose debug application ike -1
-```
+Local-in policies control traffic destined **to the FortiGate itself**.
 
-Example messages:
-
-```text
-SHORTCUT-OFFER
-SHORTCUT-QUERY
-SHORTCUT-REPLY
-NAT hole punching
-dynamic tunnel
-```
-
-Example:
-
-```text
-SHORTCUT-OFFER
-10.1.100.11 -> 192.168.4.33
-
-SHORTCUT-QUERY
-
-NAT hole punching to peer
-55.1.1.2:64916
-```
-
-The external UDP mapping:
-
-```text
-55.1.1.2:64916
-```
-
-represents the NAT-created reachable UDP endpoint.
-
----
-
-# 52. Spoke-to-Spoke Shortcut Verification
-
-```bash
-diagnose vpn ike gateway list
-```
-
-Look for:
-
-```text
-addr : 12.23.34.1:4500 -> 22.33.44.1:4500
-```
-
-A direct spoke-to-spoke UDP/4500 session indicates the shortcut path.
-
----
-
-# 53. Local-In Policy — Block IKE / ESP
-
-Local-in policies protect traffic destined **to the FortiGate itself**.
-
-Useful for blocking unwanted:
+Useful for protecting:
 
 ```text
 IKE
-ESP
+IPSec
 Management
 Other local services
 ```
 
-Architecture:
+Example scenario:
 
 ```text
 Internet
@@ -1748,17 +2442,17 @@ Internet
    v
 FortiGate
    |
-   +-- Local-In Policy
-          |
-          +-- Allow
-          +-- Deny
+   +--> Local-In Policy
+           |
+           +--> Allow
+           +--> Deny
 ```
 
 ---
 
-# 54. Local-In Policy Example
+# 79. Create Address Object
 
-Create an address object:
+Example:
 
 ```text
 Name: block-2
@@ -1767,9 +2461,13 @@ IP: 2.2.2.2/32
 Interface: any
 ```
 
-Then:
+---
 
-```bash
+# 80. FortiGate Local-In Policy
+
+Example:
+
+```fortigate
 config firewall local-in-policy
     edit 1
         set interface "port2"
@@ -1783,13 +2481,15 @@ config firewall local-in-policy
 end
 ```
 
-> Use the actual object names available in your FortiGate configuration.
+> Adjust object names and services for the actual configuration.
 
 ---
 
-# 55. Local-In Logging
+# 81. Local-In Policy Logging
 
-```bash
+Example:
+
+```fortigate
 config log setting
     set local-in-allow enable
     set local-in-deny enable
@@ -1797,9 +2497,22 @@ config log setting
 end
 ```
 
+Use logging to determine:
+
+```text
+Who is attempting IKE?
+Which source?
+Which interface?
+Which destination?
+Was it allowed?
+Was it denied?
+```
+
 ---
 
-# 56. Debug IKE Port 500
+# 82. Debug IKE / Local-In Traffic
+
+Example:
 
 ```bash
 diagnose debug flow filter dport 500
@@ -1807,25 +2520,39 @@ diagnose debug flow trace start 10
 diagnose debug enable
 ```
 
-Useful for checking whether IKE traffic reaches the FortiGate and how it is handled.
+Remember to stop debugging after troubleshooting:
+
+```bash
+diagnose debug disable
+diagnose debug reset
+```
 
 ---
 
-# 57. Change IKE Port
+# 83. Change IKE Port
 
-```bash
-config system setting
+FortiGate example:
+
+```fortigate
+config system settings
     set ike-port 500
 end
 ```
 
-> Ensure the selected port is allowed through upstream firewalls/ACLs and compatible with the peer.
+Common IKE ports:
+
+```text
+UDP 500
+UDP 4500
+```
+
+> Changing the IKE port is a topology-specific design choice and both peers must support the configuration.
 
 ---
 
-# 58. IPsec Troubleshooting Commands
+# 84. FortiGate IPSec Troubleshooting Commands
 
-## Tunnel Information
+## Show IPSec tunnels
 
 ```bash
 diagnose vpn tunnel list
@@ -1833,16 +2560,16 @@ diagnose vpn tunnel list
 
 Useful for:
 
-- Tunnel state
-- IPsec SA
-- SPI
-- Proposals
-- Source/destination
-- Tunnel parameters
+* Tunnel state
+* SPI
+* Proposal
+* SA
+* Encapsulation
+* Counters
 
 ---
 
-## IKE Gateway
+## Show IKE gateways
 
 ```bash
 diagnose vpn ike gateway list
@@ -1850,385 +2577,76 @@ diagnose vpn ike gateway list
 
 Useful for:
 
-- IKE SA
-- Peer address
-- Authentication
-- Proposal
-- HMAC
-- Negotiation state
+* IKE SA
+* Peer address
+* Local address
+* Proposal
+* Authentication
+* Gateway state
 
 ---
 
-## IKE Debug
+# 85. Dial-up IP Delay
+
+In some FortiGate dial-up VPN scenarios, released addresses may remain reserved for a period.
+
+Example:
+
+```fortigate
+config vpn ipsec phase1-interface
+    edit "link-1"
+        set ip-delay-interval 200
+    next
+end
+```
+
+This can adjust the delay before an address is reused.
+
+---
+
+# 86. Flush IKE Gateways
+
+To clear existing IKE gateway state:
 
 ```bash
-diagnose debug enable
-diagnose debug application ike -1
-```
-
-Stop debugging:
-
-```bash
-diagnose debug disable
-diagnose debug reset
-```
-
----
-
-# 59. IPsec Troubleshooting Flow
-
-```text
-                    IPsec Problem
-                         |
-                         v
-                Is IKE traffic arriving?
-                         |
-                         +---- NO ----> Routing / ACL / ISP
-                         |
-                        YES
-                         |
-                         v
-                  Phase 1 established?
-                         |
-              +----------+----------+
-              |                     |
-             NO                    YES
-              |                     |
-              v                     v
-      Check Phase 1            Phase 2?
-      - Encryption                 |
-      - Integrity                  +---- NO
-      - DH                         |
-      - Authentication             v
-      - PSK                    Check:
-      - NAT-T                    - Proposal
-      - Identity                 - PFS/DH
-      - Local-in                 - Selectors
-                                 - Routes
-                                 - Policy
-                                     |
-                                     v
-                              Traffic passing?
-                                     |
-                              +------+------+
-                              |             |
-                             NO            YES
-                              |             |
-                              v             v
-                         MTU/MSS/       Tunnel OK
-                         policy/route
-                         /NAT/selector
-```
-
----
-
-# 60. Important IPsec Ports / Protocols
-
-| Protocol / Port | Purpose |
-|---|---|
-| UDP/500 | IKE |
-| UDP/4500 | NAT-T / IPsec over UDP |
-| ESP / IP 50 | Encapsulating Security Payload |
-| AH / IP 51 | Authentication Header |
-
----
-
-# 61. IPsec Security Association
-
-An SA contains negotiated security parameters.
-
-Conceptually:
-
-```text
-IPsec SA
- |
- +-- SPI
- +-- Encryption Algorithm
- +-- Integrity Algorithm
- +-- Keys
- +-- Lifetime
- +-- Traffic Selectors
- +-- Direction
-```
-
-Normally there are separate inbound/outbound SAs:
-
-```text
-A -> B
-B -> A
-```
-
----
-
-# 62. SPI
-
-SPI = Security Parameters Index.
-
-Used to identify the security association.
-
-```text
-Packet
- |
- +-- SPI
-       |
-       v
-Find matching IPsec SA
-       |
-       v
-Decrypt / Authenticate
-```
-
----
-
-# 63. Phase 1 vs Phase 2
-
-| | Phase 1 | Phase 2 |
-|---|---|---|
-| Purpose | Build control channel | Build data-plane SA |
-| Main object | IKE SA | IPsec SA / Child SA |
-| Negotiates | IKE crypto/auth/DH | IPsec crypto/selectors |
-| Authentication | Yes | Depends on established IKE SA |
-| Traffic | Control | User/data traffic |
-
-```text
-Phase 1
-   |
-   v
-IKE SA
-   |
-   v
-Phase 2
-   |
-   v
-IPsec SA / Child SA
-   |
-   v
-Encrypted User Traffic
-```
-
----
-
-# 64. IPsec Conceptual Full Flow
-
-```text
-                IPsec VPN
-                    |
-        +-----------+-----------+
-        |                       |
-      Phase 1                 Phase 2
-        |                       |
-        v                       v
-      IKE SA                IPsec SA
-        |                       |
-        +-----------+-----------+
-                    |
-                    v
-             Secure Data Path
-                    |
-                    v
-             Encrypted Traffic
-```
-
----
-
-# 65. IPsec Packet Flow
-
-## Before IPsec
-
-```text
-Original Packet
-
-+-------------+
-| IP Header   |
-+-------------+
-| TCP/UDP     |
-+-------------+
-| Data        |
-+-------------+
-```
-
-## ESP Tunnel Mode
-
-```text
-+----------------------+
-| Outer IP Header      |
-+----------------------+
-| ESP Header           |
-+----------------------+
-| Inner IP Header      |
-+----------------------+
-| TCP/UDP              |
-+----------------------+
-| Data                 |
-+----------------------+
-| ESP Trailer          |
-+----------------------+
-| Authentication Data  |
-+----------------------+
-```
-
----
-
-# 66. Practical IPsec Checklist
-
-## Phase 1
-
-```text
-[ ] Peer IP
-[ ] IKE version
-[ ] Encryption
-[ ] Integrity
-[ ] DH group
-[ ] Authentication
-[ ] PSK / Certificate
-[ ] Local ID
-[ ] Peer ID
-[ ] NAT-T
-[ ] DPD
-[ ] Lifetime
-[ ] Local-in policy
-```
-
-## Phase 2
-
-```text
-[ ] Encryption
-[ ] Integrity
-[ ] PFS
-[ ] DH group
-[ ] Local selector
-[ ] Remote selector
-[ ] Lifetime
-[ ] Replay protection
-```
-
-## Routing
-
-```text
-[ ] Route to peer
-[ ] Route to remote subnet
-[ ] Reverse route
-[ ] Policy route / SD-WAN
-[ ] NAT exemption where required
-```
-
-## Security Policy
-
-```text
-[ ] LAN -> IPsec policy
-[ ] IPsec -> LAN policy
-[ ] NAT disabled where required
-[ ] Correct service
-[ ] Correct source/destination
-```
-
----
-
-# 67. Common IPsec Failure Domains
-
-```text
-                    IPsec Failure
-                         |
-       +-----------------+-----------------+
-       |                 |                 |
-    Phase 1           Phase 2          Data Plane
-       |                 |                 |
-   - PSK              - Proposal        - Route
-   - DH               - PFS             - Policy
-   - Encryption       - Selector        - NAT
-   - Integrity        - Lifetime        - MTU
-   - Identity                            - MSS
-   - NAT-T                              - Asymmetric path
-   - DPD
-   - Local-in
-```
-
----
-
-# 68. Quick Reference — FortiGate Commands
-
-```bash
-# IKE Gateway
-diagnose vpn ike gateway list
-
-# IPsec tunnel
-diagnose vpn tunnel list
-
-# Flush IKE gateways
 diagnose vpn ike gateway flush
+```
 
-# IKE debug
-diagnose debug enable
-diagnose debug application ike -1
+Useful during troubleshooting when you need to force renegotiation.
 
-# Debug flow for IKE
-diagnose debug flow filter dport 500
-diagnose debug flow trace start 10
-diagnose debug enable
+---
 
-# Stop debugging
-diagnose debug disable
-diagnose debug reset
+# 87. TCP MSS / MTU
+
+IPSec adds overhead.
+
+Therefore:
+
+```text
+Original MTU
+   |
+   +-- IPSec overhead
+   |
+   v
+Effective MTU
+```
+
+If TCP packets become too large:
+
+```text
+Fragmentation
+Retransmission
+Poor performance
+Connection problems
 ```
 
 ---
 
-# 69. Quick Reference — Important Configuration
+# 88. TCP MSS Adjustment
 
-## DPD
+Example:
 
-```bash
-config vpn ipsec phase1-interface
-    edit "link-1"
-        set dpd-retryinterval 15
-        set dpd-retrycount 3
-    next
-end
-```
-
-## Reauthentication
-
-```bash
-config vpn ipsec phase1-interface
-    edit "link-1"
-        set reauth enable
-    next
-end
-```
-
-## QCD
-
-```bash
-config system setting
-    set ike-quick-crash-detect enable
-end
-```
-
-## IKEv2 Fragmentation
-
-```bash
-config vpn ipsec phase1-interface
-    edit "link-1"
-        set ike-version 2
-        set fragmentation enable
-        set fragmentation-mtu 500
-    next
-end
-```
-
-## Network ID
-
-```bash
-config vpn ipsec phase1-interface
-    edit "link-1"
-        set network-id 2
-    next
-end
-```
-
-## MSS
-
-```bash
+```fortigate
 config firewall policy
     edit 1
         set tcp-mss-sender 1350
@@ -2237,101 +2655,773 @@ config firewall policy
 end
 ```
 
----
-
-# 70. CCNP Mental Model
+Concept:
 
 ```text
-                 IPsec VPN
-                     |
-                     v
-              +-------------+
-              |   Phase 1   |
-              |    IKE SA   |
-              +-------------+
-                     |
-          +----------+----------+
-          |                     |
-       IKEv1                  IKEv2
-          |                     |
-     Main/Aggressive       IKE_SA_INIT
-          |                     |
-          |                  IKE_AUTH
-          |                     |
-          +----------+----------+
-                     |
-                     v
-              +-------------+
-              |   Phase 2   |
-              | IPsec / Child|
-              |     SA      |
-              +-------------+
-                     |
-                     v
-             Encrypted Traffic
-                     |
-                     v
-              ESP / IPsec Data
+MTU problem
+    |
+    v
+Reduce TCP MSS
+    |
+    v
+Smaller TCP segments
+    |
+    v
+Less fragmentation
+```
+
+> MSS value should be calculated/tested for the actual tunnel overhead and path MTU.
+
+---
+
+# 89. UDP Hole Punching
+
+UDP hole punching helps establish direct connectivity between peers behind NAT.
+
+Useful in:
+
+```text
+ADVPN
+Spoke-to-Spoke
+NATed Spokes
+Dynamic VPN
+```
+
+Concept:
+
+```text
+Spoke A
+   |
+  NAT
+   |
+Internet
+   |
+  NAT
+   |
+Spoke B
+```
+
+The hub helps the spokes learn the reachable public addresses/ports.
+
+---
+
+# 90. ADVPN UDP Hole Punching
+
+Simplified flow:
+
+```text
+Spoke A
+   |
+   | Shortcut Offer
+   v
+Hub
+   |
+   | Shortcut information
+   v
+Spoke B
+   |
+   | Shortcut Query
+   v
+Hub
+   |
+   | Shortcut Reply
+   v
+Spoke A
+```
+
+Then:
+
+```text
+Spoke A <===========> Spoke B
+        UDP 4500
 ```
 
 ---
 
-# 71. One-Line Memory Aids
+# 91. Example ADVPN Debug
+
+Example:
+
+```text
+diagnose debug enable
+
+diagnose debug application ike -1
+```
+
+Possible messages:
+
+```text
+SHORTCUT-OFFER
+SHORTCUT-QUERY
+SHORTCUT-REPLY
+```
+
+Example conceptual output:
+
+```text
+ike 0:toHub1: notify msg received: SHORTCUT-OFFER
+
+ike 0:toHub1:
+shortcut-offer
+10.1.100.11 -> 192.168.4.33
+
+ike 0:toHub1:
+send shortcut-query
+
+ike 0:toHub1:
+SHORTCUT-QUERY
+12.1.1.2:4500 -> 22.1.1.1:4500
+
+ike 0:toHub1:
+jshortcut-reply received
+from 55.1.1.2:64916
+
+local-nat=yes
+peer-nat=yes
+
+ike 0:toHub1:
+NAT hole punching to peer
+55.1.1.2:64916
+
+ike 0:toHub1:
+created connection
+12.1.1.2 -> 55.1.1.2:64916
+
+ike 0:toHub1:
+adding new dynamic tunnel
+55.1.1.2:64916
+```
+
+---
+
+# 92. Understanding NAT Hole Punching Output
+
+Example:
+
+```text
+55.1.1.2:64916
+```
+
+This represents the public/NAT-mapped UDP endpoint learned for the peer.
+
+Concept:
+
+```text
+Private Spoke
+10.x.x.x
+    |
+    v
+NAT
+    |
+    v
+Public IP:UDP Port
+55.1.1.2:64916
+```
+
+The dynamic tunnel can then use this reachable endpoint.
+
+---
+
+# 93. Spoke-to-Spoke Shortcut
+
+Final result:
+
+```text
+Before:
+
+Spoke A
+   |
+   v
+ Hub
+   |
+   v
+Spoke B
+```
+
+After shortcut:
+
+```text
+Spoke A
+   |
+   +==================+
+                      |
+                      v
+                   Spoke B
+```
+
+This removes unnecessary hub forwarding.
+
+---
+
+# 94. Useful FortiGate IPSec Commands
+
+```bash
+diagnose vpn tunnel list
+```
+
+```bash
+diagnose vpn ike gateway list
+```
+
+```bash
+diagnose vpn ike gateway flush
+```
+
+```bash
+diagnose debug application ike -1
+```
+
+```bash
+diagnose debug enable
+```
+
+```bash
+diagnose debug disable
+```
+
+```bash
+diagnose debug reset
+```
+
+---
+
+# 95. Troubleshooting Methodology
+
+Use a layered approach.
+
+```text
+Layer 1
+  |
+  +--> Physical / ISP
+  |
+Layer 2
+  |
+  +--> VLAN / Ethernet
+  |
+Layer 3
+  |
+  +--> Routing
+  |
+Layer 4
+  |
+  +--> UDP 500 / UDP 4500
+  |
+IKE Phase 1
+  |
+  +--> Proposal
+  +--> DH
+  +--> Authentication
+  |
+IKE Phase 2
+  |
+  +--> Transform Set
+  +--> Selectors
+  +--> PFS
+  |
+IPSec
+  |
+  +--> ESP
+  +--> SPI
+  +--> Counters
+  |
+Application
+```
+
+---
+
+# 96. IKEv1 Troubleshooting States
+
+```text
+MM_WAIT_MSG2
+       |
+       +--> Policy / reachability
+
+MM_WAIT_MSG3
+       |
+       +--> Routing / peer response
+
+MM_WAIT_MSG4
+       |
+       +--> PSK / tunnel-group / identity
+
+MM_WAIT_MSG5
+       |
+       +--> PSK mismatch / authentication
+
+MM_WAIT_MSG6
+       |
+       +--> Final authentication
+
+MM_ACTIVE
+       |
+       +--> Phase 1 UP
+```
+
+---
+
+# 97. IPSec Troubleshooting Checklist
+
+## Phase 1
+
+Check:
+
+```text
+IKE version
+Encryption
+Integrity
+DH group
+Authentication method
+PSK
+Certificates
+Peer IP
+Local IP
+Identity
+Lifetime
+NAT-T
+UDP 500
+UDP 4500
+```
+
+---
+
+## Phase 2
+
+Check:
+
+```text
+ESP encryption
+ESP integrity
+PFS
+DH group
+Traffic selectors
+Proxy IDs
+Lifetime
+Crypto map
+IPSec profile
+```
+
+---
+
+## Data Plane
+
+Check:
+
+```text
+Routes
+Firewall policies
+NAT exemption
+MTU
+MSS
+ESP counters
+SPI
+Traffic selectors
+Routing symmetry
+```
+
+---
+
+# 98. Common IPSec Failure Mapping
+
+| Symptom                  | Possible Cause                     |
+| ------------------------ | ---------------------------------- |
+| No IKE packets           | Routing / firewall / ISP           |
+| No MM2                   | Peer unreachable / UDP 500 blocked |
+| MM_WAIT_MSG3             | Return path / policy               |
+| MM_WAIT_MSG4             | PSK / identity                     |
+| MM_WAIT_MSG5             | PSK mismatch                       |
+| MM_WAIT_MSG6             | Authentication                     |
+| Phase 1 UP, Phase 2 DOWN | Transform/selector/PFS             |
+| Tunnel UP, no traffic    | Routing / policy / selectors       |
+| Intermittent tunnel      | DPD / NAT timeout                  |
+| Large packets fail       | MTU / fragmentation                |
+| NAT environment fails    | NAT-T / UDP 4500                   |
+| High CPU with dial-up    | DPD / negotiation load             |
+| Spoke-to-spoke fails     | ADVPN / shortcut / NAT             |
+
+---
+
+# 99. IPSec Packet Numbers
+
+Important protocol/port values:
+
+```text
+ESP       = IP protocol 50
+AH        = IP protocol 51
+IKE       = UDP 500
+NAT-T     = UDP 4500
+```
+
+Quick memory:
+
+```text
+50 = ESP
+51 = AH
+500 = IKE
+4500 = NAT-T
+```
+
+---
+
+# 100. 🔥 Key Concept — ESP vs IKE
+
+Do not confuse:
+
+```text
+IKE
+```
+
+with:
+
+```text
+ESP
+```
+
+### IKE
+
+Creates and manages security associations.
+
+```text
+IKE
+ |
+ +-- Authentication
+ +-- DH
+ +-- Crypto negotiation
+ +-- IKE SA
+ +-- Child SA
+ +-- Rekey
+ +-- Liveness
+```
+
+### ESP
+
+Carries/protects actual user data.
+
+```text
+ESP
+ |
+ +-- Encryption
+ +-- Integrity
+ +-- Authentication
+ +-- Anti-Replay
+```
+
+---
+
+# 101. 🔥 Control Plane vs Data Plane
+
+```text
+             VPN
+              |
+       +------+------+
+       |             |
+   Control Plane   Data Plane
+       |             |
+      IKE           ESP
+       |             |
+   Negotiate       Protect
+   Authenticate    User Data
+   Establish SA    Forward Traffic
+```
+
+---
+
+# 102. 🔥 Complete IPSec Mental Model
+
+```text
+                 IPSec VPN
+                     |
+          +----------+----------+
+          |                     |
+        IKE                    ESP
+          |                     |
+   +------+-------+             |
+   |              |             |
+ Phase 1        Phase 2         |
+   |              |             |
+ IKE SA        Child/IPSec SA   |
+   |              |             |
+   +--------------+-------------+
+                  |
+                 SPI
+                  |
+             Protected Data
+```
+
+---
+
+# 103. IKEv1 Mental Model
+
+```text
+                 IKEv1
+                   |
+             +-----+-----+
+             |           |
+          Phase 1      Phase 2
+             |           |
+          Main /       Quick
+        Aggressive      Mode
+             |           |
+        IKE/ISAKMP     IPSec SA
+             |           |
+             +-----+-----+
+                   |
+                  ESP
+                   |
+               User Data
+```
+
+---
+
+# 104. IKEv2 Mental Model
+
+```text
+                  IKEv2
+                    |
+              +-----+------+
+              |            |
+         IKE_SA_INIT    IKE_AUTH
+              |            |
+       Crypto + DH     Identity +
+       + Nonce         Authentication
+              |            |
+              +-----+------+
+                    |
+                IKE SA
+                    |
+              +-----+------+
+              |            |
+          Child SA 1    Child SA 2
+              |            |
+             ESP          ESP
+              |            |
+           Traffic      Traffic
+```
+
+---
+
+# 105. IKEv1 vs IKEv2 Quick Memory
+
+```text
+IKEv1:
+
+Phase 1
+  |
+  +-- Main Mode = 6 messages
+  +-- Aggressive = 3 messages
+  |
+Phase 2
+  |
+  +-- Quick Mode = 3 messages
+
+
+IKEv2:
+
+IKE_SA_INIT
+  |
+  +-- Request
+  +-- Response
+
+IKE_AUTH
+  |
+  +-- Request
+  +-- Response
+
+Total initial exchange = 4 messages
+```
+
+---
+
+# 106. 🔥 Important Security Recommendations
+
+For modern deployments:
+
+```text
+Prefer AES
+Prefer SHA-256 or stronger integrity
+Prefer strong DH groups
+Prefer IKEv2
+Prefer certificates for scalable authentication
+Use NAT-T when required
+Use DPD appropriately
+Use strong PSKs when PSK is required
+Avoid legacy DES
+Avoid legacy 3DES
+Avoid MD5
+Avoid SHA-1 for new deployments
+Avoid weak DH groups
+```
+
+---
+
+# 107. Quick Exam Cheat Sheet
 
 ```text
 CIA
-Confidentiality = Nobody unauthorized can READ
-Integrity       = Nobody unauthorized can MODIFY
-Availability    = Authorized users can ACCESS
+ |
+ +-- Confidentiality = Encryption
+ +-- Integrity       = Hash/HMAC
+ +-- Availability    = Reliability/Redundancy
 
-IKE = Builds the control/security relationship
-IPsec SA = Protects the actual data
 
-Phase 1 = IKE SA
-Phase 2 = IPsec SA / Child SA
+IPSec
+ |
+ +-- AH  = Integrity + Authentication
+ |
+ +-- ESP = Encryption + Integrity + Authentication
+ |
+ +-- IKE = Negotiation + Authentication + Key Management
 
-IKEv1 = Main/Aggressive + Quick Mode
-IKEv2 = IKE_SA_INIT + IKE_AUTH + Child SA
 
-ESP = Protocol 50
-AH  = Protocol 51
+IKEv1
+ |
+ +-- Phase 1
+ |    |
+ |    +-- Main Mode = 6 messages
+ |    +-- Aggressive = 3 messages
+ |
+ +-- Phase 2
+      |
+      +-- Quick Mode = 3 messages
 
-IKE = UDP 500
-NAT-T = UDP 4500
 
-DPD = Is my peer alive?
-NAT-T = Is there a NAT device between us?
-QCD = Detect peer failure faster
-XAuth = Additional user authentication
-Mode Config = Assign client configuration
-ADVPN = Dynamic VPN shortcuts
-Network-ID = Separate IPsec behavior over the same interface
-SPI = Identifies the IPsec SA
+IKEv2
+ |
+ +-- IKE_SA_INIT
+ |    |
+ |    +-- SA
+ |    +-- KE
+ |    +-- Nonce
+ |
+ +-- IKE_AUTH
+      |
+      +-- ID
+      +-- AUTH
+      +-- SA
+      +-- TS
+      +-- Certificate
+
+
+Ports / Protocols
+ |
+ +-- ESP = 50
+ +-- AH  = 51
+ +-- IKE = UDP 500
+ +-- NAT-T = UDP 4500
 ```
 
 ---
 
-# 72. Final Troubleshooting Rule
+# 108. 🧠 One-Line Memory Map
 
 ```text
-If Phase 1 is DOWN
-    |
-    +--> Check IKE / Authentication / DH / NAT / Local-In
-
-If Phase 1 is UP but Phase 2 is DOWN
-    |
-    +--> Check IPsec Proposal / PFS / Selectors
-
-If Phase 2 is UP but traffic is DOWN
-    |
-    +--> Check Routing / Firewall Policy / NAT / MTU / MSS
-
-If Spoke-to-Spoke is DOWN
-    |
-    +--> Check ADVPN / Auto Discovery / Exchange Interface IP
-         / NAT Traversal / UDP Hole Punching
+CIA
+ ↓
+IPSec
+ ↓
+IKE
+ ↓
+Phase 1
+ ↓
+IKE SA
+ ↓
+Phase 2 / Child SA
+ ↓
+SPI
+ ↓
+ESP
+ ↓
+Encrypted + Authenticated Traffic
 ```
 
-> **Golden rule:**  
-> **Phase 1 builds trust → Phase 2 builds the secure data path → Routing & Firewall Policy decide whether traffic actually flows.**
-````
+---
+
+# 109. 🚀 ADVPN Mental Model
+
+```text
+                  HUB
+                   |
+        +----------+----------+
+        |                     |
+     Spoke A               Spoke B
+        |                     |
+        +---------+-----------+
+                  |
+            Shortcut
+          / UDP Hole Punch
+                  |
+           Direct Tunnel
+```
+
+---
+
+# 110. Final IPSec Architecture
+
+```text
+                       INTERNET
+                           |
+                 +---------+---------+
+                 |                   |
+              FortiGate A        FortiGate B
+                 |                   |
+              LAN-A               LAN-B
+                 |                   |
+                 +------ IPSec ------+
+                         |
+                        IKE
+                         |
+              +----------+----------+
+              |                     |
+           Phase 1                Phase 2
+              |                     |
+           IKE SA                Child SA
+              |                     |
+       +------+------+          +---+---+
+       |             |          |       |
+   Encryption      DH/Auth     ESP     SPI
+       |                        |
+       +-----------+------------+
+                   |
+              Protected Data
+```
+
+---
+
+# 📌 Final Summary
+
+| Topic             | Key Point                                 |
+| ----------------- | ----------------------------------------- |
+| CIA               | Confidentiality, Integrity, Availability  |
+| Encryption        | Provides confidentiality                  |
+| Hash/HMAC         | Provides integrity/authentication         |
+| AH                | Authentication/integrity, no encryption   |
+| ESP               | Encryption + integrity + authentication   |
+| IKE               | Negotiates and manages VPN security       |
+| DH                | Secure key agreement                      |
+| SA                | Security parameters/state                 |
+| SPI               | Identifies an SA                          |
+| IKEv1 Phase 1     | IKE/ISAKMP SA                             |
+| IKEv1 Phase 2     | IPSec SA                                  |
+| Main Mode         | 6 messages                                |
+| Aggressive Mode   | 3 messages                                |
+| Quick Mode        | 3 messages                                |
+| IKEv2             | IKE_SA_INIT + IKE_AUTH                    |
+| IKEv2             | 4 initial messages                        |
+| Child SA          | IPSec SA in IKEv2                         |
+| ESP               | IP protocol 50                            |
+| AH                | IP protocol 51                            |
+| IKE               | UDP 500                                   |
+| NAT-T             | UDP 4500                                  |
+| DPD               | Detect dead peer                          |
+| QCD               | Faster crash detection                    |
+| XAuth             | Extended user authentication              |
+| Mode Config       | Dynamic client parameters                 |
+| ADVPN             | Dynamic VPN shortcuts                     |
+| UDP Hole Punching | Direct NAT traversal                      |
+| MSS               | Helps mitigate MTU issues                 |
+| Local-In Policy   | Protects FortiGate itself                 |
+| Network ID        | Segments/differentiates VPN behavior      |
+| Mesh Selector     | Helps dynamic spoke-to-spoke connectivity |
+
+```
+این نسخه را عمداً به شکل **single-block GFM cheat sheet** نگه داشتم تا مستقیم داخل `README.md`، GitHub Wiki یا repository notes پیست کنی.
+```
