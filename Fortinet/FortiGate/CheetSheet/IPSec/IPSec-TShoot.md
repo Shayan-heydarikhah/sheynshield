@@ -1,4 +1,4 @@
-# FortiGate IPsec Troubleshooting Cheatsheet
+# FortiGate IPsec Troubleshooting
 
 > **Scope:** IPsec troubleshooting, NPU offload, ASIC acceleration, fragmentation, DSCP, Dialup/Mode-Cfg, DNS/FQDN, EAP and IKE diagnostics.
 
