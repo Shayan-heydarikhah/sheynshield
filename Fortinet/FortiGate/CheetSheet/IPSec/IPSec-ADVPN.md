@@ -1,4 +1,4 @@
-# ADVPN (Auto Discovery VPN) Cheatsheet
+# ADVPN (Auto Discovery VPN) 
 
 > **Purpose:** Dynamic Hub-and-Spoke connectivity with automatic tunnel discovery and dynamic routing
 > **Common use case:** Large-scale branch connectivity
