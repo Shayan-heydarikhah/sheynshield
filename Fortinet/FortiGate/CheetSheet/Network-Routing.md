@@ -1974,4 +1974,3 @@ diagnose netlink interface list port2 | grep index
 | Device inventory      | `diagnose user device list`                      |
 
 ```
-```
