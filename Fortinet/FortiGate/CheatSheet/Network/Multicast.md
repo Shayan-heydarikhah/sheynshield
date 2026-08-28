@@ -3719,7 +3719,7 @@ Forward packets
 
 ---
 
-# 29. IGMP Version Cheat Sheet
+# 29. IGMP Version  
 
 | Feature            | IGMPv1                | IGMPv2 | IGMPv3                    |
 | ------------------ | --------------------- | ------ | ------------------------- |
@@ -3734,7 +3734,7 @@ Forward packets
 
 ---
 
-# 30. PIM Mode Cheat Sheet
+# 30. PIM Mode  
 
 | Feature     | PIM-DM                  | PIM-SM                  | PIM-SSM              | Bidir-PIM            |
 | ----------- | ----------------------- | ----------------------- | -------------------- | -------------------- |
@@ -3751,7 +3751,7 @@ Forward packets
 
 ---
 
-# 31. Multicast State Cheat Sheet
+# 31. Multicast State 
 
 ```text
 (*,G)
@@ -4279,7 +4279,7 @@ Multicast MAC
 
 ---
 
-# 41. Final Multicast Cheat Sheet
+# 41. Final Multicast 
 
 ```text
 IPv4 Multicast
