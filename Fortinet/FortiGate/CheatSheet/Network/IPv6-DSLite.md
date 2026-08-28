@@ -1,4 +1,4 @@
-# IPv6 Tunneling & Encapsulation — FortiGate Cheat Sheet
+# IPv6 Tunneling & Encapsulation
 
 > **FortiOS 7.2.0 | IPv6 | Dual Stack | 6in4 | 4in6 | DS-Lite | MAP-E | VNE | IPv6 Routing**
 
