@@ -1,92 +1,109 @@
-# IPSec VPN Cheat Sheet (NSE 4 & NSE 7)
+# IPsec VPN & ADVPN FortiOS Cheat Sheet (NSE 4 & NSE 7)
 
-## 1. Core Security Concepts (CIA Triad)
+This cheat sheet consolidates IPsec VPN concepts, FortiOS configurations, and advanced ADVPN deployments, covering both foundational (NSE 4) and enterprise routing/security (NSE 7) objectives.
 
-* **Confidentiality:** Ensures information is accessible only to authorized entities (Protection from unauthorized access).
-* **Integrity:** Safeguards the accuracy and completeness of information. Detects alterations during storage or transit.
-* **Availability:** Ensures authorized users have access to information when required (Acceptable performance, fault clearance, redundancy).
+## 1. Core IPSec Concepts & Trust Foundations
 
-### Cryptographic Building Blocks
-| Component | Function | Algorithms |
-| :--- | :--- | :--- |
-| **Encryption** | Provides Confidentiality | DES, 3DES, AES |
-| **Authentication/Hash** | Provides Integrity | MD5, SHA-128, SHA-160, SHA-256, SHA-512 |
-| **Peer Authentication** | Validates Identity | Pre-Shared Key (PSK), RSA (Public/Private Key) |
-| **Diffie-Hellman (DH)** | Secure Key Exchange | DH-1 (768-bit), DH-2 (1024-bit), DH-5 (1536-bit) |
+The foundation of IPsec relies on the **CIA Triad**:
+* **Confidentiality:** Ensures data is accessible only to authorized entities. Achieved via encryption algorithms (DES, 3DES, AES).
+* **Integrity:** Ensures packets are not altered in transit (detection of manipulation). Achieved via authentication/hashing algorithms (MD5, SHA-160/128/256/512).
+* **Availability:** Ensures authorized users have reliable access (fault clearance, acceptable performance, redundancy).
 
----
+**Authentication Methods (Identity Proof):**
+* **Pre-Shared Key (PSK):** Symmetrical unique values matching on both sides.
+* **RSA Signatures:** Asymmetrical private/public key pairs (Certificates).
 
-## 2. IPSec Protocols & Packet Encapsulation
-
-**AH (Authentication Header - Protocol 51)**
-Protects headers only. Does not encrypt data.
-* **Transport Mode:** Global IP -> AH Header -> TCP -> Data
-* **Tunnel Mode:** New External IP -> AH Header -> Internal IP -> TCP -> Data
-
-**ESP (Encapsulating Security Payload - Protocol 50)**
-Protects whole data, port, and payload via encryption and authentication.
-* **Transport Mode:** Global IP -> ESP Header -> **[TCP -> Data -> ESP Trailer] (Encrypted)** -> ESP Auth
-* **Tunnel Mode:** New External IP -> ESP Header -> **[Internal IP -> TCP -> Data -> ESP Trailer] (Encrypted)** -> ESP Auth
+**Diffie-Hellman (DH):** Secure key exchange mechanism ensuring keys match on both ends without transmitting the actual key in plain text (e.g., DH-1: 768-bit, DH-2: 1024-bit, DH-5: 1536-bit, DH-14: 2048-bit).
 
 ---
 
-## 3. IKE (Internet Key Exchange) Framework
+## 2. IPSec Protocols & Modes
 
-### IKEv1 (6 Messages for Main Mode)
-Requires negotiated connection profiles per tunnel.
-
-**Phase 1 (ISAKMP Tunnel / Control Plane)**
-* **Main Mode:**
-  * **MM1 & MM2 (Unencrypted/Unauthenticated):** Negotiate crypto settings (SA, VID, DH Groups).
-  * **MM3 & MM4 (Unencrypted/Unauthenticated):** Secret key exchange (Nonce, KE, Anti-replay).
-  * **MM5 & MM6 (Encrypted/Unauthenticated):** Prove identity (ID, Auth, Certs, PSK Hash matching).
-* **Aggressive Mode:**
-  * Faster, uses 3 messages. Merges SA, Key Exchange, and Authentication.
-  * AM1 (Initiator), AM2 (Responder behaves like initiator), AM3 (Hash values/Authentication).
-
-**Phase 2 (IPSec Tunnel / Data Plane)**
-* **Quick Mode (QM):** Creates unidirectional tunnels. Mixes Phase 1 approved items to forward data. QM1 (Peer), QM2 (Approve SA), QM3 (Tunnel creation).
-
-### IKEv2 (4 Messages)
-Faster, lighter, and more secure than IKEv1. Uses proposal repositories.
-
-**Phase 1 (ISAKMP Tunnel)**
-* **Message 1 & 2 (IKE_SA_INIT):** Merges crypto negotiation and secret key exchange (Unencrypted/Unauthenticated). Sends SA, KE, Nonce, VID.
-
-**Phase 2 (IPSec Tunnel)**
-* **Message 3 & 4 (IKE_AUTH):** Proves identity (Encrypted but Unauthenticated). Sends ID, Auth, Cert, SA, TS, NAT, SPI.
-
-**IKEv2 Features:**
-* **EAP:** Extensible Authentication Protocol (Authentication with certificates).
-* Built-in NAT-Traversal and Keepalive timers.
-* Lower bandwidth consumption.
-* **Child SAs:** Creates multiple stable child connections from one main connection based on ECDSA signatures.
+* **AH (Authentication Header):** Protects the IP header and payload (Integrity/Authentication only). No encryption.
+* **ESP (Encapsulating Security Payload - Protocol 50):** Protects the payload (Confidentiality, Integrity, Authentication).
+  * **Transport Mode:** Uses the original IP header. (Structure: `Global IP | ESP Header | TCP | Data | ESP Trailer | ESP Auth`).
+  * **Tunnel Mode:** Encapsulates the entire original packet inside a new IP header to hide the true destination. (Structure: `New External IP | ESP Header | Internal IP | TCP | Data | ESP Trailer | ESP Auth`).
 
 ---
 
-## 4. Advanced Phase 1 Settings & VPN Features (NSE 7)
+## 3. IKEv1 vs. IKEv2 (Internet Key Exchange)
 
-| Feature | Description |
-| :--- | :--- |
-| **ADVPN** | Auto Discovery VPN. Combined with SD-WAN to manage Hub-and-Spoke or Spoke-to-Spoke shortcuts dynamically. |
-| **Mode Config** | Assigns specific features (IP addresses, services) to dial-up clients. |
-| **NAT Traversal (NAT-T)** | Forces devices to use UDP 500/4500. Detects if IP/Ports are altered by hashing them in ISAKMP payloads. Modes: Enable (Recommended) or Force. |
-| **Keepalive Frequency** | Works with NAT-T to prevent intermediary NAT devices from dropping long idle connections. |
-| **FEC** | Forward Error Correction. Duplicates data to correct transmission errors. |
-| **Add Route** | Automatically injects specific routes into the RIB for dial-up peers. |
-| **Device Creation** | Generates virtual interfaces (shells) dynamically for dial-up users to track connections. |
-| **Exchange Interface IP** | Used in Hub-and-Spoke topologies to allow direct branch-to-branch visibility. |
-| **XAuth** | Extended Authentication using User Groups, CHAP, or PAP servers (Auto/CHAP/PAP for dial-up, Client mode for static remote gateways). |
+### IKEv1 Mechanics
+* **Phase 1 (ISAKMP Tunnel - Control Plane):** Negotiates encryption, hashing, DH groups, and authentication to build the management tunnel.
+  * **Main Mode (6 Messages):**
+    * MM 1-2: Negotiate Crypto Settings (Unencrypted/Unauthenticated).
+    * MM 3-4: Secret Key Exchange/DH & Nonce for anti-replay (Unencrypted/Unauthenticated).
+    * MM 5-6: Prove Identity via ID/Auth (Encrypted/Unauthenticated).
+  * **Aggressive Mode (3 Messages):** Consolidates SA, Key Exchange, and Auth. Faster but less secure (exposes identities).
+* **Phase 2 (IPsec Tunnel - Data Plane):**
+  * **Quick Mode (3 Messages):** Builds the actual unidirectional data tunnels (IPsec SAs) using the secure ISAKMP tunnel.
 
-### Dead Peer Detection (DPD)
-Uses `r-u-there` messages to check peer availability.
-* **On-Idle:** Active mode. If a connection is idle, DP checks trigger. Drops tunnel after a timeout (e.g., 10 mins).
-* **On-Demand:** Passive mode. Triggers immediately only when there is outbound traffic but no return traffic. Uses `dpd-retrycount` and `dpd-interval`.
+### IKEv2 Mechanics
+Faster, lighter, and more secure natively. Condenses Phase 1 and Phase 2 into 4 primary messages:
+* **IKE_SA_INIT (Request/Response):** Merges crypto negotiation and key exchange (equivalent to MM 1-4).
+* **IKE_AUTH (Request/Response):** Proves identity and establishes the first Phase 2 Child SA (equivalent to MM 5-6 + Phase 2).
+* **Key Features:** Built-in NAT-T, EAP support (certificate-based auth), lower bandwidth consumption, native Keepalive timers, and Child SAs via ECDSA (Elliptic Curve Digital Signature Algorithm).
 
-### Network-ID (FortiGate Segmentation)
-Allows multiple disparate IPSec tunnels to operate over the same public interface while maintaining strict logical separation.
+---
+
+## 4. Advanced FortiOS Configurations (NSE 7)
+
+**Dead Peer Detection (DPD) & Keepalives**
+Detects if the remote peer is alive to tear down stale SAs. DPD Phase 1 default is typically 15 seconds.
+* **On-Idle:** Checks aliveness only if no traffic is received. Ideal for Dial-up/Remote Access to save resources.
+* **On-Demand:** Tears down connections immediately if traffic stops. Ideal for Site-to-Site.
+
 ```bash
 config vpn ipsec phase1-interface
-  edit "VPN_Phase1"
-    set network-id 2
+  edit "Link-1"
+    set dpd-retryinterval 15
+    set dpd-retrycount 3
+end
+```
+
+**IPSec Passive Mode**
+The device will not initiate the VPN connection, even if traffic dictates it. It strictly waits for incoming IKE requests. (Warning: Do not enable on both sides).
+
+```bash
+config vpn ipsec phase1-interface
+  edit "Link-1"
+    set rekey enable
+    set passive-mode enable
+    set passive-tunnel-interface enable
+end
+```
+
+**Quick Crash Detection (QCD)**
+Allows faster recovery when a peer reboots without sending delete payloads. Avoids waiting for DPD timeouts. (Uses `invalid_ike_spi` tokens in IKEv2).
+
+```bash
+config system settings
+  set ike-quick-crash-detect enable
+end
+```
+
+**Fragmentation & MTU Tuning**
+Handles large UDP 500/4500 packets over ISP links.
+
+```bash
+config vpn ipsec phase1-interface
+  edit "Link-1"
+    set fragmentation enable
+    set fragmentation-mtu 500  # Highly useful for IKEv2
+end
+
+# TCP MSS Adjustment for Data Plane
+config firewall policy
+  edit 1
+    set tcp-mss-sender 1350
+    set tcp-mss-receiver 1350
+end
+```
+
+**Dos Protection (Embryonic Limits)**
+Prevents CPU exhaustion from IKE floods.
+
+```bash
+config system settings
+  set embryonic-limit 50 
 end
