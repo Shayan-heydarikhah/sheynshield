@@ -1717,7 +1717,7 @@ Remote LAN
 # 22. Security / Design Notes
 
 > [!WARNING]
-> The following examples use legacy algorithms such as **DES, MD5, IKEv1, and aggressive mode** because they reflect the lab configurations in this cheatsheet. They should not be considered preferred cryptography for new production deployments.
+> The following examples use legacy algorithms such as **DES, MD5, IKEv1, and aggressive mode** because they reflect the lab configurations. They should not be considered preferred cryptography for new production deployments.
 
 For production, prefer:
 
