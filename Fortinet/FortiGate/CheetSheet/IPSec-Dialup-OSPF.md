@@ -46,7 +46,7 @@ An advanced, highly detailed reference guide for deploying Dial-up IPsec, ADVPN 
 ## 4. OSPF Routing & Overlay Interfaces
 
 **Crucial OSPF Settings:** To allow Hub-and-Spoke and Spoke-to-Spoke routing over IPsec tunnels, the OSPF network type on the IPsec interfaces must be carefully managed.
-
+```
 ### FGT-1 (Hub)
 ```text
 Interface IP: 12.23.34.1
