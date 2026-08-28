@@ -446,7 +446,7 @@ diagnose vpn ocvpn show-members
 
 ---
 
-# 13. Command Cheat Sheet
+# 13. Command  
 
 ```bash
 # IKE / VPN Gateway
