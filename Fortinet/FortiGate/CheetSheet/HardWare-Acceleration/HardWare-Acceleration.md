@@ -1,4 +1,4 @@
-# FortiGate Hardware Acceleration Cheatsheet — Part 1 & Part 2
+# FortiGate Hardware Acceleration — Part 1 & Part 2
 
 > **Scope:** SoC, SPU, NPU, CP, NTurbo, NP6/NP6Lite/NP6XLite, NP7, fast-path, ISF, NP Direct, IPsec offload, troubleshooting, HPE and optimization.
 
