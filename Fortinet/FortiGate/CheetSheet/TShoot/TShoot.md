@@ -1,4 +1,4 @@
-# FortiGate Troubleshooting Cheatsheet
+# FortiGate Troubleshooting 
 
 > **Scope:** FortiOS system, CPU, memory, sessions, routing, FortiGuard, modem/PPP, packet capture, NIC, ARP, NPU and TAC troubleshooting.
 
