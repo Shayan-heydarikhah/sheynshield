@@ -1,7 +1,6 @@
 # FortiGate DHCP
 
 > **FortiOS Reference:** DHCP Server, DHCP Relay & DHCP Options  
-> **Format:** GitHub-Flavored Markdown (GFM)
 
 ---
 
