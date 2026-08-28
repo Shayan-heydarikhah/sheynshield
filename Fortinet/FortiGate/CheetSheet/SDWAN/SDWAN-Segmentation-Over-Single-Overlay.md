@@ -1,4 +1,4 @@
-# FortiGate SD-WAN — Advanced Routing & Segmentation Cheatsheet — Part 1
+# FortiGate SD-WAN — Advanced Routing & Segmentation — Part 1
 
 > **Scope:** SD-WAN + BGP + ADVPN + VRF/VPNv4 + MPLS concepts + HA + Advanced troubleshooting
 
