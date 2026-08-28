@@ -1,3 +1,4 @@
+```markdown
 # FortiOS Dial-up IPsec & OSPF ADVPN Cheat Sheet
 
 A quick-reference guide for configuring Dial-up IPsec, ADVPN, and OSPF over multi-FortiGate topologies (Hub & Spoke with NAT traversal).
@@ -48,3 +49,62 @@ OSPF Area 0.0.0.0:
   - 192.168.101.0/24
   - 12.23.34.0/24
 Options: Inject default route always
+
+```
+
+### FGT-2 (Spoke)
+
+```text
+Interface IP: 12.23.34.2
+Remote IP: 12.23.34.1/24 (Allow Ping)
+
+OSPF Router ID: 2.2.2.2
+OSPF Area 0.0.0.0:
+  - 192.168.102.0/24
+  - 12.23.34.0/24
+
+```
+
+### FGT-4 (Spoke behind NAT)
+
+```text
+Interface IP: 12.23.34.4
+Remote IP: 12.23.34.1/24 (Allow Ping)
+
+OSPF Router ID: 4.4.4.4
+OSPF Area 0.0.0.0:
+  - 192.168.104.0/24
+  - 12.23.34.0/24
+
+```
+
+---
+
+## 5. Mode Config (DHCP over IPsec)
+
+To assign IPs dynamically over the Dialup IPsec tunnel:
+
+1. **FGT-1 Network Settings:** In Custom IPsec VPN, enable Mode Config (`Use System DNS`, `Assign IP`).
+2. **FGT-1 Interface:**
+* Subnet Mask: `255.255.255.0`
+* Local IP: `12.23.34.1` | Remote IP: `12.23.34.254/24`
+* Enable DHCP Server on the IPsec interface.
+
+
+3. **Advanced Setup:**
+* **FGT-1:** Disable all advanced components except `Device Creation` and `Add Route`.
+* **FGT-2 (Client):** Ensure `Mode Config` is enabled.
+
+
+
+---
+
+## 6. ADVPN & OSPF Troubleshooting
+
+* **OSPF Stuck in INIT:** Verify **Auto-Discovery Sender and Receiver** are enabled on FGT-1 Phase 1 advanced settings to advertise the OSPF mesh properly.
+* **Cisco Interoperability:** If spoke subnets route via public IPs instead of tunnels, change the FortiGate OSPF Interface Network Type to **Point-to-Point** or **Broadcast / Point-to-Multipoint**.
+* **Spoke-to-Spoke Traffic:** Enable **Exchange IP Address** on FGT-1 to mimic Cisco DMVPN behavior. *(Dialup user groups alone do not trigger this).*
+
+```
+
+```
