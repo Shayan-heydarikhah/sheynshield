@@ -1,4 +1,4 @@
-# FortiGate RAID — Cheat Sheet
+# FortiGate RAID 
 
 > **Purpose:** FortiGate internal disk RAID management, verification, and rebuild commands.
 
