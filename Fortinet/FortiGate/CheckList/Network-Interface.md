@@ -1,45 +1,33 @@
-# FortiGate Interface & L2/L3 Deployment Checklist
+# FortiGate Interface Deployment Checklist
 
-A comprehensive validation and operational readiness checklist for enterprise FortiGate interface setups, high-speed transceivers, Layer 2 encapsulation, and advanced switching architectures.
-
----
-
-## 🛠 1. Basic Interface & Administrative Access
-- [ ] **Physical Transceiver Compatibility:** Verified SFP/SFP+ optical modules using `get system interface transceiver`.
-- [ ] **Interface Migration Boundary:** Ensured migration procedures involve physical interfaces only (logical/virtual interfaces excluded).
-- [ ] **Administrative Access Lockdown:** Enabled only required administrative management flags per interface (`fmg-access`, `ftm`, `security-fabric`, `speedtest`).
-- [ ] **Processing Mode Verification:** Confirmed CPU-bound interfaces (Software Switches) vs ASIC-accelerated ports (Hardware Switches) based on throughput targets.
+This operational checklist standardizes FortiGate interface configurations, Layer 2/3 optimizations, and hardware-accelerated features for enterprise rollouts.
 
 ---
 
-## ⚡ 2. High-Speed Links & Forward Error Correction (FEC)
-- [ ] **Interface Speed & Media Identification:** Validated media-type specifications (e.g., `cr4` for twinax copper, `sr4`/`lr4` for fiber).
-- [ ] **FEC Status Check:**
-  - [ ] **1G / 10G / 40G:** Verified FEC is disabled or unapplied.
-  - [ ] **25G / 100G:** Verified auto-negotiation or explicit binding of `cl91-rs-fec`.
-- [ ] **Physical Layer Validation:** Confirmed link stability and error-free transmission on high-density 40G/100G paths.
+## Base Interface & Transceiver Verification
+- [ ] **Determine switch architecture:** Ensure traffic is processed via CPU for software switches, or utilize ASICs/co-processors for hardware switches to achieve optimized spanning tree processing.
+- [ ] **Configure administrative access:** Set `fmg-access` for automatic FortiManager authorization, `ftm` for FortiToken Mobile push access, `security-fabric` for FortiTelemetry/CAPWAP, or `speedtest` for bandwidth measurement.
+- [ ] **Validate Forward Error Correction (FEC):** Confirm FEC is active (`cl91-rs-fec`) automatically on 25G and 100G interfaces, and note that it is disabled or unsupported on 1000M, 10G, and 40G links.
+- [ ] **Match transceiver specifications:** Use SR4 for short-range multimode up to 100m, LR4 for long-range single-mode up to 10km+, and CR4 for twinaxial copper up to 5m.
+- [ ] **Adjust MTU parameters:** Apply `mtu-override enable`, set custom MTU values, and define the `tcp-mss` on the interface level if required by the network topology.
 
----
+## Layer 2 Switching, VLANs & MAC Management
+- [ ] **Deploy Virtual VLAN switches:** Use hardware switch ports on supported models (e.g., 60F, 100F, 200F) as Layer 2 switches to assign 802.1Q VLANs directly to trunk ports.
+- [ ] **Select VLAN tagging standard:** Use 802.1Q (EtherType 0x8100) for basic single-tag segmentation, or 802.1ad (QinQ) for double-tagging and metro-ethernet tunneling.
+- [ ] **Provision Enhanced MAC (EMAC):** Generate distinct MAC addresses for VLANs on the same physical interface, ensuring the firewall operates in NAT mode.
+- [ ] **Restrict EMAC deployment:** Avoid configuring EMAC on management interfaces, HA heartbeat links, and transparent VDOMs, as the VLAN ID and underlying interface must remain a unique pair.
+- [ ] **Configure VXLAN encapsulation:** Set the remote IP and VNI, create a VLAN under the VXLAN interface, and bind it to a software switch with the physical client port (never add the main VXLAN interface directly).
 
-## 🏷️ 3. IPAM (IP Address Management) Integration
-- [ ] **Global Pool Provisioning:** Enabled IPAM status and defined main subnet pool range (`config system ipam`).
-- [ ] **Interface Allocation Limits:** Set subnetwork size parameters (`managed-subnetwork-size`) per managed interface.
-- [ ] **Subnet Space Verification:** Executed `diagnose sys ipam largest-available-subnet` to verify contiguous block availability.
-- [ ] **Allocation Status:** Confirmed active reservations via `diagnose sys ipam reservation-status`.
+## Redundancy, LAG & Virtual Wire Pairs
+- [ ] **Align Link Aggregation (LAG):** Configure `lacp-mode static` on the FortiGate to establish aggregated links with standard switch channel-groups.
+- [ ] **Optimize LAG hashing:** Set the NPU member selection algorithm to `xor16` for lighter data center loads, or `crc16` for resource-intensive, highly granular distribution.
+- [ ] **Configure Virtual Wire Pairs (VWP):** Implement VWP for Direct Server Return (DSR) using completely empty member interfaces that possess no existing references.
+- [ ] **Apply VWP NAT routing:** Ensure Overload IP Pool NAT is utilized if NAT is required within the Virtual Wire Pair policies.
+- [ ] **Enable Parallel Redundancy Protocol (PRP):** Configure dual independent networks (LAN A and LAN B) for critical infrastructure to ensure zero-time recovery through redundant packet transmission.
 
----
-
-## 🔐 4. External Captive Portal Deployment
-- [ ] **Redirect Target Alignment:** Set external captive portal IP on FGT-1 (ingress) pointing explicitly to FGT-2 (`192.168.12.2`).
-- [ ] **Upstream Forwarder Exemption:** Exempted FGT-1 transit interface IP (`192.168.12.1`) on FGT-2 to prevent authentication loops.
-- [ ] **Transit NAT Prevention:** Disabled Source NAT on FGT-1 for transit network traffic (`192.168.12.0/30`) to retain source IP visibility.
-- [ ] **Routing Validation:** Verified default gateways and static routes ensure bidirectional client flow between nodes.
-
----
-
-## ⚙️ 5. MTU Tuning & 802.1X Port Security
-- [ ] **MTU Override:** Configured target interface MTU and TCP MSS parameters to accommodate tunneling overhead:
-  ```bash
-  set mtu-override enable
-  set mtu 1234
-  set tcp-mss 1448
+## Authentication, IPAM & Diagnostics
+- [ ] **Allocate IPAM subnets:** Enable FortiIPAM, define pool subnets, and execute `diagnose sys ipam reservation-status` or `diagnose sys ipam largest-available-subnet` to verify allocations.
+- [ ] **Setup external captive portals:** Forward authentication traffic to a secondary FortiGate (FGT-2) acting as the external source.
+- [ ] **Secure captive portal routing:** Exempt the forwarding firewall's IP address and completely disable NAT on the transit link to prevent the authentication procedures from failing.
+- [ ] **Enforce 802.1X security:** Apply port-level security directly on hardware switch interfaces running the NP6 platform.
+- [ ] **Monitor via One-Arm Sniffer:** Use one-arm sniffing strictly for short-term packet captures, acknowledging that it disables hardware acceleration (nTurbo/CP), increases CPU utilization, and impacts the kernel buffer size.
