@@ -1,4 +1,4 @@
-# 🔐 FortiGate IPsec VPN — GFM Cheat Sheet
+# 🔐 FortiGate IPsec VPN — Cheat Sheet
 
 > **Scope:** IPsec concepts, CIA, IKEv1/v2, Phase 1/2, NAT-T, DPD, QCD, fragmentation, XAuth, ADVPN, mesh, local-in protection, troubleshooting and Cisco examples.
 
