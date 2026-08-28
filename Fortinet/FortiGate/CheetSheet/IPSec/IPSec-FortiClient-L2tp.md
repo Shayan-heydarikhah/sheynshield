@@ -1,4 +1,4 @@
-# FortiGate VPN Cheat Sheet
+# FortiGate VPN
 ## Dialup IPsec with FortiClient + L2TP over IPsec
 
 ---
