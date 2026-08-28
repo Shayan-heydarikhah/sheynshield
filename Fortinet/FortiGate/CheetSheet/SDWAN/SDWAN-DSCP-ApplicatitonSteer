@@ -1,0 +1,737 @@
+# SD-WAN with DSCP — Cheat Sheet
+
+> **FortiGate / FortiOS — SD-WAN DSCP Steering, ECMP & Application-Based Routing**
+
+---
+
+## 1. SD-WAN Rule with DSCP
+
+DSCP can be used as a matching criterion in an SD-WAN service/rule.
+
+```bash
+config system sdwan
+    config service
+        edit 5
+            set name VoIP-Steer
+            set mode priority
+            set tos 0x70
+            set tos-mask 0xf0
+            set dst all
+            set health-check Default_DNS
+            set link-cost-factor jitter
+            set priority-members 4 3
+        end
+    end
+end
+```
+
+### DSCP Matching
+
+| Parameter          |         Value | Meaning                             |
+| ------------------ | ------------: | ----------------------------------- |
+| `tos`              |        `0x70` | TOS/DSCP value used for matching    |
+| `tos-mask`         |        `0xf0` | Mask used to identify relevant bits |
+| `mode`             |    `priority` | Select members based on priority    |
+| `health-check`     | `Default_DNS` | SLA/health-check object             |
+| `link-cost-factor` |      `jitter` | Prefer link based on jitter         |
+| `priority-members` |         `4 3` | Member 4 preferred over member 3    |
+
+### Important
+
+```text
+DSCP/TOS
+   ↓
+SD-WAN Service Match
+   ↓
+SLA / Quality Evaluation
+   ↓
+Priority Members
+   ↓
+Selected SD-WAN Link
+```
+
+---
+
+# 2. FGT-1 — SD-WAN DSCP Steering
+
+## Rule 1 — Backend / Application Traffic
+
+```text
+Source:
+    all
+
+Destination:
+    192.168.20.200
+
+Strategy:
+    Best Quality
+
+Zone:
+    1-back
+    2-main
+
+SLA:
+    test
+
+Quality Criteria:
+    Packet Loss
+
+Forward DSCP:
+    001010
+
+Reverse DSCP:
+    001010
+```
+
+---
+
+## Rule 2 — Google / Internet Traffic
+
+```text
+Source:
+    all
+
+Destination:
+    Wildcard Google
+
+Strategy:
+    Best Quality
+
+Zone:
+    1-main
+    2-back
+
+SLA:
+    test
+
+Quality Criteria:
+    Latency
+
+Forward DSCP:
+    101110
+
+Reverse DSCP:
+    101110
+```
+
+### Firewall Policy
+
+The firewall policy must allow the traffic toward the required destinations/interfaces.
+
+```text
+LAN
+ ↓
+Firewall Policy
+ ↓
+SD-WAN
+ ↓
+SD-WAN Rule
+ ↓
+SLA
+ ↓
+Selected Member
+```
+
+---
+
+## DSCP Packet Capture
+
+To inspect packets matching the TOS/DSCP value:
+
+```bash
+diagnose sniffer packet any '(ip and ip[1] & 0xfc == 0x70)' 6 0 l
+```
+
+### Useful Concept
+
+```text
+IP Header
+   |
+   +-- TOS / DS Field
+          |
+          +-- DSCP
+          |
+          +-- ECN
+```
+
+---
+
+# 3. FGT-4 — ISP / Remote Side
+
+## Rule 1
+
+```text
+Source:
+    192.168.20.0/24
+
+Destination:
+    192.168.101.0/24
+
+Strategy:
+    Best Quality
+
+Zone:
+    1-back
+    2-main
+
+SLA:
+    test
+
+Quality Criteria:
+    Latency
+
+Forward DSCP:
+    001010
+
+Reverse DSCP:
+    001010
+```
+
+---
+
+## Rule 2
+
+```text
+Source:
+    all
+
+Destination:
+    192.168.101.0/24
+
+Strategy:
+    Best Quality
+
+Zone:
+    1-back
+    2-main
+
+SLA:
+    test
+
+Quality Criteria:
+    Latency
+
+Forward DSCP:
+    101110
+
+Reverse DSCP:
+    101110
+```
+
+> **Note:** Firewall policies must allow traffic for the required source/destination ranges.
+
+---
+
+# 4. Traffic Shaping with DSCP
+
+## Traffic Shaper
+
+```text
+Name:
+    2k-shape
+
+Type:
+    Shared
+
+Priority:
+    Low
+
+Application:
+    Per Policy
+
+Maximum Bandwidth:
+    2 Kbps
+
+DSCP:
+    001010
+```
+
+Conceptually:
+
+```text
+DSCP 001010
+     ↓
+Traffic Shaper
+     ↓
+2k-shape
+     ↓
+Maximum 2 Kbps
+```
+
+---
+
+## Traffic Shaping Policy
+
+```text
+Source:
+    192.168.101.0/24
+
+Destination:
+    192.168.20.0/24
+
+Service:
+    HTTP
+
+Outgoing Interface:
+    FGT-2 interfaces
+        ├── main
+        └── back
+
+Shared Shaper:
+    2k-shape
+
+Reverse Shaper:
+    2k-shape
+```
+
+### Traffic Flow
+
+```text
+192.168.101.0/24
+       |
+       | DSCP 001010
+       v
+   SD-WAN Rule
+       |
+       v
+ Main / Back
+       |
+       v
+ Traffic Shaper
+       |
+       v
+   2 Kbps Limit
+       |
+       v
+192.168.20.0/24
+```
+
+---
+
+# 5. ECMP in SD-WAN Rules
+
+SD-WAN selection can interact with the FortiOS routing table and ECMP.
+
+### Common SD-WAN Strategies
+
+```text
+Manual
+Best Quality
+Lowest Cost
+```
+
+When multiple SD-WAN members remain valid, tie-breaking may be required.
+
+---
+
+# 6. Example — Two Zones / Four Links
+
+```text
+                    FGT-1
+                      |
+          +-----------+-----------+
+          |                       |
+       Zone-1                  Zone-2
+          |                       |
+     +----+----+             +----+----+
+     |         |             |         |
+   Link-1    Link-2        Link-3    Link-4
+     |         |             |         |
+     +---------+-------------+---------+
+                      |
+                    FGT-2
+              192.168.102.0/24
+```
+
+Example:
+
+```text
+Zone-1
+    link-1
+    link-2
+
+Zone-2
+    link-3
+    link-4
+```
+
+---
+
+# 7. Longest Prefix Match + SD-WAN
+
+Example routing table:
+
+```text
+0.0.0.0/0
+    → sdwan-1
+    AD 1
+
+0.0.0.0/0
+    → sdwan-2
+    AD 1
+
+192.168.102.0/24
+    → port-1
+    AD 1
+```
+
+The specific route:
+
+```text
+192.168.102.0/24
+```
+
+has a longer prefix than:
+
+```text
+0.0.0.0/0
+```
+
+Therefore:
+
+```text
+192.168.102.0/24
+        ↓
+Longest Prefix Match
+        ↓
+port-1
+```
+
+### Key Point
+
+> A specific route can influence which SD-WAN member/egress path is considered.
+
+---
+
+# 8. SD-WAN Tie-Break
+
+Example:
+
+```bash
+config system sdwan
+    config service
+        edit 1
+            set name 1
+            set mode sla
+            set dst all
+            set src 192.168.102.0/24
+            set priority-members 1 2 3 4
+            set tie-break fib-best-match
+        end
+    end
+end
+```
+
+### Tie-Break Concept
+
+Possible decision inputs include:
+
+```text
+Priority
+Interface
+SLA
+FIB Best Match
+Input Device
+```
+
+Example:
+
+```text
+SD-WAN Rule
+     |
+     +-- Zone
+     |
+     +-- SLA-qualified members
+     |
+     +-- Tie-break
+             |
+             +-- Priority
+             +-- Interface
+             +-- FIB best-match
+             +-- Input device
+```
+
+---
+
+# 9. Troubleshooting SD-WAN Service Selection
+
+### Show SD-WAN Service Decision
+
+```bash
+diagnose sys sdwan service
+```
+
+### Check Static Routes
+
+```bash
+get router info routing-table static
+```
+
+### Check Policy Route Match
+
+```bash
+diagnose ip proute match 3.1.1.34 70:4c:a5:86:de:56 port3 22 6
+```
+
+---
+
+# 10. Lowest Cost vs Best Quality
+
+## Lowest Cost
+
+With **Lowest Cost**, the decision is based on SLA/cost.
+
+Important behavior:
+
+```text
+Longest-match routes
+        ↓
+Egress members
+        ↓
+SLA / Cost evaluation
+        ↓
+Lowest-cost valid decision
+```
+
+> Even if specific-route egress ports are outside SLA, the SD-WAN rule can still select the first/configured or lower-cost egress port from those specific-route ports.
+
+---
+
+## Best Quality
+
+With **Best Quality**, quality metrics have higher importance.
+
+```text
+Latency
+Packet Loss
+Jitter
+     ↓
+Quality Calculation
+     ↓
+Best Quality Member
+```
+
+> Even if members on less-specific routes have better quality, a best-quality SD-WAN decision can remain constrained by the egress ports associated with the more-specific route.
+
+---
+
+# 11. Application Category in SD-WAN Rule
+
+SD-WAN rules can use Internet Service / Application Control categories.
+
+Example:
+
+```bash
+config system sdwan
+    config service
+        edit 1
+            set mode sla
+            set src 192.168.101.0/24
+            set internet-service enable
+            set internet-service-app-ctrl-category 5 21
+        end
+    end
+end
+```
+
+Example categories:
+
+```text
+Category 5
+    Video / Audio
+
+Category 21
+    Email
+```
+
+Concept:
+
+```text
+Client
+  |
+  v
+Application Identification
+  |
+  +---- Video / Audio
+  |
+  +---- Email
+  |
+  v
+SD-WAN Rule
+  |
+  v
+SLA / Strategy
+  |
+  v
+WAN Member
+```
+
+---
+
+# 12. Firewall Policy for Application-Based SD-WAN
+
+Example:
+
+```bash
+config firewall policy
+    edit 1
+        set srcintf port3
+        set dstintf sdwan-1
+        set action accept
+        set srcaddr 172.16.205.0
+        set dstaddr all
+        set schedule always
+        set service ALL
+        set ssl-ssh-profile certificate-inspection
+        set application-list g-default
+    end
+end
+```
+
+### Important
+
+The firewall policy provides:
+
+```text
+Application Identification
++
+Access Control
+```
+
+while the SD-WAN rule provides:
+
+```text
+Path Selection
+```
+
+So:
+
+```text
+Firewall Policy
+      |
+      +-- Allow / Deny
+      +-- Application Detection
+      |
+      v
+SD-WAN Rule
+      |
+      +-- SLA
+      +-- Strategy
+      +-- WAN Selection
+```
+
+---
+
+# 13. Troubleshooting Application-Based Steering
+
+### Policy Route Information
+
+```bash
+diagnose firewall proute list
+```
+
+Shows policy-route / forwarding information.
+
+---
+
+# 14. DSCP + SD-WAN + Traffic Shaping — End-to-End
+
+```text
+                    Client
+                       |
+                       | DSCP
+                       v
+              +----------------+
+              | Firewall       |
+              | Policy         |
+              +----------------+
+                       |
+                       v
+              +----------------+
+              | SD-WAN Rule    |
+              |                |
+              | Source         |
+              | Destination    |
+              | DSCP/TOS       |
+              | Application    |
+              +----------------+
+                       |
+                       v
+                 SLA / Quality
+                       |
+          +------------+------------+
+          |                         |
+       Main WAN                  Backup WAN
+          |                         |
+          +------------+------------+
+                       |
+                       v
+                 Traffic Shaper
+                       |
+                       v
+                  Destination
+```
+
+---
+
+# 15. Quick Reference
+
+| Requirement              | Recommended Mechanism                  |
+| ------------------------ | -------------------------------------- |
+| Match traffic by DSCP    | `tos` + `tos-mask`                     |
+| Select preferred WAN     | `priority` / manual                    |
+| Select best WAN          | Best Quality + SLA                     |
+| Select lowest-cost path  | Lowest Cost + SLA                      |
+| Match applications       | Internet Service / Application Control |
+| Limit bandwidth          | Traffic Shaper                         |
+| Apply DSCP-based shaping | Traffic Shaper + DSCP                  |
+| Check SD-WAN decisions   | `diagnose sys sdwan service`           |
+| Check routing table      | `get router info routing-table static` |
+| Check policy routing     | `diagnose firewall proute list`        |
+| Test policy-route match  | `diagnose ip proute match ...`         |
+| Capture DSCP traffic     | `diagnose sniffer packet ...`          |
+
+---
+
+# 16. Key Takeaways
+
+> [!IMPORTANT]
+> **SD-WAN rule = path selection.**
+> **Firewall policy = security/access control.**
+> **Traffic shaper = bandwidth control.**
+> **DSCP = traffic classification / QoS marking.**
+> **SLA = path quality measurement.**
+> **Routing table / FIB = determines available forwarding paths.**
+
+### Mental Model
+
+```text
+Traffic
+   |
+   v
+Firewall Policy
+   |
+   +---- Application Identification
+   +---- Security Decision
+   |
+   v
+SD-WAN Rule
+   |
+   +---- Source / Destination
+   +---- DSCP / TOS
+   +---- Application
+   +---- SLA
+   +---- Strategy
+   |
+   v
+Routing / FIB
+   |
+   v
+WAN Member
+   |
+   v
+Traffic Shaper / QoS
+   |
+   v
+Internet / VPN / Remote Site
+```
