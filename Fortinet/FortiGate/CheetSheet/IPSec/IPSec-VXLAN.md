@@ -1,4 +1,4 @@
-# VXLAN over Dialup IPsec — FortiGate Cheat Sheet
+# VXLAN over Dialup IPsec
 
 > **Goal:** Build a Layer-2 VXLAN extension between two FortiGate devices, then protect the VXLAN transport using a **Dialup IPsec tunnel**.
 
