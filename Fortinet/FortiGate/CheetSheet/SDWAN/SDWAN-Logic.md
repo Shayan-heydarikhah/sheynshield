@@ -1,4 +1,4 @@
-# FortiGate SD-WAN — Cheat Sheet
+# FortiGate SD-WAN 
 
 > **Scope:** SD-WAN, link monitoring, SLA, load balancing, passive health measurement, speed test, routing integration, and troubleshooting
 > **Platform:** FortiOS
