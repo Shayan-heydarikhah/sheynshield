@@ -1,4 +1,4 @@
-# FortiGate Routing — Cheat Sheet
+# FortiGate Routing
 
 ## 1. Static Route
 
