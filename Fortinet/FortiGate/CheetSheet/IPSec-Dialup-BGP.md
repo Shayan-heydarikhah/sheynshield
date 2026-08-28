@@ -1080,5 +1080,3 @@ ADVPN when spoke-to-spoke is required
 ```
 
 > **Key idea:** First establish the IPsec connectivity and a routable IPsec interface. Then establish BGP over that interface. BGP does not replace IPsec; BGP provides routing information through the secure IPsec transport.
-
-```
