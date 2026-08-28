@@ -1,4 +1,4 @@
-# 🔐 FortiGate Remote Access VPN — Cheatsheet
+# 🔐 FortiGate Remote Access VPN
 
 > FortiClient Dialup • L2TP over IPsec • Dialup Internet • Certificates • Troubleshooting
 
