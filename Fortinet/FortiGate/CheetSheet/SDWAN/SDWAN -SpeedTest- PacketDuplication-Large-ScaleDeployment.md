@@ -1,4 +1,4 @@
-# FortiGate SD-WAN — Speed Test, Packet Duplication & Large-Scale Deployment Cheat Sheet
+# FortiGate SD-WAN — Speed Test, Packet Duplication & Large-Scale Deployment
 
 ## 1. SD-WAN Speed Test
 
