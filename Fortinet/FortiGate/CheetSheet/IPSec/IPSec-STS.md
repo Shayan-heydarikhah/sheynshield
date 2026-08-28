@@ -1,4 +1,4 @@
-# FortiGate IPsec VPN — Site-to-Site & Advanced Cheatsheet
+# FortiGate IPsec VPN — Site-to-Site & Advanced
 
 > **Scope:** Site-to-Site IPsec, Overlapping Subnets, GRE over IPsec, GRE over IPsec with Cisco, Dial-up IPsec, Policy-Based IPsec, IPsec Concentrator, and AWS interoperability.
 
