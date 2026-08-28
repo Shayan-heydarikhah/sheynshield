@@ -1035,7 +1035,7 @@ ADVPN when spoke-to-spoke is required
 
 ---
 
-# 32. 📌 Final Cheat Sheet
+# 32. 📌 Final  
 
 | Component           | Purpose                                     |
 | ------------------- | ------------------------------------------- |
