@@ -1,4 +1,4 @@
-# SD-WAN with DSCP — Cheat Sheet
+# SD-WAN with DSCP
 
 > **FortiGate / FortiOS — SD-WAN DSCP Steering, ECMP & Application-Based Routing**
 
