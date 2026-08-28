@@ -657,7 +657,7 @@ Egress
 
 ---
 
-# 🔑 Final Cheat Sheet
+# 🔑 Final  
 
 ```text
                   FORTIGATE TROUBLESHOOTING
