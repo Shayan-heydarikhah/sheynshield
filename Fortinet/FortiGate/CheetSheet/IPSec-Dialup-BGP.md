@@ -1,6 +1,3 @@
-این ساختار مارک‌داون برای اضافه شدن مستقیم به ریپازیتوری گیت‌هاب و استفاده در مستندات دوره‌های آموزشی شبکه‌ طراحی شده است.
-
-```markdown
 # 🛡️ FortiOS Dial-up IPsec & eBGP Cheat Sheet
 
 A comprehensive reference guide for deploying Dial-up IPsec combined with eBGP routing across a Hub-and-Spoke Fortinet topology. This guide includes configurations for standard spokes and spokes situated behind NAT devices.
