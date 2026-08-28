@@ -3423,5 +3423,3 @@ Encrypted + Authenticated Traffic
 | Mesh Selector     | Helps dynamic spoke-to-spoke connectivity |
 
 ```
-این نسخه را عمداً به شکل **single-block GFM cheat sheet** نگه داشتم تا مستقیم داخل `README.md`، GitHub Wiki یا repository notes پیست کنی.
-```
