@@ -1,4 +1,4 @@
-# 🛡️ FortiOS 7.2.0 — Security Fabric Cheat Sheet
+# 🛡️ FortiOS 7.2.0 — Security Fabric
 
 > **FortiOS Version:** `7.2.0`
 > **Focus:** Security Fabric · Automation · External Connectors · SAML · FortiManager · FortiAnalyzer Cloud · EMS · OT/Purdue · Security Rating
