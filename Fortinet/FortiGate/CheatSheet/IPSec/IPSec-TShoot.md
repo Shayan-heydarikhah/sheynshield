@@ -998,7 +998,7 @@ Each layer must be checked independently.
 
 ---
 
-# 35. Minimal IPsec Troubleshooting Cheat Flow
+# 35. Minimal IPsec Troubleshooting Flow
 
 ```text
 1. IKE Status
