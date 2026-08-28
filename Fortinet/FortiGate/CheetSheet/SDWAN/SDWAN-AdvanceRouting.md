@@ -1859,33 +1859,3 @@ diagnose vpn tunnel fec link-1
 # Sessions
 diagnose sys session list
 ```
-
----
-
-# 🎯 Design Checklist
-
-* [ ] Define SD-WAN zones
-* [ ] Define WAN members
-* [ ] Configure accurate gateways
-* [ ] Configure estimated bandwidth
-* [ ] Configure SLA probes
-* [ ] Select active/passive/prefer-passive probing
-* [ ] Define SD-WAN service/rules
-* [ ] Select steering strategy
-* [ ] Validate FIB/RIB behavior
-* [ ] Configure BGP if dynamic routing is required
-* [ ] Enable BGP multipath when required
-* [ ] Use route-tags for route-based steering
-* [ ] Use route-maps for route filtering
-* [ ] Configure ADVPN if dynamic tunnels are required
-* [ ] Avoid SD-WAN load-balance mode with ADVPN
-* [ ] Configure SD-WAN neighbor roles when required
-* [ ] Configure hold-down for unstable links
-* [ ] Use FEC only for loss-sensitive traffic
-* [ ] Verify NPU implications
-* [ ] Verify firewall policies
-* [ ] Verify routing table
-* [ ] Verify SD-WAN service selection
-* [ ] Verify IPsec Phase 1
-* [ ] Verify IPsec Phase 2
-* [ ] Verify session/NPU offload
