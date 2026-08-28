@@ -2195,7 +2195,7 @@ DEBUG
 
 ## 📌 Version Note
 
-This cheat sheet is intentionally aligned with the **FortiOS 7.2.0 training material** used for the associated course/lab environment.
+This is intentionally aligned with the **FortiOS 7.2.0 training material** used for the associated course/lab environment.
 
 ```text
 FortiOS
