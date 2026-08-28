@@ -1,4 +1,4 @@
-# 🔐 IPSec / IKE / VPN — CCNP & FortiGate Cheat Sheet
+# 🔐 IPSec / IKE / VPN — CCNP & FortiGate
 
 > Comprehensive study notes for IPSec, IKEv1/v2, NAT-T, DPD, QCD, ADVPN, XAuth, FortiGate and Cisco configuration.
 
