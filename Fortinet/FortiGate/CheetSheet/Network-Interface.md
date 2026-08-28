@@ -1,4 +1,3 @@
-```markdown
 # FortiGate Architecture & Interface Management Cheat Sheet
 
 This comprehensive reference guide consolidates enterprise FortiGate Layer 2/Layer 3 interface configurations, ASIC hardware optimizations, packet acceleration techniques, and network encapsulation standards.
