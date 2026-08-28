@@ -1,4 +1,4 @@
-# FortiGate VM Cheat Sheet
+# FortiGate VM 
 
 > **Focus:** FortiGate-VM, Licensing, FortiFlex, VDOM, Terraform, SR-IOV, Metadata Service, FIPS
 
