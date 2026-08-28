@@ -68,7 +68,7 @@ A step-by-step production verification checklist for deploying, maintaining, and
 
 ---
 
-## ⚡ Quick Verification Commands Cheat Sheet
+## ⚡ Quick Verification Commands  
 
 | Task | Command |
 | :--- | :--- |
