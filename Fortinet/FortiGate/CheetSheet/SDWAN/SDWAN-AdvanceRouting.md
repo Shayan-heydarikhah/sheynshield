@@ -1,6 +1,3 @@
-حتماً — در ادامه محتوای شما را به یک **GitHub Flavored Markdown (GFM) Cheat Sheet** ساختاریافته تبدیل کردم. سعی کردم اصطلاحات FortiOS، CLI و نکات عملیاتی حفظ شوند و بخش‌های مشابه در یک ساختار منظم قرار بگیرند.
-
-````markdown
 # FortiGate SD-WAN — Advanced Routing & Overlay Cheat Sheet
 
 > FortiOS SD-WAN advanced routing, BGP, route-tag, ADVPN, SD-WAN neighbor, FEC and troubleshooting reference.
@@ -1892,8 +1889,3 @@ diagnose sys session list
 * [ ] Verify IPsec Phase 1
 * [ ] Verify IPsec Phase 2
 * [ ] Verify session/NPU offload
-
-```
-
-اگر بخواهی، می‌توانم همین Cheat Sheet را هم به شکل **:contentReference[oaicite:0]{index=0}** تبدیل کنم.
-```
