@@ -1050,7 +1050,7 @@ Think:
 
 ---
 
-# 🔥 Encapsulation Cheat Sheet
+# 🔥 Encapsulation  
 
 ## 6in4
 
