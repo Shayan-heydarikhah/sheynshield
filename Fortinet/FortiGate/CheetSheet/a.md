@@ -1,6 +1,3 @@
-حتماً. این بار فقط **GitHub-ready Markdown** می‌دهم؛ تمیز، انگلیسی، و مناسب قرار دادن مستقیم داخل Repository. همچنین نکته‌ی `add-route` را با مستندات Fortinet هم‌راستا کردم: در سناریوهای Dynamic IPsec + BGP، Fortinet برای چند tunnel معمولاً `add-route disable` و dynamic discovery را مطرح می‌کند. ([Fortinet Docs][1])
-
-````markdown
 # FortiGate Dial-Up IPsec + XAuth + LDAP + BGP
 
 > **NSE 7 Field Note**
