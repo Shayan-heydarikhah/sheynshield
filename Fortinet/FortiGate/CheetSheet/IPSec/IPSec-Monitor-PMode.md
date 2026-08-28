@@ -1,4 +1,4 @@
-# 🔐 FortiGate IPsec — Tunnel Monitoring & Passive Mode Cheat Sheet
+# 🔐 FortiGate IPsec — Tunnel Monitoring & Passive Mode
 
 ---
 
