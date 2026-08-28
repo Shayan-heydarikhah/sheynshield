@@ -1,4 +1,4 @@
-# 🔐 FortiGate Dial-Up IPsec + OSPF Cheat Sheet
+# 🔐 FortiGate Dial-Up IPsec + OSPF 
 
 > **Topology**
 >
