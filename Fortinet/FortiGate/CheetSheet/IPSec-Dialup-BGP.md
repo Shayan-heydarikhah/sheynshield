@@ -1,4 +1,4 @@
-```markdown
+ 
 # 🛡️ Advanced FortiOS Dial-up IPsec & eBGP Architecture Guide
 
 A deep-dive engineering reference for deploying scalable Dial-up IPsec tunnels integrated with eBGP routing in a Hub-and-Spoke topology. This guide covers granular CLI configurations, NAT-Traversal (NAT-T) scenarios, and critical architectural caveats regarding ADVPN limitations.
@@ -241,8 +241,6 @@ get router info bgp network
 
 # Verify the FortiOS Routing Information Base (RIB)
 get router info routing-table bgp
-
-```
 
 ```
 
