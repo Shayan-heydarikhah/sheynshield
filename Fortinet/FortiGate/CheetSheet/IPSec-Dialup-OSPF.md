@@ -1,4 +1,4 @@
-
+```markdown
 # Comprehensive FortiOS Dial-up IPsec, ADVPN & OSPF Cheat Sheet
 
 An advanced, highly detailed reference guide for deploying Dial-up IPsec, ADVPN (Auto-Discovery VPN), and OSPF dynamic routing over multi-FortiGate Hub-and-Spoke topologies, including NAT traversal scenarios.
@@ -6,6 +6,7 @@ An advanced, highly detailed reference guide for deploying Dial-up IPsec, ADVPN 
 ---
 
 ## 1. Identity & Fabric Prerequisites
+
 - **Active Directory (LDAP):** Define AD as an LDAP server on the FortiGate Hub (FGT-1) under `User & Authentication > LDAP Servers`.
 - **FSSO Integration:** Configure AD FSSO under `Security Fabric > External Connectors` to map IP addresses to AD user groups dynamically.
 - **User Groups:** Create local Firewall User Groups mapping to the LDAP/FSSO groups to be used in the IPsec XAuth configuration.
@@ -17,7 +18,7 @@ An advanced, highly detailed reference guide for deploying Dial-up IPsec, ADVPN 
 | Parameter | FGT-1 (Hub / HQ) | FGT-2 (Spoke - Static IP) | FGT-4 (Spoke - Behind NAT FGT-3) |
 | :--- | :--- | :--- | :--- |
 | **Gateway Type** | Dialup User | Static IP (FGT-1 Public IP) | Static IP (FGT-1 Public IP) |
-| **IKE Version/Mode**| IKEv1, Aggressive Mode | IKEv1, Aggressive Mode | IKEv1, Aggressive Mode |
+| **IKE Version/Mode** | IKEv1, Aggressive Mode | IKEv1, Aggressive Mode | IKEv1, Aggressive Mode |
 | **Phase 1 Crypto** | DES, MD5, DH 5 (Consider AES/SHA256 for Prod) | DES, MD5, DH 5 | DES, MD5, DH 5 |
 | **Phase 2 Crypto** | DES, MD5, PFS DH 5, Auto-negotiate | DES, MD5, PFS DH 5, Auto-negotiate | DES, MD5, PFS DH 5, Auto-negotiate |
 | **DPD (Dead Peer)** | On-Idle (Saves Hub resources) | On-Demand | On-Demand |
@@ -116,6 +117,7 @@ To assign IPs dynamically to spokes over the Dialup IPsec tunnel instead of stat
 
 * **OSPF Stuck in INIT:** Verify **Auto-Discovery Sender and Receiver** are enabled on FGT-1 Phase 1. If the Hub cannot dynamically create the Spoke interface, OSPF Hellos will fail.
 * **Cisco Interoperability / Bad Next-Hops:** If spoke subnets route via public IPs instead of tunnels (a common issue with Cisco DMVPN interop), change the FortiGate OSPF Interface Network Type via CLI:
+
 ```bash
 config router ospf
   config ospf-interface
@@ -126,7 +128,6 @@ config router ospf
 end
 
 ```
-
 
 * **Spoke-to-Spoke Traffic:** Enable `set exchange-ip-addr4` via CLI on FGT-1 Phase 1 to mimic Cisco DMVPN behavior and allow spokes to learn each other's physical IPs for shortcut tunnels. *(Dialup user groups alone do not trigger this).*
 
@@ -147,6 +148,8 @@ get router info ospf database
 diagnose vpn ike log filter dst-addr4 <Peer_Public_IP>
 diagnose debug application ike -1
 diagnose debug enable
+
+```
 
 ```
 
