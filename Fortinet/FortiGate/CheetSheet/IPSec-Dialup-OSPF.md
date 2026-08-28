@@ -149,5 +149,3 @@ diagnose debug application ike -1
 diagnose debug enable
 
 ```
-
-```
