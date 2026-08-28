@@ -1,4 +1,4 @@
-# FortiGate SD-WAN — Advanced Routing & Overlay Cheat Sheet
+# FortiGate SD-WAN — Advanced Routing & Overlay
 
 > FortiOS SD-WAN advanced routing, BGP, route-tag, ADVPN, SD-WAN neighbor, FEC and troubleshooting reference.
 
