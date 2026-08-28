@@ -1,4 +1,4 @@
-```markdown
+
 # Comprehensive FortiOS Dial-up IPsec, ADVPN & OSPF Cheat Sheet
 
 An advanced, highly detailed reference guide for deploying Dial-up IPsec, ADVPN (Auto-Discovery VPN), and OSPF dynamic routing over multi-FortiGate Hub-and-Spoke topologies, including NAT traversal scenarios.
