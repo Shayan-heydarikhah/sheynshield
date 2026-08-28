@@ -1,4 +1,4 @@
-# FortiGate HA / FGCP / FGSP / VRRP / VDOM Cheat Sheet
+# FortiGate HA / FGCP / FGSP / VRRP / VDOM 
 
 > **FortiGate High Availability & Redundancy Quick Reference**
 > Topics: **FGCP · HA · A-P · A-A · VDOM · VCluster · FGSP · VRRP · Session Pickup · HA Management · Failover · VMAC · Troubleshooting**
