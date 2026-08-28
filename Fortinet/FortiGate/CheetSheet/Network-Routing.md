@@ -1,4 +1,3 @@
-```markdown
 # FortiGate Routing & Forwarding Cheat Sheet
 
 ## Route Lookup & Core Diagnostics
@@ -15,18 +14,16 @@ get router info routing-table database  # All received and learned routes
 get router info kernel                  # FIB and routing daemon information
 diagnose ip rtcache list                # Route lookup and cache checking
 diagnose ip address list                # Show all assigned IP addresses
-
 ```
 
 **Kernel Table Information (`get router info kernel`)**
-
-* **Tables:** `254` (Unicast), `255` (Multicast).
-* **vf:** VDOM name/index (0 if no VDOM).
-* **prio:** Lower priority is the best path.
-* **pref:** Preferred next-hop.
+* **Tables:** `254` (Unicast), `255` (Multicast)
+* **vf:** VDOM name/index (0 if no VDOM)
+* **prio:** Lower priority is the best path
+* **pref:** Preferred next-hop
 
 | Type Value | Description | Proto Value | Description |
-| --- | --- | --- | --- |
+| :--- | :--- | :--- | :--- |
 | `0` | Unspecific | `0` | Unspecific |
 | `1` | Unicast | `2` | Kernel |
 | `2` | Local | `11` | ZebOS routing module (dynamic routing) |
@@ -34,8 +31,8 @@ diagnose ip address list                # Show all assigned IP addresses
 | `4` | Anycast | `15` | HA (Learned from HA) |
 | `5` | Multicast | `16` | Authentication based |
 | `6` | Blackhole | `17` | HA1 (Learned from heartbeat links) |
-| `7` | Unreachable |  |  |
-| `8` | Prohibited (Blocked/TTL omitted) |  |  |
+| `7` | Unreachable | | |
+| `8` | Prohibited (Blocked/TTL omitted) | | |
 
 ---
 
@@ -43,16 +40,13 @@ diagnose ip address list                # Show all assigned IP addresses
 
 **Reverse Path Forwarding (RPF)**
 Prevents IP spoofing. Feasible-path is default; strict mode checks all source/destination interfaces.
-
 ```bash
 config system settings
   set strict-src-check enable 
 end
-
 ```
 
 **Asymmetric Routing & Session Preservation**
-
 ```bash
 # Allow asymmetric routing (bypass 3-way handshake checks - has security risks)
 config system settings
@@ -69,7 +63,6 @@ end
 config system global
   set snat-route-change enable
 end
-
 ```
 
 ---
@@ -77,7 +70,6 @@ end
 ## ECMP & Link Redundancy
 
 **ECMP Load Balancing Algorithms**
-
 * **Source IP (Default):** Divided equally based on source IP.
 * **Weighted:** Distributed based on assigned interface weights.
 * **Usage (Spillover):** Uses an interface until bandwidth exceeds set thresholds, then spills to the next.
@@ -90,11 +82,9 @@ config system settings
   set v4-ecmp-mode usage-base
   set ecmp-max-path 4
 end
-
 ```
 
 **Link Health Monitor (Failover)**
-
 ```bash
 config system link-monitor
   edit 1
@@ -110,7 +100,6 @@ config system link-monitor
     set update-static-route enable     # Switch static routes on fail
     set update-cascade-interface enable # Shutdown cascade interfaces on fail
 end
-
 ```
 
 ---
@@ -118,7 +107,6 @@ end
 ## Dynamic Routing: RIP & OSPF
 
 ### RIP Configurations
-
 Ensure timers match across all devices. Split horizon can be verified via `get router info rip interfaces`.
 
 ```bash
@@ -138,13 +126,11 @@ config router key-chain
         set send-lifetime 12:20:00 8 2 2025 infinite
     end
 end
-
 ```
 
 ### OSPF Configurations & Diagnostics
 
 **Core Diagnostics**
-
 ```bash
 get router ospf                          # Comprehensive OSPF setup
 get router info routing-table ospf       # Global (VRF 0) received routes
@@ -152,12 +138,10 @@ get router info ospf neighbor details    # Neighbor states and statistics
 get router info ospf database brief      # LSDB and LSA information
 get router info ospf route               # Received and learned routes in RIB
 get router info ospf status              # Uptime, VRF binds, SPF algorithm updates
-
 ```
 
 **Graceful Restart (Topology Change)**
 Provides non-interrupted forwarding between HA switch mechanisms during SPF algorithm runs.
-
 ```bash
 config router ospf
   set router-id 31.1.1.1
@@ -165,7 +149,6 @@ config router ospf
   set restart-period 180
   set restart-on-topology-change enable
 end
-
 ```
 
 ---
@@ -173,7 +156,6 @@ end
 ## Dynamic Routing: BGP
 
 **Basic BGP & Multi-pathing**
-
 ```bash
 config router bgp
   set as 65001
@@ -191,7 +173,6 @@ config router bgp
       set soft-reconfiguration enable
   end
 end
-
 ```
 
 **BGP Route Flap Dampening**
@@ -210,7 +191,6 @@ config router bgp
   set dampening-reuse 750
   set dampening-suppress 2000
 end
-
 ```
 
 **Bidirectional Forwarding Detection (BFD)**
@@ -232,7 +212,6 @@ config router bgp
       set bfd enable
   end
 end
-
 ```
 
 ---
@@ -242,7 +221,6 @@ end
 Provides network segmentation without VDOMs. Supports up to 64 VRFs per VDOM. Modifying VRF attributes on interfaces disrupts forwarding.
 
 **Configure VDOM Links for VRF Overlap**
-
 ```bash
 config system vdom-link
   edit v-2-3-
@@ -251,11 +229,9 @@ end
 config system settings
   set allow-subnet-overlap enable
 end
-
 ```
 
 **Route Leaking Between VRFs (via BGP)**
-
 ```bash
 config router bgp
   config vrf
@@ -274,11 +250,9 @@ config router bgp
       end
   end
 end
-
 ```
 
 **Blackhole Routes per VRF**
-
 ```bash
 config router static
   edit 1
@@ -286,7 +260,6 @@ config router static
     set blackhole enable
     set vrf 3
 end
-
 ```
 
 ---
@@ -296,7 +269,6 @@ end
 Sends client information to the FortiGate during scanning (essential for SNMP/RESTAPI).
 
 **Configuration Tiers**
-
 ```bash
 # Global
 config system global
@@ -311,19 +283,12 @@ config system interface
     set lldp-transmit enable
     set device-identification enable
 end
-
 ```
 
 **Diagnostics**
-
 ```bash
 diagnose user device list
 diagnose lldprx neighbor summary
 diagnose lldprx neighbor details
 diagnose lldprx port summary
-
-```
-
-```
-
 ```
