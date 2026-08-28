@@ -1,4 +1,4 @@
-# FortiGate Interfaces — Cheat Sheet
+# FortiGate Interfaces
 
 > **Scope:** Software/Hardware Switch, VLAN, FEC, IPAM, Captive Portal, MTU/MSS, Sniffer, LAG, Redundant Interface, VWP, PRP, EMAC, VXLAN
 
