@@ -1586,7 +1586,6 @@ Egress
 | NP Direct                        | `set low-latency-mode enable`              |
 
 ---
----
 
 # 🧠 Golden Rules
 
