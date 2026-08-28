@@ -118,5 +118,3 @@ Because FGT-4 is situated behind FGT-3, the NAT handling on FGT-3 must be strict
 * **ISP ➔ FGT-4 (Inbound Policy):** `Disable NAT` (Crucial for testing and isolating phase 1/2 encapsulation issues).
 
 ```
-
-```
