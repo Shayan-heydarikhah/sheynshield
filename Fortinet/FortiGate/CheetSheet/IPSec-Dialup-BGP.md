@@ -1,12 +1,5 @@
 
-Conversation with Gemini
-حالا اعلاوه بر این خروجی بیا با ساختار checklist هم اینو بهم بده
-
-بله، حتماً! داشتن یک Checklist عملیاتی (Pre-Deployment & Troubleshooting Checklist) برای ریپازیتوری گیت‌هاب بسیار مفید است. مهندسان شبکه می‌توانند این چک‌لیست را پیش از پیاده‌سازی در محیط Production یا حین رفع اشکال، مرحله به مرحله بررسی کنند.
-
-این چک‌لیست را می‌توانید به عنوان یک بخش مجزا در انتهای همان فایل fortigate-ha-cheat-sheet.md یا به صورت یک فایل جداگانه مانند fortigate-ha-deployment-checklist.md استفاده کنید:
-
-📋 FortiGate HA Deployment & Operational Checklist
+# 📋 FortiGate HA Deployment & Operational Checklist
 A step-by-step verification checklist for deploying, maintaining, and troubleshooting FortiGate FGCP/FGSP High Availability clusters in enterprise environments.
 
 🛠 Phase 1: Pre-Deployment Hardware & License Validation
