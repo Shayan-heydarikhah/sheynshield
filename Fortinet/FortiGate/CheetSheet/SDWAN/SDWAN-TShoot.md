@@ -1,5 +1,4 @@
-# FortiGate SD-WAN — Cloud On-Ramp & Troubleshooting Cheatsheet
-
+# FortiGate SD-WAN — Cloud On-Ramp & Troubleshooting
 > **Focus:** Cloud On-Ramp, DNAT/VIP behavior, SD-WAN diagnostics, interface SLA logs, and Speed Test
 
 ---
