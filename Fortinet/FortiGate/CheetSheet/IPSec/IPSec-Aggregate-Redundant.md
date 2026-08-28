@@ -1,4 +1,4 @@
-# 🔗 FortiGate IPsec Aggregation & Redundancy — Cheatsheet
+# 🔗 FortiGate IPsec Aggregation & Redundancy
 
 > IPsec Aggregate • Round-Robin • Redundant • IPsec Monitoring • OSPF • HA • ESP Sync
 
