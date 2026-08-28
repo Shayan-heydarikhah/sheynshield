@@ -1,4 +1,4 @@
-# 🔀 FortiGate SD-WAN Strategies — Cheatsheet
+# 🔀 FortiGate SD-WAN Strategies
 
 > **SD-WAN Strategies** determine how FortiGate selects SD-WAN members based on interface priority, SLA results, bandwidth, and routing conditions.
 
