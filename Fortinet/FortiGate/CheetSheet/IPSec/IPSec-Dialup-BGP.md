@@ -1,4 +1,4 @@
-# 🔐 Dial-up IPsec + BGP — FortiGate Cheatsheet
+# 🔐 Dial-up IPsec + BGP
 
 > **Scenario:** Dial-up IPsec VPN + Dynamic Routing using BGP  
 > **Topology:** Hub-and-Spoke / Dynamic Spokes
