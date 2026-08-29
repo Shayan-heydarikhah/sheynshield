@@ -1117,7 +1117,7 @@ IKE Phase 1
 * Use certificate authentication when certificate-based identity is required.
 * Use IKE/FNBAMD debug when authentication or negotiation fails.
 
-```
+ 
 
 ## 🔗 SheynShield Resources
 
