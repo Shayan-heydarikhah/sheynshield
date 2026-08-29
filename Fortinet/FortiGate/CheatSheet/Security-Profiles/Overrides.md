@@ -832,12 +832,8 @@ end
 ```
 
 ---
-
-## 🏷️ Suggested GitHub Metadata
-
-**Primary topic:** `FortiGate SSL Inspection`
-
-**Secondary topics:**
+ 
+**  topics:**
 
 ```text
 FortiOS
@@ -856,26 +852,7 @@ Domain Reputation
 Security Profiles
 Network Security
 NSE4
-NSE7
-```
-
-**Suggested filename:**
-
-```text
-fortigate-ssl-inspection-web-rating-overrides-.md
-```
-
-**Suggested  title:**
-
-```text
-FortiGate SSL Inspection & Web Rating Override   | FortiOS
-```
-
-**Suggested GitHub description:**
-
-```text
-Practical FortiGate SSL Inspection   covering HTTP/2,
-ALPN, SNI, certificate replacement, FortiGuard domain/IP rating,
-Web Rating Overrides, alternate Web Filter profiles, and
+NSE7 
+ 
 temporary web access controls.
 ```
