@@ -703,7 +703,3 @@ FortiGate | FortiOS | Network Security | Firewall Engineering
 
 * [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
 
-باشد.
-
-می‌توانم برای همین Checklist یک **:contentReference[oaicite:0]{index=0}** هم طراحی کنم تا داخل README گیت‌هاب و پست LinkedIn استفاده شود.
-```
