@@ -1359,3 +1359,25 @@ diagnose test application vned 1
 ## 🔑 Keywords
 
 `IPv6` · `IPv6 Routing` · `IPv6 Tunneling` · `IPv6 Encapsulation` · `FortiGate IPv6` · `FortiOS 7.2.0` · `Dual Stack` · `6in4` · `SIT Tunnel` · `4in6` · `DS-Lite` · `Dual-Stack Lite` · `MAP-E` · `VNE` · `Virtual Network Enabler` · `AFTR` · `Border Relay` · `IPv4 over IPv6` · `IPv6 over IPv4` · `PSID` · `BMR` · `IPv6 Transition Technologies` · `FortiGate Tunnel` · `IPv6 Firewall Policy` · `IPv6 Static Route`
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
