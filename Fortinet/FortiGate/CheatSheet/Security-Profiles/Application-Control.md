@@ -1597,43 +1597,7 @@ diagnose wad debug enable level verbose
 ```
 
 ---
-
-## 🏷️ Suggested GitHub  Metadata
-
-**Title:**
-
-```text
-FortiGate Application Control   — FortiOS 7.x | NSE
-```
-
-**Suggested filename:**
-
-```text
-fortigate-application-control-.md
-```
-
-**Suggested repository topics:**
-
-```text
-fortigate
-fortios
-fortinet
-application-control
-ips
-network-security
-cybersecurity
-nse
-nse4
-nse7
-scada
-ics-security
-modbus
-dnp3
-gtp
-quic
-http3
-firewall
-```
+ 
 
 **keywords:**
 
