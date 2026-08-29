@@ -974,10 +974,6 @@ SSH
 
 ---
 
-## 🏷️  / GitHub Tags
+## 🏷️  /  Tags
 
 `fortigate` `fortios` `ssl-inspection` `ssh-inspection` `deep-inspection` `certificate-inspection` `tls-inspection` `https-inspection` `ssh` `scp` `sftp` `fortinet` `nse4` `nse7` `network-security` `cybersecurity` `firewall` `utm` `proxy-inspection` `dlp` `antivirus` `ips`
-
-## 🔑 Recommended GitHub Title
-
-**FortiGate SSL & SSH Inspection   — Certificate Inspection, Deep Inspection, TLS, SSH, SCP, SFTP & Security Profiles**
