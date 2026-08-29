@@ -1519,7 +1519,7 @@ Each layer must be verified independently.
 
 ---
 
-# 🔗 SheynShield Resources
+## 🔗 SheynShield Resources
 
 ### 🎥 Video Learning
 
