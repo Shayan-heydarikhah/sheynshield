@@ -937,3 +937,26 @@ RADIUS
 
 > **The NSE mental model:**
 > **TACACS+ controls administrators. RADIUS authenticates users and carries AAA attributes. 802.1X controls network admission. EAP defines how the endpoint authenticates.**
+
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
