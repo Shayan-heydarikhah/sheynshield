@@ -1,325 +1,327 @@
-# 🔐 FortiGate ZTNA Deployment & Troubleshooting Checklist
-## FortiOS 7.2+ | FortiClient EMS | FortiClient | Access Proxy
+# 🔐 FortiGate ZTNA Deployment & Operations Checklist — FortiOS 7.2+
 
-> **SheynShield | Engineering Secure Networks**
->
-> Practical implementation checklist for FortiGate Zero Trust Network Access (ZTNA).
->
-> Covers:
->
-> - FortiClient EMS Integration
-> - ZTNA Tags
-> - Endpoint Identity
-> - Access Proxy
-> - TCP Forwarding
-> - SSH Proxy
-> - SAML Authentication
-> - EMS Synchronization
-> - Troubleshooting Workflow
-> - NSE4/NSE7 Exam Preparation
+> **SheynShield | Engineering Secure Networks**  
+> Production-ready checklist for designing, deploying, validating, and troubleshooting **FortiGate ZTNA** environments with **FortiClient EMS, FortiClient, ZTNA Tags, Access Proxy, TCP Forwarding, SSH Proxy, SAML Authentication, and Endpoint Synchronization**.
 
 ---
 
 # 📌 Table of Contents
 
-- [ZTNA Architecture Checklist](#ztna-architecture-checklist)
+- [Architecture Planning Checklist](#architecture-planning-checklist)
 - [Version Compatibility Checklist](#version-compatibility-checklist)
-- [FortiClient EMS Checklist](#forticlient-ems-checklist)
-- [FortiGate EMS Integration Checklist](#fortigate-ems-integration-checklist)
-- [ZTNA Tag Checklist](#ztna-tag-checklist)
-- [Access Proxy Checklist](#access-proxy-checklist)
-- [Authentication Checklist](#authentication-checklist)
-- [TCP Forwarding Checklist](#tcp-forwarding-checklist)
-- [SSH Access Proxy Checklist](#ssh-access-proxy-checklist)
+- [FortiClient EMS Preparation](#forticlient-ems-preparation)
+- [EMS Identity & Certificate Checklist](#ems-identity--certificate-checklist)
+- [FortiGate EMS Integration](#fortigate-ems-integration)
+- [ZTNA Tag Design Checklist](#ztna-tag-design-checklist)
+- [ZTNA Access Proxy Checklist](#ztna-access-proxy-checklist)
+- [ZTNA Authentication Checklist](#ztna-authentication-checklist)
 - [SAML Integration Checklist](#saml-integration-checklist)
+- [SSH Access Proxy Checklist](#ssh-access-proxy-checklist)
+- [TCP Forwarding Checklist](#tcp-forwarding-checklist)
+- [Policy Validation Checklist](#policy-validation-checklist)
+- [Security Hardening Checklist](#security-hardening-checklist)
+- [Performance & Scaling Checklist](#performance--scaling-checklist)
 - [Troubleshooting Checklist](#troubleshooting-checklist)
-- [Production Design Checklist](#production-design-checklist)
-- [NSE Memory Map](#nse-memory-map)
+- [Operational Validation Checklist](#operational-validation-checklist)
+- [NSE Exam Memory Checklist](#nse-exam-memory-checklist)
 
 ---
 
-# 🧠 ZTNA Architecture Checklist
+# 🏗️ Architecture Planning Checklist
 
-## Core Security Model
+## ZTNA Design Decision
 
-ZTNA decision should include:
+- [ ] Define business requirement:
+
+  - [ ] Full network access
+  - [ ] Application-specific access
+  - [ ] Remote workforce access
+  - [ ] BYOD access
+  - [ ] Micro-segmentation
+
+- [ ] Decide architecture:
+
+| Requirement | Recommended Solution |
+|---|---|
+| Access multiple networks/subnets | VPN |
+| Access specific applications | ZTNA |
+| Application publishing | ZTNA Access Proxy |
+| Secure site-to-site | IPsec VPN |
+| Device posture enforcement | ZTNA |
+
+---
+
+## ZTNA Security Model Validation
+
+Confirm access decision includes:
 
 - [ ] User identity
 - [ ] Device identity
 - [ ] Client certificate
 - [ ] Endpoint posture
-- [ ] ZTNA tags
+- [ ] ZTNA Tags
 - [ ] Application identity
 - [ ] Authentication state
 - [ ] Network context
 
-Remember:
+Expected model:
 
-```
-
-IP Address ≠ Identity
-
-ZTNA Decision:
-
-User
-+
-Device
-+
-Posture
-+
-Application
-+
-Policy
-
-=
-Access Decision
-
-```
+```text
+WHO?
+ +
+WHAT DEVICE?
+ +
+WHAT POSTURE?
+ +
+WHAT APPLICATION?
+ +
+WHICH POLICY?
+        |
+        ▼
+   ZTNA Decision
+````
 
 ---
 
 # 🔄 Version Compatibility Checklist
 
-## Platform Alignment
+Validate:
 
-- [ ] FortiGate running FortiOS 7.2+
-- [ ] FortiClient EMS version aligned with FortiGate
-- [ ] FortiClient version aligned with EMS
-- [ ] Endpoint OS compatibility verified
+* [ ] FortiGate FortiOS 7.2+
+* [ ] FortiClient EMS same release family
+* [ ] FortiClient compatible version deployed
+* [ ] Windows endpoint requirements verified
+* [ ] Platform limitations reviewed
 
-Recommended:
+Recommended alignment:
 
-```
-
+```text
 FortiGate 7.2.x
 
-```
-    ↓
-```
+        ↓
 
 FortiClient EMS 7.2.x
 
-```
-    ↓
-```
+        ↓
 
 FortiClient 7.2.x+
-
 ```
 
 ---
 
-# 🏢 FortiClient EMS Preparation Checklist
+# 🏢 FortiClient EMS Preparation
 
 ## EMS Installation
 
-- [ ] Install FortiClient EMS
-- [ ] Register EMS with Fortinet account
-- [ ] Verify licensing
-- [ ] Configure EMS certificates
-- [ ] Configure EMS CA
-- [ ] Verify HTTPS communication
-
-
-## EMS Authentication
-
-Configure:
-
-```
-
-Administrator
-|
-└── Authentication Server
-
-```
-
-Checklist:
-
-- [ ] LDAP server configured
-- [ ] LDAP connectivity verified
-- [ ] Service account created
-- [ ] Credentials stored securely
-
-
-Never commit:
-
-- [ ] LDAP password
-- [ ] API token
-- [ ] Private key
-- [ ] Certificate secret
-
-to GitHub.
+* [ ] Install FortiClient EMS
+* [ ] Register EMS with Fortinet account
+* [ ] Configure system settings
+* [ ] Configure EMS certificate infrastructure
+* [ ] Verify EMS connectivity
 
 ---
 
-# 🖥 Endpoint Management Checklist
+## EMS Certificate Checklist
 
-EMS should collect:
+Validate:
 
-- [ ] Device identity
-- [ ] Operating system
-- [ ] Logged-in user
-- [ ] Security posture
-- [ ] Vulnerability state
-- [ ] Network information
+* [ ] EMS certificate exists
+* [ ] EMS CA configured
+* [ ] FortiClient trusts EMS CA
+* [ ] FortiGate trusts EMS certificate
+* [ ] Endpoint certificate issuance works
 
+Certificate relationship:
 
-Verify:
-
-```
-
+```text
 FortiClient
 
-```
-  ↓
-```
+      |
+
+      ▼
 
 FortiClient EMS
 
-```
-  ↓
-```
+      |
+
+      ▼
 
 FortiGate
-
 ```
 
 ---
 
-# 🏷 ZTNA Tag Checklist
+# 👤 EMS Authentication Checklist
 
-ZTNA Tags are dynamic security attributes.
+## LDAP Integration
 
-Verify:
+Validate:
 
-- [ ] ZTNA rules created
-- [ ] Endpoint conditions defined
-- [ ] Security posture matching configured
-- [ ] Tags assigned correctly
-
+* [ ] LDAP server reachable
+* [ ] LDAP service account configured
+* [ ] LDAP authentication successful
+* [ ] User synchronization verified
 
 Example:
 
+```text
+LDAP
+
+IP:
+Port:
+Bind Account:
 ```
 
-Windows Device
+Security:
 
-*
+* [ ] Never store passwords in GitHub
+* [ ] Never publish API tokens
+* [ ] Never publish private keys
 
-Antivirus Enabled
+---
 
-```
-    ↓
-```
+# 🖥️ Endpoint Management Checklist
 
-ZTNA Tag
+Verify EMS collects:
 
-```
-    ↓
-```
+* [ ] Device information
+* [ ] Operating system
+* [ ] Logged-on user
+* [ ] Network information
+* [ ] Security posture
+* [ ] Vulnerability state
+* [ ] Endpoint identity
 
-FortiGate Policy Match
+---
 
-```
+# 🏷️ ZTNA Tag Design Checklist
 
+## Create ZTNA Tags
 
-## Tag Capacity Planning
+Navigate:
 
-Important:
+```text
+EMS
 
-```
+└── Zero Trust Tags
 
-1 ZTNA Tag
-
-=
-
-1 IP Address Object
-
-*
-
-1 MAC Address Object
-
+    └── Rules
 ```
 
+Validate:
 
-Calculate:
+* [ ] Tag naming standard created
+* [ ] Tag purpose documented
+* [ ] Rules tested
+* [ ] Endpoint receives correct tag
 
-```
+---
 
-Maximum Tags
+## Example Tag Logic
 
-≈
+```text
+Endpoint
 
-Firewall Address Limit / 2
+ |
 
+ ├── Antivirus Enabled
+
+ ├── OS Version
+
+ ├── Vulnerability State
+
+ ├── Security Posture
+
+        |
+
+        ▼
+
+    ZTNA Tag
+
+        |
+
+        ▼
+
+ FortiGate Policy
 ```
 
 ---
 
-# 🔗 FortiGate EMS Connector Checklist
+# 🔗 FortiGate EMS Integration Checklist
 
 Navigate:
 
-```
-
+```text
 Security Fabric
 
 └── Fabric Connectors
 
-```
-  └── FortiClient EMS
-```
-
+    └── FortiClient EMS
 ```
 
+Validate:
+
+* [ ] EMS connector created
+* [ ] Certificate trust established
+* [ ] Fabric authorization completed
+* [ ] EMS connectivity successful
+* [ ] Endpoint synchronization active
+
+---
+
+# 🔐 Endpoint Certificate Validation
 
 Verify:
 
-- [ ] EMS reachable
-- [ ] Certificate trusted
-- [ ] Fabric authorization completed
-- [ ] Endpoint synchronization active
-- [ ] ZTNA tags synchronized
+* [ ] FortiClient receives certificate
+* [ ] Certificate UID exists
+* [ ] Certificate serial number exists
+* [ ] FortiGate receives endpoint information
 
+Validation flow:
+
+```text
+Client Certificate
+
+        |
+
+        ▼
+
+FortiGate Endpoint Database
+
+        |
+
+        ▼
+
+ZTNA Policy Matching
+```
 
 ---
 
 # 🚪 ZTNA Access Proxy Checklist
 
-Access Proxy provides:
+## Access Proxy Preparation
 
-- [ ] Application publishing
-- [ ] Identity validation
-- [ ] Device trust validation
-- [ ] Posture checking
-- [ ] Micro segmentation
+Validate:
 
+* [ ] Public IP available
+* [ ] DNS record created
+* [ ] SSL certificate installed
+* [ ] Virtual host configured
+* [ ] Real server reachable
 
-Supported:
+---
 
-- [ ] HTTPS
-- [ ] HTTP
-- [ ] SSH
-- [ ] RDP
-- [ ] SMB
-- [ ] TCP applications
+## Supported Applications
 
+Validate required services:
 
-Architecture:
-
-```
-
-Client
-
-↓
-
-FortiGate Access Proxy
-
-↓
-
-Internal Application
-
-```
+* [ ] HTTP
+* [ ] HTTPS
+* [ ] SSH
+* [ ] RDP
+* [ ] SMB
+* [ ] TCP Applications
 
 ---
 
@@ -327,257 +329,317 @@ Internal Application
 
 Verify:
 
-- [ ] ZTNA feature enabled
-- [ ] External interface configured
-- [ ] Public IP configured
-- [ ] Certificate assigned
-- [ ] Virtual host configured
-- [ ] Real server configured
+* [ ] ZTNA feature enabled
 
+```text
+System
 
-Example:
+└── Feature Visibility
 
+    └── Zero Trust Network Access
 ```
 
-app.company.com
+Configure:
 
-```
-    ↓
-```
+* [ ] External interface
+* [ ] External IP
+* [ ] External port
+* [ ] Certificate
+* [ ] Authentication method
+
+---
+
+# 🧩 Access Proxy Security Checklist
+
+Verify policy evaluates:
+
+* [ ] Client certificate
+* [ ] User identity
+* [ ] ZTNA Tag
+* [ ] Endpoint posture
+* [ ] Application
+
+Expected flow:
+
+```text
+Client
+
+ |
+
+ ▼
 
 FortiGate Access Proxy
 
-```
-    ↓
-```
+ |
 
-Internal Server
+ ├── Certificate Check
 
-```
+ ├── Authentication
 
----
+ ├── Tag Validation
 
-# 🔥 Proxy Policy Checklist
+ └── Policy Match
 
-Verify:
+        |
 
-- [ ] Source configured
-- [ ] Destination configured
-- [ ] Access Proxy selected
-- [ ] ZTNA tag configured
-- [ ] User group configured
-- [ ] Authentication configured
-- [ ] Logging enabled
+        ▼
 
-
-Tag logic:
-
-```
-
-AND
-
-=
-All tags required
-
-OR
-
-=
-Any tag accepted
-
+Application Access
 ```
 
 ---
 
-# 🔐 Certificate Authentication Checklist
+# 🔑 Authentication Checklist
 
-Verify:
+Validate:
 
-- [ ] EMS issues endpoint certificate
-- [ ] FortiGate trusts EMS CA
-- [ ] Certificate UID matches endpoint
-- [ ] Certificate serial matches endpoint record
+* [ ] Local authentication
+* [ ] LDAP authentication
+* [ ] RADIUS authentication
+* [ ] SAML authentication
+* [ ] User group mapping
 
+---
 
-Failure:
+# 🔐 SAML + ZTNA Checklist
 
+Validate:
+
+## FortiGate
+
+* [ ] SAML object created
+* [ ] SP entity ID configured
+* [ ] SSO URL configured
+* [ ] SLO URL configured
+* [ ] IdP certificate imported
+
+---
+
+## Identity Provider
+
+Validate:
+
+* [ ] FortiGate registered
+* [ ] Metadata exchanged
+* [ ] Certificate trusted
+* [ ] User authentication successful
+
+---
+
+## Cookie Handling
+
+For non-IP authentication:
+
+```bash
+set ip-based disable
+set web-auth-cookie enable
 ```
 
-Certificate mismatch
+Validate:
 
-```
-    ↓
-```
+* [ ] Authentication session persistence works
 
-ZTNA authentication failure
+---
 
+# 🐧 SSH Access Proxy Checklist
+
+Validate:
+
+* [ ] SSH Access Proxy configured
+* [ ] Host key validation enabled
+* [ ] SSH certificate configured
+* [ ] User authentication works
+* [ ] SSH server trusts certificate
+
+---
+
+SSH flow:
+
+```text
+FortiClient
+
+↓
+
+FortiGate SSH Proxy
+
+↓
+
+SSH Certificate
+
+↓
+
+SSH Server
+
+↓
+
+Session Established
 ```
 
 ---
 
-# 🔑 SAML Authentication Checklist
+# 🔄 TCP Forwarding Checklist
 
-Verify:
+Validate:
 
-- [ ] SAML server configured
-- [ ] Identity Provider configured
-- [ ] SP entity ID configured
-- [ ] SSO URL configured
-- [ ] Certificate imported
-- [ ] User group mapping completed
-
-
-Authentication flow:
-
-```
-
-User
-
-↓
-
-FortiGate
-
-↓
-
-SAML IdP
-
-↓
-
-Authentication
-
-↓
-
-ZTNA Policy
-
-↓
-
-Application
-
-```
-
----
-
-# 🧪 TCP Forwarding Checklist
-
-Use TCP forwarding for:
-
-- [ ] RDP
-- [ ] SSH
-- [ ] FTPS
-- [ ] Other TCP applications
-
-
-Verify:
-
-- [ ] Real server reachable
-- [ ] Correct service configured
-- [ ] Security inspection requirements understood
-
+* [ ] TCP forwarding required
+* [ ] Application supports forwarding
+* [ ] Server reachability confirmed
+* [ ] Security inspection requirements defined
 
 Remember:
 
-```
-
-TCP Forwarding
-
-≠
-
-Encryption
+```text
+TCP Forwarding ≠ Encryption
 
 ```
+
+It does not automatically secure insecure protocols.
 
 ---
 
-# 🔐 SSH Access Proxy Checklist
+# 🔥 ZTNA Policy Checklist
+
+Validate:
+
+* [ ] Proxy policy created
+* [ ] Source configured
+* [ ] Destination configured
+* [ ] ZTNA server selected
+* [ ] User/group configured
+* [ ] ZTNA Tag configured
+* [ ] Match logic verified
+* [ ] Logging enabled
+* [ ] UTM profile attached if required
+
+---
+
+## Tag Matching Logic
 
 Verify:
 
-- [ ] SSH proxy configured
-- [ ] SSH host key validation enabled
-- [ ] SSH client certificate configured
-- [ ] User identity validated
+### AND
 
+```text
+Tag A
++
+Tag B
 
-Security features:
+=
+Both required
+```
 
-- [ ] Device trust
-- [ ] User authentication
-- [ ] SSH certificate signing
-- [ ] Host key verification
+### OR
+
+```text
+Tag A
+
+OR
+
+Tag B
+
+=
+One is enough
+```
 
 ---
 
-# 🔄 EMS Fast Convergence Checklist
+# 📊 ZTNA Scaling Checklist
 
-For large deployments:
+Monitor:
 
-- [ ] Websocket capability enabled
-- [ ] Push CA enabled
-- [ ] Synchronization timeout optimized
-- [ ] Out-of-sync threshold reviewed
+* [ ] Firewall address consumption
+* [ ] Dynamic address objects
+* [ ] WAD resources
+* [ ] EMS synchronization
+* [ ] Endpoint count
+* [ ] FortiGate model capacity
 
+Important:
 
-Goal:
+```text
+1 ZTNA Tag
 
+=
+
+1 IP Address Object
+
++
+
+1 MAC Address Object
 ```
 
-Endpoint Posture Change
+---
 
+# ⚡ EMS Fast Convergence Checklist
+
+Validate:
+
+* [ ] Synchronization optimized
+* [ ] Websocket capability enabled if required
+* [ ] Out-of-sync threshold reviewed
+* [ ] Endpoint changes propagate quickly
+
+Critical scenario:
+
+```text
+Endpoint Healthy
+
+↓
+
+ZTNA Tag Present
+
+↓
+
+Access Allowed
+
+
+Endpoint Unhealthy
+
+↓
+
+ZTNA Tag Removed
+
+↓
+
+Access Denied
 ```
-    ↓
-```
-
-EMS Update
-
-```
-    ↓
-```
-
-FortiGate Sync
-
-```
-    ↓
-```
-
-ZTNA Policy Re-evaluation
-
-````
 
 ---
 
 # 🧪 Troubleshooting Checklist
 
-## Step 1 — Endpoint Registration
+## Endpoint
 
-Check:
+* [ ] FortiClient installed
+* [ ] Endpoint registered
+* [ ] Certificate exists
+* [ ] EMS sees endpoint
+
+Command:
 
 ```bash
 diagnose endpoint record list
-````
-
-Verify:
-
-* [ ] Endpoint exists
-* [ ] UID available
-* [ ] Certificate available
+```
 
 ---
 
-## Step 2 — EMS Connectivity
+## EMS Connectivity
 
-Test:
+Validate:
 
 ```bash
 diagnose endpoint fctems test-connectivity <EMS>
 ```
 
-Verify:
+Certificate:
 
-* [ ] FortiGate reaches EMS
-* [ ] Certificate validation succeeds
+```bash
+execute fctems verify <EMS>
+```
 
 ---
 
-## Step 3 — Dynamic Tags
+## ZTNA Tags
 
 Check:
 
@@ -585,16 +647,17 @@ Check:
 diagnose firewall dynamic list
 ```
 
-Verify:
+Validate:
 
-* [ ] ZTNA tags exist
-* [ ] Dynamic addresses created
+* [ ] Tag exists
+* [ ] Address created
+* [ ] Policy matches
 
 ---
 
-## Step 4 — WAD Troubleshooting
+## WAD Debugging
 
-Check:
+Commands:
 
 ```bash
 diagnose wad user list
@@ -604,133 +667,143 @@ diagnose wad user list
 diagnose wad worker policy list
 ```
 
-Verify:
+Endpoint query:
 
-* [ ] User authentication
-* [ ] Policy matching
-* [ ] Proxy session
-
----
-
-# 🧰 Golden Troubleshooting Workflow
-
-```
-1. FortiClient Registered?
-
-        ↓
-
-2. EMS Knows Endpoint?
-
-        ↓
-
-3. Certificate Exists?
-
-        ↓
-
-4. FortiGate Endpoint Sync?
-
-        ↓
-
-5. ZTNA Tag Available?
-
-        ↓
-
-6. Authentication Successful?
-
-        ↓
-
-7. Proxy Policy Match?
-
-        ↓
-
-8. Internal Server Reachable?
-
-        ↓
-
-9. WAD Session Working?
+```bash
+diagnose wad dev query-by uid <UID>
 ```
 
 ---
 
-# 🏗 Production Design Checklist
+## FCNACD Debugging
 
-## Use ZTNA When:
+Commands:
 
-* [ ] Application-level access required
-* [ ] Micro segmentation required
-* [ ] Device posture required
-* [ ] BYOD control required
-
-## Use VPN When:
-
-* [ ] Full network access required
-* [ ] Multiple subnet access required
-* [ ] Site connectivity required
-
-Decision:
-
+```bash
+diagnose test application fcnacd 2
 ```
-Application Access
 
-        ↓
+```bash
+diagnose test application fcnacd 7
+```
 
-ZTNA
-
-
-Network Access
-
-        ↓
-
-VPN
+```bash
+diagnose test application fcnacd 8
 ```
 
 ---
 
-# 🧠 NSE Memory Map
+# 🧭 Golden Troubleshooting Workflow
 
-```
-                 ZTNA
+Follow this order:
 
-                  |
+```text
+1. FortiClient Registration
 
-        ---------------------
+        ↓
 
-        |          |        |
+2. EMS Endpoint Visibility
 
-       EMS    FortiClient  FortiGate
+        ↓
 
-        |          |        |
+3. Client Certificate
 
-       Tags   Certificate  Proxy
+        ↓
 
-       CA     Identity     Policy
+4. FortiGate Synchronization
 
-       User   Posture      SAML
+        ↓
 
-                  |
+5. ZTNA Tag Validation
 
-                  ↓
+        ↓
 
-            ZTNA Decision
+6. Certificate UID/SN Match
 
-                  |
+        ↓
 
-          Allow / Deny
+7. Authentication
+
+        ↓
+
+8. Proxy Policy Match
+
+        ↓
+
+9. Server Reachability
+
+        ↓
+
+10. WAD Session Processing
 ```
 
 ---
 
-# ⭐ Golden Rules
+# 🛡️ Production Security Checklist
 
-* [ ] ZTNA is application-centric
-* [ ] EMS provides endpoint intelligence
-* [ ] FortiClient provides device context
-* [ ] FortiGate enforces access decisions
-* [ ] Certificates represent device identity
-* [ ] SAML represents user identity
-* [ ] Tags represent dynamic security posture
-* [ ] VPN and ZTNA solve different problems
-* [ ] Troubleshoot from endpoint → EMS → FortiGate → Policy → Server
+* [ ] Use valid certificates
+* [ ] Disable unnecessary empty certificates
+* [ ] Enable logging
+* [ ] Monitor failed authentication
+* [ ] Review ZTNA tags periodically
+* [ ] Document access policies
+* [ ] Avoid excessive tag creation
+* [ ] Review endpoint posture rules
+* [ ] Protect EMS credentials
+
+---
+
+# 🧠 NSE Exam Memory Checklist
+
+Remember:
+
+* [ ] EMS = Endpoint identity source
+* [ ] FortiClient = Device identity + posture collector
+* [ ] FortiGate = ZTNA enforcement point
+* [ ] ZTNA Tag = Dynamic security attribute
+* [ ] Client Certificate = Device trust
+* [ ] SAML = User identity
+* [ ] Access Proxy = Application publishing
+* [ ] VPN = Network access
+* [ ] ZTNA = Application access
+
+---
+
+# 🎯 Final ZTNA Mental Model
+
+```text
+FortiClient
+
+(Device Identity + Posture)
+
+          |
+
+          ▼
+
+FortiClient EMS
+
+(Tags + Certificate + Telemetry)
+
+          |
+
+          ▼
+
+FortiGate ZTNA
+
+(Policy Enforcement)
+
+          |
+
+          ▼
+
+Access Proxy
+
+          |
+
+          ▼
+
+Internal Application
+```
 
 ---
 
@@ -756,12 +829,8 @@ VPN
 
 * [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
 
-
 ---
 
-# 🛡 SheynShield
-
-**Security Engineering Knowledge Base**
-
-Fortinet | Network Security | Firewall | ZTNA | Zero Trust Architecture
+⭐ **SheynShield | Engineering Secure Networks**
+**ZTNA = Identity + Device Trust + Posture + Application + Policy**
 
