@@ -1194,7 +1194,7 @@ LOGS
 
 ---
 
-## 🔎 SEO / Search Keywords
+## 🔎 Keywords
 
 `FortiGate Licensing` · `FortiGate License` · `FortiGuard` · `FortiGuard Update` · `FortiGuard Troubleshooting` · `FortiGate FortiGuard` · `FortiGate Offline Update` · `FortiGate Online Update` · `FortiGate Signature Update` · `FortiGate Antivirus Update` · `FortiGate IPS Update` · `FortiGate Web Filter` · `FortiGate Anti-Spam` · `FortiGuard Ports` · `FortiGuard Connectivity` · `FortiGate Firmware Upgrade` · `FortiOS Upgrade Path` · `FortiOS Release Notes` · `FortiGate NSE4` · `Fortinet NSE4` · `Fortinet NSE7` · `FortiGate NSE7 Troubleshooting` · `Fortinet Troubleshooting` · `FortiGate Security Updates` · `Fortinet FortiGuard Services`
 
