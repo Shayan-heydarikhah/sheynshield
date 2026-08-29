@@ -1208,7 +1208,7 @@ That is the difference between **FortiGate configuration knowledge** and **Forti
 
 ---
 
-# 🔗 SheynShield Resources
+## 🔗 SheynShield Resources
 
 ### 🎥 Video Learning
 
@@ -1229,6 +1229,7 @@ That is the difference between **FortiGate configuration knowledge** and **Forti
 ### 🐙 Technical Knowledge Base
 
 * [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+
 
 ---
 
