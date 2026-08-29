@@ -1240,7 +1240,7 @@ Overlay
 
 ---
 
-# 🔗 SheynShield Resources
+## 🔗 SheynShield Resources
 
 ### 🎥 Video Learning
 
@@ -1261,6 +1261,7 @@ Overlay
 ### 🐙 Technical Knowledge Base
 
 * [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+
 
 ---
 
