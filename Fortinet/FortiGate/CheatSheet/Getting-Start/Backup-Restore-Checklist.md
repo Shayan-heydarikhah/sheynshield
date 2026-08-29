@@ -999,5 +999,4 @@ execute factoryreset2
 ## Tags
 
 `FortiGate` `FortiOS` `Fortinet` `NSE4` `NSE7` `Backup` `Restore` `Configuration` `YAML` `Configuration Revision` `Factory Reset` `IPS` `Certificates` `Network Security` `Cyber Security`
-
-```
+ 
