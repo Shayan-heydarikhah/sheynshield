@@ -997,3 +997,24 @@ Main troubleshooting order
 > **IPv6 transition is not simply "IPv4 vs IPv6". The real engineering challenge is preserving IPv4 reachability, subscriber identity, port scalability, routing, and security while the transport network moves toward IPv6.**
 
 **SheynShield | Engineering Secure Networks**
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
