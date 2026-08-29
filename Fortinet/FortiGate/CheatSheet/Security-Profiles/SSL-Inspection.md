@@ -977,3 +977,25 @@ SSH
 ## 🏷️  /  Tags
 
 `fortigate` `fortios` `ssl-inspection` `ssh-inspection` `deep-inspection` `certificate-inspection` `tls-inspection` `https-inspection` `ssh` `scp` `sftp` `fortinet` `nse4` `nse7` `network-security` `cybersecurity` `firewall` `utm` `proxy-inspection` `dlp` `antivirus` `ips`
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
