@@ -1,6 +1,3 @@
-حتماً Sheyn — این نسخه را به‌جای تبدیل صرفِ متن به checklist، به شکل **GitHub-ready / GFM / SEO-friendly / Expert-level** بازطراحی کردم؛ یعنی برای هر بخش، موارد **Study / Configuration / Verification / Troubleshooting / Design / Exam** جدا شده‌اند و ساختار برای GitHub Search و استفاده آموزشی هم تمیزتر است.
-
-````markdown
 # 🛡️ FortiGate HA Checklist
 
 > **SheynShield | Engineering Secure Networks**
