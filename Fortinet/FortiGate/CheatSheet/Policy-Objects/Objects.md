@@ -1312,3 +1312,24 @@ Internet Service Identity
 ```
 
 > **FortiGate policy design principle:** use the most meaningful identity available. For internal resources, prefer structured address objects/groups; for users use FSSO; for Fabric devices use dynamic Fabric addresses; and for dynamic Internet services prefer ISDB over manually maintaining large IP lists.
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
