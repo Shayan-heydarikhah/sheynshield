@@ -1191,7 +1191,7 @@ Verify Recovery
 
 ---
 
-# 🔎 SEO / Search Keywords
+# 🔎 Keywords
 
 `FortiGate LED` · `FortiGate status LED` · `FortiGate PWR LED` · `FortiGate STA LED` · `FortiGate HA LED` · `FortiGate alarm LED` · `FortiGate fan failure` · `FortiGate PSU troubleshooting` · `FortiGate PoE` · `FortiGate SFP` · `FortiGate SFP+` · `FortiGate SFP28` · `FortiGate QSFP28` · `FortiGate IPMI` · `FortiGate BLE diagnostics` · `FortiGate hardware troubleshooting` · `FortiGate hardware indicators` · `FortiGate LED troubleshooting` · `FortiGate hardware failure` · `FortiGate HA troubleshooting`
 
