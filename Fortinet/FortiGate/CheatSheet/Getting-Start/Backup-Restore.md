@@ -652,7 +652,7 @@ execute factoryreset2
 
 ### 💼 Professional Network
 
-- [LinkedIn — SheynShield](linkedin.com/in/shayan-heydarikhah)
+- [LinkedIn — Shayan-heydarikhah](linkedin.com/in/shayan-heydarikhah)
 
 ### 🐙 Technical Knowledge Base
 
