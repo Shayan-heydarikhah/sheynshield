@@ -1480,7 +1480,7 @@ Client Traffic
 
 ---
 
-# 🔗 SheynShield Resources
+## 🔗 SheynShield Resources
 
 ### 🎥 Video Learning
 
@@ -1501,6 +1501,7 @@ Client Traffic
 ### 🐙 Technical Knowledge Base
 
 * [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+
 
 ---
 
