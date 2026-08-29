@@ -1820,11 +1820,11 @@ Encrypted + Authenticated Traffic
 
 ---
 
-# 🔗 SheynShield Resources
+## 🔗 SheynShield Resources
 
 ### 🎥 Video Learning
 
-* [ ] [YouTube — SheynShield](https://youtube.com/@sheynshield)
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
 
   * Fortinet NSE content
   * FortiGate troubleshooting
@@ -1832,15 +1832,16 @@ Encrypted + Authenticated Traffic
 
 ### 📚 Notes & Updates
 
-* [ ] [Telegram — SheynShield](https://t.me/sheynshield)
+* [Telegram — SheynShield](https://t.me/sheynshield)
 
 ### 💼 Professional Network
 
-* [ ] [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
 
 ### 🐙 Technical Knowledge Base
 
-* [ ] [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+
 
 ---
 
