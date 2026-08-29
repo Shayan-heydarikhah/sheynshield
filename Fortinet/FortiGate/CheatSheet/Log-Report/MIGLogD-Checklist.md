@@ -1449,7 +1449,7 @@ rather than the only source of historical security evidence.
 
 ---
 
-# 🔗 SheynShield Resources
+## 🔗 SheynShield Resources
 
 ### 🎥 Video Learning
 
@@ -1465,7 +1465,7 @@ rather than the only source of historical security evidence.
 
 ### 💼 Professional Network
 
-* [LinkedIn — Shayan Heydari-khah](https://linkedin.com/in/shayan-heydarikhah)
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
 
 ### 🐙 Technical Knowledge Base
 
