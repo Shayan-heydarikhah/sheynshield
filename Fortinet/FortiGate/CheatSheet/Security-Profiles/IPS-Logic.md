@@ -1904,3 +1904,25 @@ Modern IPS
 > **Policy → Inspection Mode → Encryption → Protocol Decoder → Normalization → Signature/Heuristic Detection → Action → Log**
 >
 > If you understand this pipeline, IPS troubleshooting becomes much more systematic—and you can distinguish a **visibility problem**, a **detection problem**, and an **enforcement problem** instead of simply assuming that “the IPS didn't detect it.”
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
