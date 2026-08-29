@@ -1397,7 +1397,7 @@ FortiGuard
 
 ---
 
-## 🔖 SEO Keywords
+## 🔖 Keywords
 
 `FortiGate License`
 `FortiGate Licensing  `
