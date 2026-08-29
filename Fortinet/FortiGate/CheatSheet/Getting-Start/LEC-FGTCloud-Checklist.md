@@ -1072,7 +1072,7 @@ FDSM
 
 ---
 
-## 🔖 SEO / GitHub Keywords
+## 🔖 Keywords
 
 `FortiGate LENC`
 `FortiGate Low Encryption`
