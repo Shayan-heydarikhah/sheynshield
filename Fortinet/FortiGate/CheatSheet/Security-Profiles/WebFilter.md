@@ -1,6 +1,3 @@
-حتماً. این هم نسخه‌ی **خالص GitHub Flavored Markdown (GFM)**، آماده‌ی کپی مستقیم داخل فایل `.md`:
-
-````markdown
 # FortiGate Web Filter & HTTP/3/QUIC  
 
 > **FortiGate Web Filtering | URL Filtering | FortiGuard | Content Filter | Anti-Phishing | Safe Search | WISP | HTTP/3 | QUIC**
@@ -2009,7 +2006,4 @@ QUIC
 >
 > FortiGate • Network Security • Secure Network Design • NSE Knowledge Base
 
-```
-
-اگر بخواهی، می‌توانم همین   را در مرحله بعد به یک **:contentReference[oaicite:0]{index=0}** هم تبدیل کنم.
-```
+ 
