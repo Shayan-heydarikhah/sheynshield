@@ -3422,7 +3422,6 @@ Encrypted + Authenticated Traffic
 | Network ID        | Segments/differentiates VPN behavior      |
 | Mesh Selector     | Helps dynamic spoke-to-spoke connectivity |
 
-```
 
 ## 🔗 SheynShield Resources
 
