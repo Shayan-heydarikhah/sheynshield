@@ -429,24 +429,24 @@ NetFlow
 
 ---
 
-# 🔗 SheynShield Resources
+## 🔗 SheynShield Resources
 
-## 🎥 Video Learning
+### 🎥 Video Learning
 
-* YouTube — SheynShield
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
 
-  * Fortinet NSE Content
-  * FortiGate Troubleshooting
+  * Fortinet NSE content
+  * FortiGate troubleshooting
   * Network Security Engineering
 
-## 📚 Notes & Updates
+### 📚 Notes & Updates
 
-* Telegram — SheynShield
+* [Telegram — SheynShield](https://t.me/sheynshield)
 
-## 💼 Professional Network
+### 💼 Professional Network
 
-* LinkedIn — Shayan-heydarikhah
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
 
-## 🐙 Technical Knowledge Base
+### 🐙 Technical Knowledge Base
 
-* SheynShield GitHub
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
