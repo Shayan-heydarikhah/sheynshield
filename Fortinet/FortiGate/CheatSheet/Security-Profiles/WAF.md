@@ -1,4 +1,4 @@
-# FortiGate Web Application Firewall (WAF) —  
+# FortiGate Web Application Firewall (WAF)
 
 > **FortiOS Focus:** Web Application Firewall, WAF Policy, VIP, Reverse Proxy, HTTP/HTTPS Protection, Security Fabric
 > **Audience:** FortiGate / NSE4–NSE7 / Network & Security Engineers
