@@ -188,4 +188,6 @@ Unlike typical certification summaries, these notes are:
 - Rich in CLI examples  
 - Aligned with real Fortinet behavior—not just documentation  
 
-This makes the repository one of the most practical Fortinet knowledge bases available publicly.
+These notes are designed to provide a practical, 
+scenario-driven Fortinet engineering reference focused on 
+configuration, troubleshooting, and real-world operational behavior.
