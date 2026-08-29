@@ -688,3 +688,24 @@ Egress
 ## 🔑 Keywords
 
 `FortiGate Diagnose` · `FortiOS Troubleshooting` · `diagnose sniffer packet` · `FortiGate Packet Capture` · `FortiGate Packet Sniffer` · `PCAP` · `FortiGate Debug Flow` · `diagnose debug flow` · `FortiOS Packet Flow` · `FortiGate Firewall Policy Troubleshooting` · `FortiGate Routing Troubleshooting` · `FortiGate Network Troubleshooting` · `FortiOS 7.2.0` · `NSE4` · `NSE7`
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
