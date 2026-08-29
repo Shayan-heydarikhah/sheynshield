@@ -1,4 +1,4 @@
-# FortiGate Logging, `miglogd` & `fgtlogd` —  
+# FortiGate Logging, `miglogd` & `fgtlogd`
 
 > **FortiOS Focus:** 7.2.x
 > **Scope:** Local Logging, FortiAnalyzer, FortiAnalyzer Cloud, Syslog, VDOM Overrides, `miglogd`, `fgtlogd`, Log Filtering & Troubleshooting
