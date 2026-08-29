@@ -1473,3 +1473,25 @@ Check HA / Fabric
 ## 🔑 Keywords
 
 `FortiOS 7.2.0` · `FortiGate Firmware Upgrade` · `FortiGate Upgrade` · `FortiOS Upgrade Path` · `Security Fabric` · `Fabric Management` · `FortiGate Federated Upgrade` · `FortiGate TFTP Upgrade` · `FortiGate USB Firmware Upgrade` · `FortiOS Controlled Upgrade` · `FortiGate Firmware Verification` · `FortiOS Firmware Signature` · `FortiGuard Update` · `execute update-now` · `execute restore image tftp` · `execute restore secondary-image` · `FortiGate Downgrade` · `FortiGate Recovery` · `FortiGate Boot Menu`
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
