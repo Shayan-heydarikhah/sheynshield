@@ -636,3 +636,24 @@ execute factoryreset2
 
 > **Golden Rule:**
 > **Backup before change → Revision before risky operation → Verify compatibility before restore → Factory reset only when you explicitly intend to destroy/reset configuration.**
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+- [YouTube — SheynShield](youtube.com/@sheynshield)
+  - Fortinet NSE content
+  - FortiGate troubleshooting
+  - Network Security Engineering
+
+### 📚 Notes & Updates
+
+- [Telegram — SheynShield](t.me/sheynshield)
+
+### 💼 Professional Network
+
+- [LinkedIn — SheynShield](linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+- [SheynShield GitHub](github.com/Shayan-heydarikhah/sheynshield)
