@@ -1133,3 +1133,25 @@ get router info routing-table static
 > **9.** FortiExtender is useful for **LTE backup, SD-WAN, branch connectivity and out-of-band management**.
 
 > **10.** In redundant designs, understand the difference between **link failure, route failure and interface cascade** before enabling failover behavior.
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
