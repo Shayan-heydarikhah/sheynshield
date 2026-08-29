@@ -941,7 +941,7 @@ On-Demand Packet Capture
 
 ---
 
-# SheynShield Resources
+## 🔗 SheynShield Resources
 
 ### 🎥 Video Learning
 
@@ -957,11 +957,12 @@ On-Demand Packet Capture
 
 ### 💼 Professional Network
 
-* [LinkedIn — Shayan Heydari](https://linkedin.com/in/shayan-heydarikhah)
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
 
 ### 🐙 Technical Knowledge Base
 
 * [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+
 
 ---
 
