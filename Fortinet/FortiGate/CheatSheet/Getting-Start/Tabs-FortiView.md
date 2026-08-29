@@ -489,3 +489,25 @@ execute report recreate-db
 > **Visibility ≠ Inspection ≠ Logging ≠ Reporting.**
 >
 > FortiGate may be able to detect traffic, log it, process it for FortiView, and include it in reports through different mechanisms. Always identify **which layer the question is asking about**.
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
