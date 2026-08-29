@@ -962,3 +962,24 @@ Physical + Registered + Anycast + Match Mode + Policy Order
 **SheynShield | Engineering Secure Networks**
 
 #FortiGate #FortiOS #Fortinet #GeoIP #Anycast #ISDB #NetworkSecurity #Firewall #CyberSecurity #NSE7 #NSE4 #FortiGuard #ZeroTrust
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
