@@ -1159,7 +1159,7 @@ LAN / DMZ
 
 ---
 
-# 🔗 SheynShield Resources
+## 🔗 SheynShield Resources
 
 ### 🎥 Video Learning
 
@@ -1180,6 +1180,7 @@ LAN / DMZ
 ### 🐙 Technical Knowledge Base
 
 * [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+
 
 ---
 
