@@ -959,3 +959,26 @@ diagnose debug disable
 **Level:** NSE4 → NSE7
 **Use Cases:** AD SSO, Identity-Based Firewall Policies, User/Group-Based Access Control, FSSO Troubleshooting
 **Format:**   + Lab Reference + Troubleshooting Guide
+
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
