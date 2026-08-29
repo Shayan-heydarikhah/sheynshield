@@ -1685,3 +1685,25 @@ diagnose autoupdate versions | grep internet -a 6
 ### 🔎 SEO / GitHub Keywords
 
 `FortiGuard` · `FortiGate FortiGuard` · `FortiOS FortiGuard` · `FortiGuard Anycast` · `FortiGuard troubleshooting` · `FortiGuard update` · `FortiManager FortiGuard` · `FortiGate IoT Detection` · `FortiGate ISDB` · `FortiGate air gap` · `FortiGate offline licensing` · `FortiGuard proxy` · `FortiGuard AV IPS update` · `FortiGuard Labs` · `NSE4` · `NSE7` · `FortiGate CLI` · `Fortinet Security`
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
