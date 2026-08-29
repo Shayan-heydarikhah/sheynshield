@@ -1635,7 +1635,7 @@ http3
 firewall
 ```
 
-**Suggested keywords:**
+**keywords:**
 
 ```text
 FortiGate Application Control
