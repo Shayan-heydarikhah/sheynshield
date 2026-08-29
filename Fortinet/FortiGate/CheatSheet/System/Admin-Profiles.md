@@ -1859,3 +1859,25 @@ Accurate Time / NTP
 ### SEO Keywords
 
 `FortiGate administrator` · `FortiOS administrator configuration` · `FortiGate admin profile` · `FortiGate LDAP administrator` · `FortiGate remote authentication` · `FortiGate wildcard administrator` · `FortiGate MFA` · `FortiToken administrator` · `FortiGate trusted hosts` · `FortiGate REST API` · `FortiGate API user` · `FortiGate SSO` · `FortiCloud SSO` · `FortiGate password policy` · `FortiGate SSH public key` · `FortiOS 7.2` · `FortiGate security hardening` · `Fortinet NSE4` · `Fortinet NSE7`
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
