@@ -1,4 +1,4 @@
-# FortiGate HA  
+# FortiGate HA
 
 ## High Availability — FGCP, FGSP, VRRP, VDOM & HA Operations
 
@@ -27,7 +27,7 @@ FortiGate High Availability provides redundancy by grouping multiple FortiGate u
 
 ## Active-Passive — A-P
 
-One FortiGate actively processes traffic while another is standby.
+One FortiGate actively processes traffic while another unit remains standby.
 
 ```text
              Users
@@ -79,7 +79,7 @@ Multiple cluster members can actively process traffic.
 * VDOM/vCluster configuration can influence traffic distribution.
 
 > **Exam Tip:**
-> Active-active does **not** simply mean "both firewalls independently route everything." FGCP determines cluster roles and traffic processing behavior.
+> Active-active does not simply mean that both FortiGates independently operate as separate firewalls. FGCP controls cluster behavior and traffic processing.
 
 ---
 
@@ -87,8 +87,8 @@ Multiple cluster members can actively process traffic.
 
 Before forming an HA cluster, verify:
 
-* Same FortiGate model/platform where required by the supported HA design.
-* Compatible/same FortiOS firmware version.
+* Same FortiGate model/platform where required.
+* Compatible FortiOS firmware.
 * Compatible hardware configuration.
 * HA interfaces are physically connected.
 * Heartbeat interfaces are reliable.
@@ -96,7 +96,7 @@ Before forming an HA cluster, verify:
 * Network topology is understood.
 * Configuration backup exists.
 
-### Before adding a new FortiGate
+### Before Adding a New FortiGate
 
 ```text
 1. Register FortiGate
@@ -127,13 +127,28 @@ CLI:
 
 ```bash
 config system ha
+# Enter the FortiGate HA configuration context.
+
     set mode a-p
+    # Configure the HA operating mode as active-passive.
+
     set group-id 2
+    # Assign the HA group identifier.
+
     set group-name "FGT-HA"
+    # Define the HA cluster name.
+
     set priority 200
+    # Set the device HA priority.
+
     set override enable
+    # Allow the preferred unit to regain the primary role after recovery.
+
     set hbdev "port3" 50 "port4" 50
+    # Configure redundant heartbeat interfaces and their priorities.
+
 end
+
 ```
 
 ### Device Priority
@@ -144,7 +159,7 @@ Range:
 0–255
 ```
 
-Higher priority value = higher preference for becoming primary when priority is considered by the election process.
+Higher priority value means higher preference when priority is used in the election process.
 
 Default:
 
@@ -154,98 +169,72 @@ Default:
 
 ---
 
-# 5. How FortiGate Determines the Primary Unit
+# 5. HA Election
 
 HA election should be understood as a **tie-breaking process**, not simply "highest priority always wins."
 
-The exact election behavior depends on HA settings and FortiOS version.
+Election behavior depends on HA settings and FortiOS version.
 
-## Without Override
-
-The general election logic considers factors such as:
-
-1. Monitored interface status
-2. Uptime
-3. Device priority
-4. Serial number
-
-The exact ordering is version/implementation dependent, so always verify the behavior for the target FortiOS release.
-
----
-
-## With Override Enabled
-
-Override changes the election preference so that configured HA priority has greater influence.
-
-Conceptually:
+### Important Factors
 
 ```text
-Monitored interface availability
-        ↓
-Device priority
+Monitored interface status
         ↓
 Uptime
+        ↓
+Device priority
         ↓
 Serial number
 ```
 
-### Important
-
-```text
-Higher priority value
-        ↓
-Higher preference
-```
-
-Do **not** confuse this with statements such as:
-
-> "0 has the highest priority."
-
-That is incorrect for normal FortiGate HA device-priority interpretation.
+The exact ordering can vary by FortiOS implementation and configuration.
 
 ---
 
 # 6. HA Override
 
-## What is Override?
+HA Override determines whether the preferred unit should regain the Primary role after recovery.
 
-FortiGate HA Override is conceptually similar to **Cisco HSRP preempt**.
-
-It controls whether the preferred unit should regain the primary role after recovery.
+Conceptually:
 
 ```text
 Override disabled
-    ↓
-Current primary can remain primary
+        ↓
+Current Primary may remain Primary
 after another unit returns
 
 Override enabled
-    ↓
-Preferred unit can reclaim primary role
+        ↓
+Preferred unit can reclaim Primary
 according to election criteria
 ```
 
-### Configuration
+CLI:
 
 ```bash
 config system ha
+# Enter the HA configuration context.
+
     set override enable
+    # Enable HA override and allow the preferred unit to reclaim Primary.
+
 end
+
 ```
 
-### Critical Production Rule
+### Important
 
-If using override:
+Higher priority means higher preference.
 
-> **Configure the HA election strategy consistently across the cluster.**
-
-Do not intentionally leave one member with different override behavior unless you understand the resulting election behavior.
+```text
+Priority 200
+    >
+Priority 100
+```
 
 ---
 
 # 7. HA Election Example
-
-Assume:
 
 ```text
 FGT-1
@@ -258,7 +247,7 @@ Priority = 100
 With appropriate override configuration:
 
 ```text
-FGT-1 → preferred Primary
+FGT-1 → Preferred Primary
 FGT-2 → Secondary
 ```
 
@@ -270,28 +259,29 @@ FGT-2 → Primary
 
 When FGT-1 returns:
 
-### Override enabled
+```text
+Override enabled
+    ↓
+FGT-1 can reclaim Primary
+```
 
-FGT-1 can reclaim the preferred role.
-
-### Override disabled
-
-FGT-2 may remain Primary depending on the election state.
+```text
+Override disabled
+    ↓
+FGT-2 may remain Primary
+```
 
 ---
 
-# 8. Changing HA Roles for Testing
-
-You may manipulate HA uptime for testing/election behavior.
-
-Example diagnostic command:
+# 8. HA Election Testing
 
 ```bash
 diagnose sys ha reset-uptime
+# Reset the HA uptime value for election testing.
 ```
 
-> **Important:**
-> HA election manipulation is primarily a troubleshooting/testing technique. Avoid unnecessary manual role manipulation in production.
+> **Warning:**
+> Use election manipulation mainly for troubleshooting and controlled testing.
 
 ---
 
@@ -299,7 +289,7 @@ diagnose sys ha reset-uptime
 
 Heartbeat interfaces carry HA control and synchronization information.
 
-They can be used for:
+They can provide:
 
 * HA election information
 * Configuration synchronization
@@ -311,13 +301,16 @@ Example:
 
 ```bash
 config system ha
+# Enter the HA configuration context.
+
     set hbdev "port3" 50 "port4" 50
+    # Configure two redundant heartbeat interfaces.
+
 end
+
 ```
 
 ### Recommended Design
-
-Use redundant heartbeat links:
 
 ```text
 FGT-1 port3 <----------> FGT-2 port3
@@ -330,30 +323,14 @@ Prefer:
 * Separate physical paths
 * Multiple heartbeat interfaces
 
-### Why?
-
-To reduce the probability of:
-
-```text
-Heartbeat failure
-       ↓
-Cluster members cannot see each other
-       ↓
-Both believe they should become Primary
-       ↓
-Split Brain
-```
-
 ---
 
 # 10. Split Brain
 
-## Definition
-
-Split brain occurs when cluster members lose reliable communication with each other and independently believe they should become Primary.
+Split brain occurs when HA members lose reliable communication and independently believe they should become Primary.
 
 ```text
-        Heartbeat failure
+        Heartbeat Failure
               ↓
        +------+------+
        |             |
@@ -363,93 +340,85 @@ Split brain occurs when cluster members lose reliable communication with each ot
 
 ### Prevention
 
-Use:
-
-* Multiple heartbeat interfaces
-* Physically diverse paths
-* Reliable L2 connectivity
-* Direct heartbeat connections where appropriate
-* Correct HA monitoring
-* Correct network design
+```text
+Multiple heartbeat links
+        +
+Physically diverse paths
+        +
+Reliable L2 connectivity
+        +
+Correct HA monitoring
+```
 
 ---
 
 # 11. Heartbeat Timing
 
-HA heartbeat parameters can influence failure detection.
-
-Example:
-
 ```bash
 config system ha
-    set hb-interval-in-milliseconds 10
-    set hb-lost-threshold 2
-end
-```
+# Enter the HA configuration context.
 
-Depending on FortiOS release, command spelling/availability may differ.
+    set hb-interval-in-milliseconds 10
+    # Define the heartbeat transmission interval.
+
+    set hb-lost-threshold 2
+    # Define how many heartbeat losses can trigger failure detection.
+
+end
+
+```
 
 Conceptually:
 
 ```text
-Heartbeat interval
-       +
-Allowed missed heartbeats
-       =
-Failure detection behavior
+Heartbeat Interval
+        +
+Missed Heartbeat Threshold
+        =
+Failure Detection Behavior
 ```
 
-### Trade-off
-
-Very aggressive timers:
-
-```text
-Fast detection
-       +
-Higher sensitivity to transient network problems
-```
-
-Do not blindly reduce timers in production.
+> **Production Rule:**
+> Do not blindly use aggressive heartbeat timers.
 
 ---
 
 # 12. Monitored Interfaces
 
-HA can monitor critical interfaces.
-
-Typical examples:
+HA can monitor critical interfaces such as:
 
 ```text
 WAN
 DMZ
 LAN
-Critical uplink
-Internet-facing interface
+Critical uplinks
+Internet-facing interfaces
 ```
 
-Example concept:
+Example:
 
 ```bash
 config system ha
+# Enter the HA configuration context.
+
     set monitor "wan1" "dmz"
+    # Monitor critical interfaces for HA health decisions.
+
 end
-```
 
-If a monitored interface fails:
-
-```text
-Interface failure
-      ↓
-HA health degradation
-      ↓
-Failover
 ```
 
 ### Important
 
-Do not rely only on heartbeat connectivity.
+A FortiGate can have healthy heartbeat links while its WAN/uplink is unavailable.
 
-A FortiGate can still have a healthy heartbeat while its WAN/uplink is broken.
+Therefore:
+
+```text
+Heartbeat Health
+        ≠
+Service Health
+```
 
 ---
 
@@ -458,16 +427,11 @@ A FortiGate can still have a healthy heartbeat while its WAN/uplink is broken.
 Common HA failover conditions include:
 
 ```text
-FortiGate device failure
-        ↓
+Device failure
 Power loss
-        ↓
 Critical interface failure
-        ↓
-SSD failure (when configured)
-        ↓
-Memory-based failover
-        ↓
+SSD failure
+Memory-based conditions
 Other HA health conditions
 ```
 
@@ -475,88 +439,85 @@ Other HA health conditions
 
 # 14. Session Pickup
 
-Session pickup allows session state to be synchronized between HA members.
+Session pickup synchronizes session state between HA members.
 
-Without session synchronization:
+Without session pickup:
 
 ```text
 Client
   ↓
 FGT-1
   ↓
-Session exists only on FGT-1
+Session exists on FGT-1
 
 FGT-1 fails
   ↓
-FGT-2 receives packet
+FGT-2 receives traffic
   ↓
 Session may need to be rebuilt
 ```
 
-With session pickup:
-
-```text
-Client
-  ↓
-FGT-1
-  │
-  ├── Session state
-  └──────────────→ FGT-2
-                       ↓
-                    Session
-```
-
-Configuration:
+Enable session pickup:
 
 ```bash
 config system ha
+# Enter the HA configuration context.
+
     set session-pickup enable
+    # Enable synchronization of supported session states.
+
 end
+
 ```
 
 ---
 
 # 15. Session Pickup Types
 
-Depending on FortiOS/version and platform, additional session synchronization options can include:
-
 ```bash
-set session-pickup enable
-set session-pickup-connectionless enable
-set session-pickup-expectation enable
-set session-pickup-nat enable
+config system ha
+# Enter the HA configuration context.
+
+    set session-pickup enable
+    # Enable session state synchronization.
+
+    set session-pickup-connectionless enable
+    # Synchronize supported connectionless sessions such as UDP/ICMP.
+
+    set session-pickup-expectation enable
+    # Synchronize supported expectation sessions.
+
+    set session-pickup-nat enable
+    # Synchronize supported NAT session information.
+
+end
+
 ```
 
-### Connectionless
-
-Useful for protocols such as:
+Typical areas:
 
 ```text
+TCP
 UDP
 ICMP
+NAT
+Expectation Sessions
 ```
 
-### Expectation Sessions
-
-Useful for protocols/applications involving related sessions, such as:
-
-```text
-FTP
-SIP
-```
+Exact support depends on FortiOS version and platform.
 
 ---
 
 # 16. Session Pickup vs Configuration Synchronization
 
-These are different concepts.
+These are different mechanisms.
 
-| Function           | Purpose                                                        |
-| ------------------ | -------------------------------------------------------------- |
-| Configuration sync | Synchronize configuration                                      |
-| Session pickup     | Synchronize active session state                               |
-| FGCP               | Native FortiGate clustering                                    |
-| FGSP               | Session synchronization between standalone FortiGates/clusters |
+| Function           | Purpose                                             |
+| ------------------ | --------------------------------------------------- |
+| Configuration Sync | Synchronize configuration                           |
+| Session Pickup     | Synchronize active session state                    |
+| FGCP               | Native FortiGate clustering                         |
+| FGSP               | Session synchronization between FortiGates/clusters |
 
 ---
 
@@ -564,18 +525,16 @@ These are different concepts.
 
 ## FortiGate Clustering Protocol
 
-FGCP is Fortinet's native clustering mechanism.
+FGCP is Fortinet's native HA clustering mechanism.
 
-Used for:
+It provides mechanisms for:
 
 * HA membership
 * Primary/Secondary election
 * Configuration synchronization
 * Cluster state
-* Session synchronization mechanisms
+* Session synchronization
 * HA failover
-
-Conceptually:
 
 ```text
         FGCP
@@ -588,11 +547,9 @@ Conceptually:
 
 ---
 
-# 18. HA Reserved Management Interface
+# 18. Reserved Management Interface
 
-Reserved management interfaces allow administrators to reach individual cluster members independently.
-
-Example:
+Reserved management interfaces provide individual access to each cluster member.
 
 ```text
               Management Network
@@ -605,7 +562,7 @@ Example:
         +------ HA -------+
 ```
 
-This is extremely useful for:
+Useful for:
 
 * Individual device management
 * SNMP
@@ -615,163 +572,206 @@ This is extremely useful for:
 * FortiSandbox communication
 * NetFlow
 * sFlow
-* Remote authentication/certificate verification
+* Remote authentication
 
 ---
 
-# 19. Reserved Management Interface Properties
+# 19. Reserved Management Configuration
 
-Reserved management interfaces:
+Reserved management interfaces have individual identity.
+
+They:
 
 * Are individually addressable.
-* Keep their physical MAC address rather than HA virtual MAC behavior.
-* Configuration is **not synchronized** like normal cluster interface configuration.
-* Should be placed on an appropriate management network.
+* Maintain individual physical MAC identity.
+* Are not synchronized like normal cluster interface configuration.
+* Should normally use an appropriate management network.
 
 ### Important
 
-Do not use the reserved management IPs as the normal FortiManager management address for the HA cluster.
-
-Use the cluster's appropriate management/interface address according to the FortiManager design.
+Reserved management addresses should not automatically be treated as the cluster's normal management identity.
 
 ---
 
 # 20. HA Direct
 
-For services that must originate from the individual reserved management interface:
-
 ```bash
 config system ha
+# Enter the HA configuration context.
+
     set ha-mgmt-status enable
+    # Enable reserved HA management interfaces.
+
     set ha-direct enable
+    # Allow supported services to use the reserved management path.
+
 end
+
 ```
 
 Example:
 
 ```bash
 config system ha
-    set ha-direct enable
-    set ha-mgmt-status enable
-    config ha-mgmt-interfaces
-        edit 1
-            set interface "mgmt"
-            set gateway 192.168.20.1
-            set dst 192.168.20.0 255.255.255.0
-        next
-    end
-end
-```
+# Enter the HA configuration context.
 
-These management settings are not treated like ordinary synchronized cluster configuration.
+    set ha-direct enable
+    # Enable HA-direct functionality.
+
+    set ha-mgmt-status enable
+    # Enable reserved management interfaces.
+
+    config ha-mgmt-interfaces
+    # Enter reserved management interface configuration.
+
+        edit 1
+        # Select the first reserved management interface.
+
+            set interface "mgmt"
+            # Assign the physical management interface.
+
+            set gateway 192.168.20.1
+            # Define the management gateway.
+
+            set dst 192.168.20.0 255.255.255.0
+            # Define the destination network using the management path.
+
+        next
+        # Finish the management interface entry.
+
+    end
+    # Exit the reserved management configuration.
+
+end
+
+```
 
 ---
 
 # 21. SNMP with HA Management
 
-When using reserved management interfaces, HA-direct can be required.
-
-Concept:
-
-```text
-SNMP Manager
-     |
-Management Network
-     |
-+----+----+
-|         |
-FGT-1    FGT-2
-```
-
 Example:
 
 ```bash
 config system snmp
+# Enter SNMP configuration.
+
     edit 1
+    # Select the SNMP configuration.
+
         config hosts
+        # Enter SNMP host configuration.
+
             edit 1
+            # Select the SNMP manager entry.
+
                 set ha-direct enable
+                # Send SNMP communication through the HA management path.
+
             next
+            # Finish the SNMP host entry.
+
         end
+        # Exit SNMP host configuration.
+
     next
+    # Finish the SNMP configuration.
+
 end
+# Exit SNMP configuration.
 ```
 
 ---
 
 # 22. Logs in HA
 
-When connected to the cluster's normal HA/management address, logs generally represent the active processing unit and cluster context.
-
-When directly connecting to a reserved management address:
+Normal cluster access:
 
 ```text
-FGT-1 management IP
+Cluster Management Address
         ↓
-FGT-1 local perspective/logs
+Active Processing Context
+```
 
-FGT-2 management IP
+Reserved management:
+
+```text
+FGT-1 Management IP
         ↓
-FGT-2 local perspective/logs
+FGT-1 Local Perspective
+
+FGT-2 Management IP
+        ↓
+FGT-2 Local Perspective
 ```
 
 ### Operational Rule
 
-For troubleshooting individual members, use their dedicated management addresses.
+Use individual management addresses when troubleshooting a specific cluster member.
 
 ---
 
 # 23. SSD Failover
 
-SSD-related failure can trigger HA failover when configured.
-
-Example:
-
 ```bash
 config system ha
-    set ssd-failover enable
-end
-```
+# Enter the HA configuration context.
 
-This can be particularly relevant when features depend heavily on local storage.
+    set ssd-failover enable
+    # Allow configured SSD conditions to participate in HA failover.
+
+end
+
+```
 
 ---
 
 # 24. Memory-Based Failover
 
-FortiGate can use memory conditions as an HA failover trigger.
-
-Conceptual parameters include:
+Conceptual configuration:
 
 ```bash
-set memory-based-failover enable
-set memory-failover-threshold
-set memory-failover-monitor-period
-set memory-failover-sample-rate
-set memory-failover-flip-timeout
+config system ha
+# Enter the HA configuration context.
+
+    set memory-based-failover enable
+    # Enable memory-based HA failover monitoring.
+
+    set memory-failover-threshold <value>
+    # Define the memory utilization threshold.
+
+    set memory-failover-monitor-period <value>
+    # Define how long the condition is monitored.
+
+    set memory-failover-sample-rate <value>
+    # Define the memory sampling interval.
+
+    set memory-failover-flip-timeout <value>
+    # Define the timeout used by memory-based failover logic.
+
+end
+
 ```
 
-### Concept
+Concept:
 
 ```text
-Memory usage
+Memory Usage
      ↓
-Threshold exceeded
+Threshold
      ↓
-Condition monitored
+Monitoring
      ↓
-Repeated/qualified condition
+Qualified Condition
      ↓
-HA failover
+HA Failover
 ```
-
-> **Important:** Exact behavior and parameter names can vary by FortiOS release.
 
 ---
 
 # 25. HA Failover Timing
 
-Failover time consists of multiple stages:
+Failover consists of several stages:
 
 ```text
 Failure
@@ -780,11 +780,11 @@ Detection
   ↓
 Election
   ↓
-Role transition
+Role Transition
   ↓
-MAC/ARP convergence
+MAC/ARP Convergence
   ↓
-Traffic forwarding
+Traffic Forwarding
 ```
 
 Reducing heartbeat timers is only one part of failover optimization.
@@ -793,164 +793,144 @@ Reducing heartbeat timers is only one part of failover optimization.
 
 # 26. Gratuitous ARP — GARP
 
-After failover, downstream devices may still have the old MAC/IP association cached.
-
-FortiGate can use gratuitous ARP to accelerate convergence.
-
-Relevant HA settings include:
+GARP helps downstream devices update gateway information after failover.
 
 ```bash
 config system ha
+# Enter the HA configuration context.
+
     set gratuitous-arps enable
+    # Enable gratuitous ARP transmission after HA events.
+
 end
+
 ```
 
 Concept:
 
 ```text
-Before failover:
+Before Failover:
 
 Gateway IP → FGT-1 MAC
 
-After failover:
+After Failover:
 
-Gateway IP → FGT-2/HA VMAC
+Gateway IP → FGT-2 / HA VMAC
 
         ↓
-      GARP
+       GARP
         ↓
-Switches/hosts update ARP/FDB
+ARP/FDB Convergence
 ```
 
 ---
 
 # 27. ARP Parameters
 
-Relevant parameters can include:
-
 ```bash
-set arps
-set arps-interval
-set gratuitous-arps enable
+config system ha
+# Enter the HA configuration context.
+
+    set arps <value>
+    # Define the ARP-related HA parameter.
+
+    set arps-interval <value>
+    # Define the ARP transmission interval.
+
+    set gratuitous-arps enable
+    # Enable gratuitous ARP behavior.
+
+end
+
 ```
 
-Use the values appropriate to the target FortiOS release and production design.
+> Verify exact parameters for the target FortiOS release.
 
 ---
 
 # 28. Link-Failed Signaling
 
-HA can use link-failure signaling to react more aggressively to certain interface failures.
-
-Conceptually:
+Concept:
 
 ```text
-Monitored interface failure
+Interface Failure
        ↓
-Signal cluster
+HA Failure Signal
        ↓
-Traffic transition
+Cluster Decision
+       ↓
+Traffic Transition
 ```
 
-This should be designed carefully because aggressive propagation of failures can create unnecessary traffic interruption.
+Use carefully to avoid unnecessary failovers.
 
 ---
 
 # 29. HA Virtual MAC
 
-In HA, interfaces may use virtual MAC addresses so the active unit can assume the cluster identity.
-
-Concept:
+HA interfaces can use virtual MAC addresses so the active member assumes the cluster identity.
 
 ```text
-Normal:
+Before:
 
-Client → MAC of FGT-1
+Client → HA VMAC → FGT-1
 
-Failover:
+After:
 
-Client → Same HA/virtual MAC
-             ↓
-           FGT-2
+Client → HA VMAC → FGT-2
 ```
 
-This minimizes the need for network devices to relearn a completely different gateway identity.
+This reduces the need for downstream devices to learn a completely different gateway identity.
 
 ---
 
 # 30. VMAC Troubleshooting
 
-Useful command:
-
 ```bash
 diagnose sys ha mac
-```
+# Display HA-related MAC information.
 
-Hardware information:
-
-```bash
 diagnose hardware deviceinfo nic <interface>
+# Display physical NIC information such as MAC and interface state.
 ```
 
-Useful information includes:
+Useful information:
 
-* Physical MAC
-* Virtual MAC
-* Speed
-* Errors
-* Frames
-* Interface state
+```text
+Physical MAC
+Virtual MAC
+Interface State
+Speed
+Errors
+Frames
+```
 
 ---
 
 # 31. HA VMAC Structure
 
-A FortiGate HA VMAC contains information derived from:
+HA VMAC information is derived from HA-related identifiers such as:
 
 ```text
-Group prefix
-+
 Group ID
-+
-Virtual cluster
-+
-Interface index
+Virtual Cluster
+Interface Index
 ```
 
 Conceptual format:
 
 ```text
-00:09:0f:09 : XX : YY
-```
-
-Where the final components encode HA-related identifiers.
-
-### Example
-
-For:
-
-```text
-Group ID = 0
-Virtual Cluster = 1
-Interface index = 3
-```
-
-An example VMAC can be:
-
-```text
-00:09:0f:09:00:03
+00:09:0f:09:XX:YY
 ```
 
 > **Exam Tip:**
-> VMAC structure is useful for troubleshooting and understanding HA behavior, but do not memorize a simplified formula without checking the exact FortiOS release/documentation.
+> Use VMAC structure mainly for troubleshooting and conceptual understanding. Verify the exact FortiOS implementation before relying on a formula.
 
 ---
 
 # 32. HA Group ID
 
 The Group ID separates HA clusters.
-
-Example:
 
 ```text
 Cluster A
@@ -960,163 +940,138 @@ Cluster B
 Group ID = 20
 ```
 
-This prevents unrelated FortiGate devices from accidentally forming the same HA cluster.
+Example:
+
+```bash
+config system ha
+# Enter the HA configuration context.
+
+    set group-id 10
+    # Assign the HA group identifier.
+
+end
+
+```
 
 ### Production Rule
 
-Do not blindly leave every HA deployment at the same default Group ID when multiple clusters share the same L2 environment.
+Avoid blindly using the same Group ID for multiple HA clusters sharing the same L2 environment.
 
 ---
 
-# 33. HA Management — Useful Commands
-
-### HA Configuration
+# 33. HA Management Commands
 
 ```bash
 show system ha
-```
+# Display the HA configuration.
 
-### HA Information
-
-```bash
 get system ha
-```
+# Display the current HA configuration/state.
 
-### Detailed HA Status
-
-```bash
 get system ha status
-```
+# Display detailed HA cluster status.
 
-### HA Synchronization
-
-```bash
 execute ha sync start
-```
+# Start HA synchronization.
 
-### HA Check/Recalculation
-
-```bash
 diagnose sys ha check recalc
-```
+# Recalculate/check HA election state.
 
-### Enter another HA member
-
-```bash
 execute ha manage <index> <admin>
+# Access another HA member from the current FortiGate.
 ```
 
 Example:
 
 ```bash
 execute ha manage 0 admin
+# Access the HA member with index 0 using the admin account.
 ```
-
-> Never place real production passwords in documentation or shared  s.
 
 ---
 
 # 34. HA Synchronization Troubleshooting
 
-Basic workflow:
+Workflow:
 
 ```text
 1. Check HA status
-       ↓
 2. Check cluster membership
-       ↓
 3. Check heartbeat interfaces
-       ↓
 4. Check firmware versions
-       ↓
 5. Check configuration checksum
-       ↓
 6. Check session synchronization
-       ↓
 7. Check monitored interfaces
-       ↓
 8. Check logs/events
 ```
 
-Useful commands:
+Commands:
 
 ```bash
 get system ha status
+# Display cluster membership and HA health.
+
 diagnose sys ha checksum
+# Display HA configuration checksum information.
+
 diagnose sys ha checksum autoscale-cluster
+# Display checksum information for the autoscale cluster context.
 ```
 
 ---
 
-# 35. What Does NOT Synchronize?
+# 35. What Does Not Synchronize?
 
-Important HA exceptions include settings such as:
+Important HA exceptions can include:
 
-* Hostname
-* GUI dashboard widgets/layout
-* HA override setting
-* Device priority
-* Virtual cluster priority
-* Certain HA-specific monitoring/election parameters
-* Reserved management interface settings
-* Reserved management default route/gateway
-* Individual licensing/registration state
+```text
+Hostname
+GUI dashboard state
+HA override
+Device priority
+Virtual cluster priority
+Certain HA-specific parameters
+Reserved management settings
+Individual licensing/registration state
+```
 
 ### Golden Rule
 
-> **Cluster configuration ≠ identical local device identity.**
-
-Some settings must remain unique per member.
+> **Cluster configuration does not mean identical local device identity.**
 
 ---
 
 # 36. Safe HA Deployment Sequence
 
-Recommended workflow:
-
 ```text
-                    START
-                      |
-                      ↓
-             Backup configuration
-                      |
-                      ↓
-          Verify model + FortiOS
-                      |
-                      ↓
-             Register/license
-                      |
-                      ↓
-          Configure base connectivity
-                      |
-                      ↓
-          Configure A-P HA first
-                      |
-                      ↓
-          Configure heartbeat links
-                      |
-                      ↓
-          Configure monitored links
-                      |
-                      ↓
-          Configure reserved Mgmt
-                      |
-                      ↓
-          Verify synchronization
-                      |
-                      ↓
-           Test controlled failover
-                      |
-                      ↓
-             Configure A-A/vCluster
-                 if required
+Backup configuration
+        ↓
+Verify model + FortiOS
+        ↓
+Register/license
+        ↓
+Configure connectivity
+        ↓
+Configure A-P HA
+        ↓
+Configure heartbeat
+        ↓
+Configure monitored interfaces
+        ↓
+Configure reserved management
+        ↓
+Verify synchronization
+        ↓
+Test controlled failover
+        ↓
+Configure A-A/vCluster if required
 ```
 
 ---
 
-# 37. Adding a New FortiGate to a Cluster
+# 37. Adding a New FortiGate
 
-Recommended order:
+Recommended sequence:
 
 ```text
 Primary FGT
@@ -1131,37 +1086,21 @@ Configuration synchronization
     ↓
 Verify cluster state
     ↓
-Only then perform role/failover testing
-```
-
-### Why?
-
-If the new unit is empty and you immediately switch traffic:
-
-```text
-FGT-1 = Fully configured
-
-FGT-2 = Empty/not synchronized
-
-Failover
-    ↓
-FGT-2 becomes active
-    ↓
-Unexpected behavior
+Controlled failover test
 ```
 
 ---
 
 # 38. Removing a FortiGate
 
-When removing a cluster member:
+Recommended sequence:
 
 ```text
-Remove Secondary/Slave first
+Remove Secondary
         ↓
-Verify remaining cluster
+Verify Remaining Cluster
         ↓
-Remove HA connections
+Remove HA Connections
 ```
 
 Avoid removing the current Primary first unless the migration procedure specifically requires it.
@@ -1170,84 +1109,67 @@ Avoid removing the current Primary first unless the migration procedure specific
 
 # 39. HA Backup Strategy
 
-Before:
-
-* HA configuration changes
-* Firmware upgrades
-* Cluster membership changes
-* Major VDOM changes
-* FGSP changes
-
-Take:
+Take a configuration backup before:
 
 ```text
-Configuration backup
+HA configuration changes
+Firmware upgrades
+Cluster membership changes
+Major VDOM changes
+FGSP changes
 ```
 
-Think of backup as the **rollback mechanism**, not simply a documentation step.
+Think of backup as the **rollback mechanism**.
 
 ---
 
 # 40. Firmware Upgrade — HA
 
-Always check the supported:
-
-> **Fortinet Firmware Upgrade Path**
-
-before upgrading.
-
-Two broad upgrade strategies exist.
-
----
-
-## Uninterruptible Upgrade
-
-Used when supported by the platform/configuration.
-
-Concept:
+Always verify:
 
 ```text
-Cluster
-  |
-  +-- FGT-1 upgrades
-  |
-  +-- FGT-2 continues traffic
-  |
-  +-- FGT-1 returns
-  |
-  +-- FGT-2 upgrades
+Firmware Upgrade Path
++
+Release Notes
++
+HA Compatibility
 ```
 
-Goal:
+### Uninterruptible Upgrade
 
 ```text
-Minimal/no user-visible interruption
+FGT-1 upgrades
+      ↓
+FGT-2 processes traffic
+      ↓
+FGT-1 returns
+      ↓
+FGT-2 upgrades
 ```
 
----
-
-## Interrupted Upgrade
-
-Disable uninterruptible upgrade when required:
+### Interrupted Upgrade
 
 ```bash
 config system ha
+# Enter the HA configuration context.
+
     set uninterruptible-upgrade disable
+    # Disable uninterruptible upgrade behavior.
+
 end
+
 ```
 
-Then perform a controlled maintenance-window upgrade.
-
-### Production Checklist
+### Upgrade Checklist
 
 ```text
 ✓ Backup
-✓ Verify firmware compatibility
 ✓ Verify upgrade path
-✓ Check release notes
+✓ Verify compatibility
+✓ Read release notes
 ✓ Check HA status
-✓ Check cluster synchronization
-✓ Upgrade according to supported procedure
+✓ Check synchronization
+✓ Perform upgrade
 ✓ Verify HA after upgrade
 ```
 
@@ -1255,22 +1177,17 @@ Then perform a controlled maintenance-window upgrade.
 
 # 41. Hardware Switch and HA Monitoring
 
-Hardware/software switching can introduce design limitations.
-
-Do not assume that a hardware switch automatically provides HA-level redundancy.
-
-Example problem:
+Do not assume a hardware switch automatically provides HA-level redundancy.
 
 ```text
-FortiGate power failure
-        ↓
-Hardware switch still exists
-        ↓
-Clients may continue using
-the same local switching path
+Physical Failure
+      ↓
+Switching Layer
+      ↓
+HA Monitoring
 ```
 
-HA interface monitoring must be designed around actual physical/logical failure domains.
+HA monitoring must be based on the actual physical and logical failure domain.
 
 ---
 
@@ -1278,20 +1195,19 @@ HA interface monitoring must be designed around actual physical/logical failure 
 
 VDOM = Virtual Domain.
 
-Conceptually similar to:
-
-```text
-Cisco VRF
-```
-
-but VDOM provides broader administrative/security isolation than a simple VRF.
+Conceptually similar to VRF in terms of traffic separation, but VDOM provides broader administrative and security isolation.
 
 Enable multi-VDOM:
 
 ```bash
 config system global
+# Enter global system configuration.
+
     set vdom-mode multi-vdom
+    # Enable multi-VDOM operating mode.
+
 end
+# Exit global system configuration.
 ```
 
 ---
@@ -1300,64 +1216,53 @@ end
 
 Each VDOM can have its own:
 
-* Routing table
-* Firewall policies
-* VPN configuration
-* Security policies
-* Interfaces/logical resources
-* Administrative context
+```text
+Routing
+Firewall Policies
+VPN
+Security Policies
+Interfaces/Logical Resources
+Administrative Context
+```
 
-Global configuration includes things such as:
+Global configuration can include:
 
-* Physical interfaces
-* DNS/global settings
-* Firmware
-* Global logging
-* Global system behavior
+```text
+Physical Interfaces
+Firmware
+Global System Settings
+Global Logging
+```
 
 ---
 
 # 44. Admin VDOM vs Traffic VDOM
 
-A FortiGate can have:
-
 ### Management/Admin VDOM
-
-Used primarily for:
 
 ```text
 Management
 Administration
-System services
+System Services
 ```
 
 ### Traffic VDOM
 
-Used for:
-
 ```text
-Production traffic
-Internet access
-Security policies
+Production Traffic
+Internet Access
+Security Policies
 Routing
 VPN
 ```
 
-A common design principle is:
-
-> Keep management logically separated from production traffic when the architecture requires it.
+Keep management logically separated when required by the architecture.
 
 ---
 
 # 45. VDOM HA / Virtual Clustering
 
-With VDOMs, HA can distribute roles at the VDOM level.
-
-This is commonly associated with:
-
-> **Virtual Cluster / vCluster**
-
-Concept:
+With VDOMs, HA can distribute active roles at VDOM level.
 
 ```text
 FGT-1                     FGT-2
@@ -1366,7 +1271,9 @@ VDOM-A → Primary          VDOM-A → Secondary
 VDOM-B → Secondary        VDOM-B → Primary
 ```
 
-This allows different VDOMs to prefer different cluster members.
+This is commonly associated with:
+
+> **vCluster**
 
 ---
 
@@ -1376,54 +1283,59 @@ Conceptual configuration:
 
 ```bash
 config system ha
+# Enter HA configuration.
+
     set vcluster-status enable
+    # Enable virtual clustering.
 
     config vcluster
+    # Enter virtual cluster configuration.
+
         edit 1
+        # Select virtual cluster 1.
+
             set override enable
+            # Enable preferred-role recovery for the virtual cluster.
+
             set priority <value>
+            # Set virtual cluster priority.
+
             set vdom "root"
+            # Associate the VDOM with the virtual cluster.
+
             set monitor "port3"
+            # Monitor the selected interface for virtual cluster health.
+
         next
+        # Finish the virtual cluster entry.
+
     end
+    # Exit virtual cluster configuration.
+
 end
+# Exit HA configuration.
 ```
 
-Depending on FortiOS release, syntax and available options may differ.
-
-### Why use vCluster?
-
-To distribute active traffic between HA members.
-
-```text
-VDOM-A → FGT-1
-VDOM-B → FGT-2
-VDOM-C → FGT-1
-VDOM-D → FGT-2
-```
+> Verify syntax and available options for the target FortiOS version.
 
 ---
 
-# 47. vCluster Design Considerations
+# 47. vCluster Design
 
 Each virtual cluster can have:
 
-* Its own priority
-* Its own override behavior
-* Its own monitored interfaces
-* VDOM membership
-
-This provides granular HA behavior.
-
-### Important
+```text
+Priority
+Override
+Monitored Interfaces
+VDOM Membership
+```
 
 Heartbeat interfaces remain part of the global HA mechanism.
 
 ---
 
 # 48. vCluster + A-A
-
-A-A designs become more powerful with VDOM partitioning.
 
 Example:
 
@@ -1438,19 +1350,13 @@ Example:
        ACTIVE                ACTIVE
 ```
 
-This is fundamentally different from simply running two independent firewalls.
+This allows active traffic processing to be distributed between cluster members.
 
 ---
 
 # 49. Inter-VDOM Routing
 
-VDOMs can communicate through:
-
-```text
-VDOM Links
-```
-
-Concept:
+VDOMs can communicate through VDOM links.
 
 ```text
 VDOM-A
@@ -1460,9 +1366,20 @@ VDOM Link
 VDOM-B
 ```
 
-Depending on platform and architecture, traffic through inter-VDOM links may have hardware-offload limitations.
+Example concept:
 
-### Design Rule
+```bash
+config system vdom-link
+# Enter VDOM link configuration.
+
+    edit "vdom-link"
+    # Create/select the VDOM link.
+
+end
+# Exit VDOM link configuration.
+```
+
+> Exact syntax depends on FortiOS release and configuration model.
 
 When using:
 
@@ -1476,7 +1393,7 @@ HA
 A-A
 ```
 
-always verify the hardware acceleration/offload behavior for the exact platform.
+verify hardware-offload behavior for the exact platform.
 
 ---
 
@@ -1484,11 +1401,19 @@ always verify the hardware acceleration/offload behavior for the exact platform.
 
 ## FortiGate Session Life Support Protocol
 
-FGSP is **not the same as FGCP**.
+FGSP is different from FGCP.
 
-FGSP is designed for session synchronization between FortiGate devices that are not necessarily members of one traditional FGCP HA cluster.
+```text
+FGCP
+=
+FortiGate Clustering
 
-Typical topology:
+FGSP
+=
+Session Synchronization
+```
+
+Typical architecture:
 
 ```text
                  Load Balancer
@@ -1504,35 +1429,37 @@ Typical topology:
 
 # 51. FGSP Use Cases
 
-Useful when:
+FGSP is useful for:
 
-* Load balancers are upstream/downstream.
-* Asymmetric routing exists.
-* FortiGates are standalone.
-* Multiple FortiGate clusters need session synchronization.
-* Traffic can enter one FortiGate and return through another.
+```text
+Load Balancers
+Asymmetric Routing
+Standalone FortiGates
+Multiple FortiGate Clusters
+Distributed Security Architectures
+```
 
 ---
 
 # 52. FGSP vs FGCP
 
-| Feature                       | FGCP      | FGSP                        |
-| ----------------------------- | --------- | --------------------------- |
-| Native HA cluster             | Yes       | No                          |
-| Primary/Secondary election    | Yes       | No                          |
-| Configuration synchronization | Yes       | Limited/separate mechanisms |
-| Session synchronization       | Yes       | Yes                         |
-| Standalone FortiGates         | No        | Yes                         |
-| Load-balancer architectures   | Sometimes | Excellent use case          |
-| vCluster                      | Yes       | No                          |
-| Asymmetric-routing designs    | Limited   | Strong use case             |
+| Feature                       | FGCP     | FGSP            |
+| ----------------------------- | -------- | --------------- |
+| Native HA cluster             | Yes      | No              |
+| Primary/Secondary election    | Yes      | No              |
+| Configuration synchronization | Yes      | No/Separate     |
+| Session synchronization       | Yes      | Yes             |
+| Standalone FortiGates         | No       | Yes             |
+| Load balancer architecture    | Possible | Strong use case |
+| vCluster                      | Yes      | No              |
+| Asymmetric routing            | Limited  | Strong use case |
 
 ### Remember
 
 ```text
 FGCP = Cluster
 
-FGSP = Session synchronization
+FGSP = Session Synchronization
 ```
 
 ---
@@ -1543,70 +1470,79 @@ Example:
 
 ```bash
 config system ha
+# Enter HA configuration.
+
     set session-pickup enable
+    # Enable session synchronization.
+
     set session-pickup-expectation enable
+    # Synchronize supported expectation sessions.
+
     set session-pickup-connectionless enable
+    # Synchronize supported connectionless sessions.
+
     set session-pickup-nat enable
+    # Synchronize supported NAT session state.
+
     set sync-packet-balance enable
+    # Distribute synchronization packet processing.
+
 end
+# Exit HA configuration.
 ```
-
-Potentially synchronized session types include:
-
-* IPv4
-* IPv6
-* TCP
-* UDP
-* SCTP
-* ICMP
-* NAT sessions
-* Expectation sessions
-
-Exact support depends on FortiOS/platform.
 
 ---
 
-# 54. FGSP Session Synchronization Link
+# 54. FGSP Synchronization Link
 
-A dedicated synchronization interface/path is recommended.
-
-Concept:
+Recommended design:
 
 ```text
 FGT-1
   |
-  | Session Sync
+  | Session Synchronization
   |
 FGT-2
 ```
 
-The synchronization path may use L2 or L3 connectivity depending on the design and supported configuration.
+Use a dedicated synchronization path when practical.
+
+The path can use supported L2/L3 designs depending on the FortiOS implementation.
 
 ---
 
 # 55. Cluster Sync
 
-FGSP can use:
+Conceptual configuration:
 
 ```bash
 config system cluster-sync
-    edit 1
-        set peer-ip 1.2.3.4
-        set peervd "root"
-        set syncvd "root"
-    next
-end
-```
+# Enter cluster synchronization configuration.
 
-The exact syntax varies by FortiOS version.
+    edit 1
+    # Select the first synchronization peer.
+
+        set peer-ip 1.2.3.4
+        # Define the synchronization peer IP address.
+
+        set peervd "root"
+        # Define the peer VDOM.
+
+        set syncvd "root"
+        # Define the local synchronization VDOM.
+
+    next
+    # Finish the synchronization peer entry.
+
+end
+# Exit cluster synchronization configuration.
+```
 
 ---
 
 # 56. Standalone Cluster
 
-FortiGate also supports advanced synchronization architectures involving standalone clusters.
-
-Concept:
+Advanced architecture:
 
 ```text
         HA Cluster 1
@@ -1618,7 +1554,7 @@ Concept:
         FGT-3 + FGT-4
 ```
 
-This allows session state to be synchronized across larger distributed architectures.
+This allows distributed session synchronization.
 
 ---
 
@@ -1628,53 +1564,59 @@ Conceptual configuration:
 
 ```bash
 config system standalone-cluster
+# Enter standalone cluster configuration.
+
     set standalone-group-id 1
+    # Define the standalone synchronization group ID.
+
     set group-member-id 0
+    # Define the local member ID.
+
     set session-sync-dev "port5"
+    # Define the interface used for session synchronization.
+
 end
+# Exit standalone cluster configuration.
 ```
-
-### Important
-
-All members participating in the same standalone synchronization group need compatible group identifiers and appropriate member identities.
 
 ---
 
 # 58. FGSP Encryption
 
-For Layer-3 synchronization paths, encryption can be configured where supported:
+For supported Layer-3 synchronization designs:
 
 ```bash
 config system standalone-cluster
+# Enter standalone cluster configuration.
+
     set encryption enable
+    # Enable synchronization-path encryption.
+
     set psksecret <secret>
+    # Configure the pre-shared secret for synchronization security.
+
 end
+# Exit standalone cluster configuration.
 ```
 
-Never publish a real PSK in documentation.
+> Never publish a real PSK in documentation.
 
 ---
 
 # 59. FGSP Scale
 
-FGSP can support multiple FortiGate devices/clusters depending on FortiOS/platform limits.
+Do not memorize a universal device limit.
 
-Do not treat:
-
-```text
-16 devices
-```
-
-or similar values as universal.
-
-Always verify the exact limit for:
+Always verify:
 
 ```text
-FortiOS version
+FortiOS Version
 +
-FortiGate model
+FortiGate Model
 +
-FGSP topology
+FGSP Topology
++
+Feature Combination
 ```
 
 ---
@@ -1693,33 +1635,36 @@ Classic architecture:
                  Server Farm
 ```
 
-The load balancer may distribute new connections.
+Traffic can enter one FortiGate and later arrive through another.
 
-FGSP synchronizes session state so that:
+FGSP synchronizes session state:
 
 ```text
-Packet enters FGT-1
-        ↓
-Session synchronized
-        ↓
-Packet later enters FGT-2
-        ↓
-FGT-2 understands session
+Packet → FGT-1
+          ↓
+     Session Sync
+          ↓
+Packet → FGT-2
+          ↓
+   Session Recognized
 ```
 
 ---
 
 # 61. Sync Packet Balance
 
-For high-volume environments:
-
 ```bash
-set sync-packet-balance enable
+config system ha
+# Enter HA configuration.
+
+    set sync-packet-balance enable
+    # Balance synchronization packet processing.
+
+end
+# Exit HA configuration.
 ```
 
-This can distribute synchronization processing.
-
-Large MTU/jumbo frames may also reduce packet-processing overhead where supported end-to-end.
+Jumbo frames may reduce processing overhead when supported end-to-end.
 
 Example:
 
@@ -1727,102 +1672,106 @@ Example:
 MTU ≈ 9216
 ```
 
-> Only use jumbo frames when every device/path in the synchronization path supports them.
+> Only use jumbo frames when every device on the synchronization path supports them.
 
 ---
 
-# 62. IKE Session Synchronization in FGSP
-
-For IPsec environments, IKE state synchronization may be required.
+# 62. IKE Session Synchronization
 
 Conceptual configuration:
 
 ```bash
 config system cluster-sync
-    edit 1
-        set peer-ip 1.2.3.4
-        set ike-monitor enable
-        set ike-monitor-interval 15
-        set ike-heartbeat-interval <value>
-        set ike-seqjump-speed 10
-    next
-end
-```
+# Enter cluster synchronization configuration.
 
-Exact values and syntax are FortiOS/version dependent.
+    edit 1
+    # Select the synchronization peer.
+
+        set peer-ip 1.2.3.4
+        # Define the synchronization peer.
+
+        set ike-monitor enable
+        # Enable IKE session monitoring.
+
+        set ike-monitor-interval 15
+        # Define the IKE monitoring interval.
+
+        set ike-heartbeat-interval <value>
+        # Define the IKE heartbeat interval.
+
+        set ike-seqjump-speed 10
+        # Define the IKE sequence jump speed.
+
+    next
+    # Finish the synchronization peer configuration.
+
+end
+# Exit cluster synchronization configuration.
+```
 
 ---
 
 # 63. FGSP Firmware Compatibility
 
-Session synchronization is sensitive to FortiOS versions.
+FGSP session synchronization is sensitive to FortiOS compatibility.
 
-Example historical compatibility issue:
-
-```text
-FortiOS 7.0.2+
-       ↕
-FortiOS 7.0.1-
-```
-
-Changes to synchronization packet structures/features can make cross-version session synchronization incompatible.
+Do not assume arbitrary cross-version synchronization will work.
 
 ### Rule
 
-> Do not assume FGSP session synchronization works across arbitrary FortiOS versions.
+```text
+Same/Compatible FortiOS
+        +
+Compatible Platform
+        +
+Supported FGSP Design
+```
 
-Always check the release notes and upgrade documentation.
+Always verify release notes and upgrade documentation.
 
 ---
 
 # 64. PFCP and Session Compatibility
 
-Modern FortiOS session structures can contain additional information such as PFCP-related state.
+Modern session structures can contain additional state.
 
-If a newer FortiOS synchronizes sessions to an older version that does not understand the additional information:
+Concept:
 
 ```text
-Session structure mismatch
+Newer Session Structure
         ↓
-State may be lost/ignored
+Older FortiOS
         ↓
-Session behavior can be affected
+Unsupported Information
+        ↓
+Session State May Be Affected
 ```
 
 ---
 
 # 65. SCTP Session Support
 
-SCTP is useful in environments requiring:
+SCTP can provide:
 
-* Multihoming
-* Multiple paths
-* Telecommunications/signaling
-* Resilient path switching
-
-FortiOS can support SCTP session behavior and, depending on release/configuration, session synchronization mechanisms.
+```text
+Multihoming
+Multiple Paths
+Telecom Signaling
+Path Failover
+```
 
 Example:
 
 ```bash
 config system setting
+# Enter system setting configuration.
+
     set sctp-session-without-init enable
+    # Allow supported SCTP sessions without an INIT packet.
+
 end
+# Exit system setting configuration.
 ```
-
-### Concept
-
-```text
-SCTP
-  |
-Multiple paths
-  |
-Path failure
-  ↓
-Alternate path
-```
-
-This can be useful for highly available streaming/telecom applications.
 
 ---
 
@@ -1830,12 +1779,14 @@ This can be useful for highly available streaming/telecom applications.
 
 SCTP includes mechanisms such as:
 
-* Verification Tag
-* Checksum
-* Multi-homing
-* Multi-streaming
+```text
+Verification Tag
+Checksum
+Multihoming
+Multistreaming
+```
 
-These help maintain session integrity and path management.
+These support session integrity and path management.
 
 ---
 
@@ -1862,7 +1813,7 @@ VRRP provides gateway redundancy between independent devices.
 
 # 68. VRRP Virtual MAC
 
-With VRRP virtual MAC:
+VRRP uses a virtual MAC:
 
 ```text
 00:00:5e:00:01:<VRID>
@@ -1876,61 +1827,91 @@ VRID = 1
 00:00:5e:00:01:01
 ```
 
-This provides a shared gateway identity.
-
 ---
 
 # 69. VRRP Configuration
 
-Example:
+Primary device:
 
 ```bash
 config system interface
+# Enter interface configuration.
+
     edit "vlan10"
+    # Select the interface participating in VRRP.
+
         set vrrp-virtual-mac enable
+        # Enable the VRRP virtual MAC.
 
         config vrrp
+        # Enter VRRP configuration.
+
             edit 1
+            # Create/select VRRP instance 1.
+
                 set vrip 192.168.10.1
+                # Define the virtual gateway IP address.
+
                 set priority 255
+                # Set the VRRP priority.
+
             next
+            # Finish the VRRP instance.
+
         end
+        # Exit VRRP configuration.
+
     next
+    # Finish interface configuration.
+
 end
+# Exit interface configuration.
 ```
 
-Second device:
+Secondary:
 
 ```bash
 config system interface
+# Enter interface configuration.
+
     edit "vlan10"
+    # Select the VRRP interface.
 
         config vrrp
+        # Enter VRRP configuration.
+
             edit 1
+            # Select VRRP instance 1.
+
                 set vrip 192.168.10.1
+                # Use the same virtual gateway IP.
+
                 set priority 200
+                # Set a lower VRRP priority.
+
             next
+            # Finish the VRRP instance.
+
         end
+        # Exit VRRP configuration.
+
     next
+    # Finish interface configuration.
+
 end
+# Exit interface configuration.
 ```
 
 ---
 
 # 70. VRRP Priority
 
-Higher priority wins the VRRP master role.
-
-Example:
+Higher priority wins the Master role.
 
 ```text
 FGT-1 = 255
 FGT-2 = 200
-```
 
-Result:
-
-```text
 FGT-1 → MASTER
 FGT-2 → BACKUP
 ```
@@ -1939,63 +1920,81 @@ FGT-2 → BACKUP
 
 # 71. VRRP Preemption
 
-VRRP preemption is conceptually similar to HA override.
-
-```text
-Primary fails
-    ↓
-Backup becomes Master
-    ↓
-Original Primary returns
-    ↓
-Preemption enabled
-    ↓
-Higher-priority router can become Master again
-```
-
-Example:
+Preemption allows a higher-priority device to regain Master after recovery.
 
 ```bash
 config system interface
+# Enter interface configuration.
+
     edit "vlan10"
+    # Select the VRRP interface.
+
         config vrrp
+        # Enter VRRP configuration.
+
             edit 1
+            # Select VRRP instance 1.
+
                 set preempt enable
+                # Allow the higher-priority device to reclaim Master.
+
             next
+            # Finish the VRRP instance.
+
         end
+        # Exit VRRP configuration.
+
     next
+    # Finish interface configuration.
+
 end
+# Exit interface configuration.
 ```
 
 ---
 
 # 72. VRRP Monitoring
 
-VRRP can monitor a destination.
-
 Conceptual configuration:
 
 ```bash
 config system interface
-    edit "vlan10"
-        config vrrp
-            edit 1
-                set vrip 192.168.10.1
-                set vrdst 8.8.8.8
-                set vrdst-priority 10
-            next
-        end
-    next
-end
-```
+# Enter interface configuration.
 
-This allows gateway priority to be influenced by destination reachability.
+    edit "vlan10"
+    # Select the VRRP interface.
+
+        config vrrp
+        # Enter VRRP configuration.
+
+            edit 1
+            # Select VRRP instance 1.
+
+                set vrip 192.168.10.1
+                # Define the virtual gateway IP.
+
+                set vrdst 8.8.8.8
+                # Define the destination used for VRRP monitoring.
+
+                set vrdst-priority 10
+                # Define the priority adjustment related to destination monitoring.
+
+            next
+            # Finish the VRRP instance.
+
+        end
+        # Exit VRRP configuration.
+
+    next
+    # Finish interface configuration.
+
+end
+# Exit interface configuration.
+```
 
 ---
 
-# 73. VRRP Multiple Virtual Routers
-
-A single interface can participate in multiple VRRP instances/virtual IPs.
+# 73. Multiple VRRP Instances
 
 Example:
 
@@ -2009,7 +2008,7 @@ VIP = 192.168.100.100
 Priority = 155
 ```
 
-Each VRID has its own virtual MAC.
+Virtual MACs:
 
 ```text
 VRID 1
@@ -2023,19 +2022,15 @@ VRID 2
 
 # 74. VRRP Troubleshooting
 
-Useful commands:
-
 ```bash
 get router info vrrp
-```
+# Display VRRP routing and state information.
 
-and:
-
-```bash
 get system vrrp
+# Display system-level VRRP information.
 ```
 
-Look for:
+Check:
 
 ```text
 VRID
@@ -2044,7 +2039,7 @@ Priority
 State
 Master
 Backup
-Advertisement interval
+Advertisement Interval
 Preempt
 Virtual MAC
 ```
@@ -2053,80 +2048,71 @@ Virtual MAC
 
 # 75. VRRP vs FGCP
 
-| Feature                       | FGCP HA | VRRP                             |
-| ----------------------------- | ------- | -------------------------------- |
-| FortiGate cluster             | Yes     | No                               |
-| Configuration synchronization | Yes     | No                               |
-| Session pickup                | Yes     | No native FGCP session mechanism |
-| Virtual gateway               | Yes     | Yes                              |
-| Primary election              | Yes     | Yes                              |
-| FortiGate-specific            | Yes     | No                               |
-| VDOM/vCluster                 | Yes     | No                               |
-| Independent devices           | No      | Yes                              |
+| Feature             | FGCP HA | VRRP                     |
+| ------------------- | ------- | ------------------------ |
+| FortiGate Cluster   | Yes     | No                       |
+| Configuration Sync  | Yes     | No                       |
+| Session Pickup      | Yes     | No native FGCP mechanism |
+| Virtual Gateway     | Yes     | Yes                      |
+| Primary Election    | Yes     | Yes                      |
+| FortiGate Specific  | Yes     | No                       |
+| vCluster            | Yes     | No                       |
+| Independent Devices | No      | Yes                      |
 
 ### Remember
 
 ```text
 FGCP
-= FortiGate cluster
+= FortiGate Cluster
 
 VRRP
-= Virtual gateway redundancy
+= Virtual Gateway Redundancy
 
 FGSP
-= Session synchronization
+= Session Synchronization
 ```
 
 ---
 
 # 76. HA Forced Failover
 
-For controlled testing:
-
 ```bash
 execute ha failover set <cluster-id>
+# Force the specified HA cluster/virtual cluster failover for testing.
 ```
 
-To remove the forced condition:
+Remove the forced condition:
 
 ```bash
 execute ha failover unset <cluster-id>
+# Remove the forced HA failover condition.
 ```
 
-### Production Warning
-
-Use forced failover for:
-
-```text
-Testing
-Troubleshooting
-Maintenance validation
-```
-
-Not as a routine production operation.
+> Use forced failover for testing and controlled maintenance validation.
 
 ---
 
 # 77. HA Status Verification
 
-Always start troubleshooting with:
+Start troubleshooting with:
 
 ```bash
 get system ha status
+# Display the complete HA cluster status.
 ```
 
 Check:
 
 ```text
-Cluster state
-Primary/Secondary role
-Serial numbers
+Cluster State
+Primary/Secondary Role
+Serial Numbers
 Priority
 Uptime
 Heartbeat
-Monitored interfaces
+Monitored Interfaces
 Synchronization
-Virtual cluster state
+Virtual Cluster State
 ```
 
 ---
@@ -2135,47 +2121,67 @@ Virtual cluster state
 
 ```bash
 get system ha
+# Display HA configuration/state.
+
 show system ha
+# Display the HA configuration in CLI format.
+
 get system ha status
+# Display detailed HA status.
 
 diagnose sys ha check recalc
+# Recalculate/check HA election information.
+
 diagnose sys ha mac
+# Display HA virtual and physical MAC information.
+
 diagnose sys ha checksum
+# Display HA configuration checksum information.
 
 diagnose sys session list
+# Display active firewall sessions.
+
 diagnose ips session list
+# Display IPS-related session information.
+
 diagnose ips share list
+# Display shared IPS information.
 
 execute log display
-```
+# Display available local log information.
 
-For HA synchronization statistics:
-
-```bash
 get test hasync 50
+# Display HA synchronization test/statistics information.
 ```
 
 ---
 
 # 79. HA Checksum
 
-Configuration synchronization can be validated using HA checksum information.
+HA checksum can help identify configuration synchronization problems.
+
+```bash
+diagnose sys ha checksum
+# Display configuration checksum information for HA members.
+```
 
 Concept:
 
 ```text
-FGT-1 configuration checksum
-          ≠
-FGT-2 configuration checksum
-          ↓
-Investigate synchronization
+FGT-1 Checksum
+      ≠
+FGT-2 Checksum
+      ↓
+Investigate Synchronization
 ```
 
 Useful for:
 
-* Configuration mismatch
-* Sync troubleshooting
-* Cluster verification
+```text
+Configuration mismatch
+Sync troubleshooting
+Cluster verification
+```
 
 ---
 
@@ -2183,48 +2189,42 @@ Useful for:
 
 FortiGate HA heartbeat communication can use link-local addressing internally.
 
-Do not treat these addresses as ordinary management IP addresses.
-
-Heartbeat links are primarily:
+These addresses should not be treated as normal management addresses.
 
 ```text
-Cluster communication paths
+Heartbeat Address
+=
+Cluster Communication
 ```
 
 ---
 
 # 81. HA + NPU + VDOM
 
-One of the more advanced NSE7 topics:
+Advanced NSE7 design:
 
 ```text
 HA
- +
++
 A-A
- +
++
 VDOM
- +
++
 NPU
- +
-Inter-VDOM traffic
++
+Inter-VDOM Traffic
 ```
 
-can introduce asymmetric routing/session-distribution considerations.
-
-Potential design:
+can introduce:
 
 ```text
-             Router
-           /        \
-        FGT-1      FGT-2
-          |          |
-        VDOM        VDOM
-          \          /
-           Internal
-            routing
+Asymmetric Routing
+Session Ownership
+Traffic Distribution
+Hardware Offload Considerations
 ```
 
-Depending on the platform and topology, a router or appropriate inter-VDOM routing design may be needed to control traffic paths.
+Always verify the exact platform behavior.
 
 ---
 
@@ -2244,63 +2244,60 @@ Example:
 
 ```bash
 config global
+# Enter global configuration context.
 
 config system vdom-exception
+# Enter VDOM exception configuration.
+
     edit 1
+    # Create/select a VDOM exception entry.
+
         set object <object>
+        # Define the configuration object affected by the exception.
+
         set scope inclusive
+        # Define the synchronization scope for the selected object.
+
         set vdom "test"
+        # Apply the exception to the selected VDOM.
+
     next
+    # Finish the VDOM exception entry.
+
 end
+# Exit VDOM exception configuration.
 ```
 
-Potential use cases can include:
-
-* FortiAnalyzer-related objects
-* Management-related objects
-* VIPs
-* IP pools
-* NAT pools
-
-> Verify the exact supported object types for the FortiOS version in use.
+> Verify supported objects for the target FortiOS release.
 
 ---
 
 # 83. Software Switch / Hardware Switch
 
-Useful command:
-
 ```bash
 show system switch-interface
+# Display software switch and switch-interface configuration.
 ```
-
-This shows software switch-related configuration.
 
 ### HA Design Warning
 
-Do not automatically assume a hardware switch provides interface-level HA monitoring.
-
-A physical uplink failure inside/behind a switching construct may not produce the HA event you expect.
+Do not automatically assume that a hardware switch provides interface-level HA monitoring.
 
 ---
 
 # 84. HA + DHCP
 
-Be careful when DHCP and HA roles are involved.
-
-Gateway configuration should normally reference the **virtual gateway address** where the design requires gateway redundancy.
-
-Example:
+When gateway redundancy is used, DHCP should normally provide the virtual gateway address where appropriate.
 
 ```text
 DHCP Gateway
       ↓
 192.168.10.1
       ↓
-VRRP/HA virtual gateway
+Virtual HA/VRRP Gateway
 ```
 
-rather than hard-coding one physical FortiGate's IP when that address is not intended to be the client gateway.
+Avoid hard-coding one physical FortiGate IP when the design requires a virtual gateway.
 
 ---
 
@@ -2309,7 +2306,7 @@ rather than hard-coding one physical FortiGate's IP when that address is not int
 ## Heartbeat
 
 ```text
-✓ Use at least two heartbeat links
+✓ Use multiple heartbeat links
 ✓ Prefer physically diverse paths
 ✓ Direct links are excellent
 ✓ Avoid single points of failure
@@ -2319,8 +2316,8 @@ rather than hard-coding one physical FortiGate's IP when that address is not int
 
 ```text
 ✓ Use reserved/out-of-band management
-✓ Separate management network
-✓ Give each cluster member unique management IP
+✓ Use a separate management network
+✓ Give each member a unique management IP
 ```
 
 ## Monitoring
@@ -2334,7 +2331,7 @@ rather than hard-coding one physical FortiGate's IP when that address is not int
 ## Synchronization
 
 ```text
-✓ Verify configuration sync
+✓ Verify configuration synchronization
 ✓ Enable session pickup when required
 ✓ Test failover
 ```
@@ -2344,15 +2341,15 @@ rather than hard-coding one physical FortiGate's IP when that address is not int
 ```text
 ✓ Backup first
 ✓ Check upgrade path
-✓ Check release notes
-✓ Verify HA health before upgrade
+✓ Read release notes
+✓ Verify HA health
 ```
 
 ---
 
 # 86. HA Failure-Domain Design
 
-Bad design:
+### Weak Design
 
 ```text
           Same Switch
@@ -2363,24 +2360,24 @@ Bad design:
       HB-1            HB-1
 ```
 
-Better:
+### Better Design
 
 ```text
 FGT-1 HB1 ───────── FGT-2 HB1
 
 FGT-1 HB2 ───────── FGT-2 HB2
      \                /
-      Different physical
-           paths
+      Different Physical
+          Paths
 ```
 
-Best design depends on physical infrastructure and failure domains.
+The exact design depends on physical infrastructure.
 
 ---
 
 # 87. HA Monitoring Strategy
 
-Do not monitor only the heartbeat.
+Do not monitor only heartbeat connectivity.
 
 ```text
 Heartbeat
@@ -2391,16 +2388,14 @@ Critical LAN
     +
 DMZ
     +
-Relevant health checks
+Relevant Health Checks
 ```
 
-This provides a better representation of the FortiGate's actual service availability.
+This provides a better representation of actual service availability.
 
 ---
 
 # 88. HA vs Link Monitor
-
-These are related but different.
 
 ### HA Interface Monitoring
 
@@ -2412,9 +2407,9 @@ Answers:
 
 Answers:
 
-> "Is this network path/service reachable?"
+> "Is this network path or service reachable?"
 
-Link monitoring can be used for health detection and failover-related behavior depending on the design.
+They solve different problems.
 
 ---
 
@@ -2427,90 +2422,90 @@ FortiGate
    |
 Link Monitor
    |
-Probe target
+Probe Target
    |
-Internet/Upstream
+Upstream/Internet
 ```
 
-If the monitored path becomes unavailable:
+Failure:
 
 ```text
-Health failure
+Path Failure
       ↓
-HA decision
+Health Failure
       ↓
-Possible failover
+HA Decision
+      ↓
+Possible Failover
 ```
 
-Do not confuse this with simply detecting whether the physical interface is electrically up.
+Physical interface state and service reachability are not the same thing.
 
 ---
 
 # 90. Production HA Testing Matrix
 
-Before declaring HA production-ready:
-
-| Test                       | Expected Result                          |
-| -------------------------- | ---------------------------------------- |
-| Primary power loss         | Secondary takes over                     |
-| Primary WAN failure        | Expected failover                        |
-| Primary LAN/uplink failure | Expected behavior                        |
-| Heartbeat link 1 failure   | Cluster remains healthy                  |
-| Heartbeat link 2 failure   | Cluster remains healthy                  |
-| Both heartbeat links fail  | Split-brain protection behavior verified |
-| Session pickup             | Existing sessions behave as designed     |
-| Management access          | Both members reachable                   |
-| SNMP                       | Individual members monitored             |
-| Syslog                     | Logs received correctly                  |
-| FortiAnalyzer              | Connectivity verified                    |
-| Firmware upgrade           | Supported procedure succeeds             |
-| Primary recovery           | Expected role behavior verified          |
-| vCluster failover          | Correct VDOM ownership                   |
-| FGSP session sync          | Session survives path change             |
+| Test                       | Expected Result                      |
+| -------------------------- | ------------------------------------ |
+| Primary power loss         | Secondary takes over                 |
+| Primary WAN failure        | Expected failover                    |
+| Primary LAN/uplink failure | Expected behavior                    |
+| Heartbeat link 1 failure   | Cluster remains healthy              |
+| Heartbeat link 2 failure   | Cluster remains healthy              |
+| Both heartbeat links fail  | Split-brain behavior verified        |
+| Session pickup             | Existing sessions behave as designed |
+| Management access          | Both members reachable               |
+| SNMP                       | Individual members monitored         |
+| Syslog                     | Logs received correctly              |
+| FortiAnalyzer              | Connectivity verified                |
+| Firmware upgrade           | Supported procedure succeeds         |
+| Primary recovery           | Expected role behavior               |
+| vCluster failover          | Correct VDOM ownership               |
+| FGSP session sync          | Session survives path change         |
 
 ---
 
 # 91. Troubleshooting Decision Tree
 
 ```text
-HA problem
+HA Problem
    |
    +-- Cluster not forming?
    |      |
    |      +-- Model?
    |      +-- Firmware?
    |      +-- Group ID?
-   |      +-- Group name?
+   |      +-- Group Name?
    |      +-- Heartbeat?
-   |      +-- HA mode?
+   |      +-- HA Mode?
    |
    +-- Wrong Primary?
    |      |
    |      +-- Override?
    |      +-- Priority?
    |      +-- Uptime?
-   |      +-- Monitored interfaces?
+   |      +-- Monitored Interfaces?
    |      +-- Serial?
    |
    +-- Failover not happening?
    |      |
    |      +-- Monitor configured?
-   |      +-- Interface really failed?
+   |      +-- Interface actually failed?
    |      +-- Heartbeat healthy?
    |      +-- Health-check behavior?
    |
    +-- Sessions dropped?
    |      |
-   |      +-- Session pickup?
-   |      +-- Connectionless pickup?
-   |      +-- NAT pickup?
-   |      +-- Expectation pickup?
+   |      +-- Session Pickup?
+   |      +-- Connectionless Pickup?
+   |      +-- NAT Pickup?
+   |      +-- Expectation Pickup?
    |
    +-- Config mismatch?
           |
           +-- Checksum
           +-- Synchronization
-          +-- HA exceptions
+          +-- HA Exceptions
 ```
 
 ---
@@ -2523,7 +2518,7 @@ HA problem
 Cluster
 Election
 Primary/Secondary
-Config Sync
+Configuration Sync
 Session Pickup
 Heartbeat
 VMAC
@@ -2578,54 +2573,58 @@ Traffic Distribution
 # 93. Most Important HA Commands
 
 ```bash
-# HA configuration
 show system ha
+# Display HA configuration.
+
 get system ha
+# Display HA configuration/state.
 
-# HA status
 get system ha status
+# Display detailed HA status.
 
-# HA synchronization
 execute ha sync start
+# Start HA synchronization.
 
-# HA election/check
 diagnose sys ha check recalc
+# Recalculate/check HA election state.
 
-# HA MAC addresses
 diagnose sys ha mac
+# Display HA MAC information.
 
-# HA checksum
 diagnose sys ha checksum
+# Display HA configuration checksum.
 
-# HA member access
 execute ha manage <index> <admin>
+# Access another HA member.
 
-# Session information
 diagnose sys session list
+# Display active sessions.
 
-# Shared IPS information
 diagnose ips share list
+# Display shared IPS information.
 
-# IPS/session information
 diagnose ips session list
+# Display IPS session information.
 
-# HA statistics
 get test hasync 50
+# Display HA synchronization statistics.
 
-# VRRP
 get router info vrrp
+# Display VRRP state information.
+
 get system vrrp
+# Display system VRRP information.
 
-# Interface hardware
 diagnose hardware deviceinfo nic <interface>
+# Display physical NIC information.
 
-# Switch interface
 show system switch-interface
+# Display switch-interface configuration.
 ```
 
 ---
 
-# 94. Ultra-Fast HA  
+# 94. Ultra-Fast HA
 
 ```text
 FGCP
@@ -2645,7 +2644,7 @@ FGCP
 │   └── Serial number
 │
 ├── Override
-│   └── Similar concept to preempt
+│   └── Similar concept to preemption
 │
 ├── Heartbeat
 │   ├── HA control
@@ -2671,15 +2670,15 @@ FGCP
 FGSP
 │
 ├── Standalone FortiGates
-├── Session synchronization
-├── Load balancer
-├── Asymmetric routing
-└── Multi-cluster designs
+├── Session Synchronization
+├── Load Balancer
+├── Asymmetric Routing
+└── Multi-Cluster Designs
 
 
 VRRP
 │
-├── Virtual gateway
+├── Virtual Gateway
 ├── VRID
 ├── Priority
 ├── Preempt
@@ -2692,9 +2691,9 @@ VRRP
 
 > **1. FGCP = FortiGate clustering.**
 
-> **2. FGSP = session synchronization between FortiGates/clusters.**
+> **2. FGSP = Session synchronization between FortiGates/clusters.**
 
-> **3. VRRP = virtual gateway redundancy.**
+> **3. VRRP = Virtual gateway redundancy.**
 
 > **4. Higher HA device priority means higher preference when priority is used in the election.**
 
@@ -2718,13 +2717,11 @@ VRRP
 
 > **14. Always verify the exact FortiOS version before applying a command from a different release.**
 
-> **15. Backup + upgrade path + release notes = mandatory before HA firmware changes.**
+> **15. Backup + upgrade path + release notes are mandatory before HA firmware changes.**
 
 ---
 
 # 96. Production Golden Architecture
-
-A strong production design commonly looks like:
 
 ```text
                        Internet
@@ -2752,7 +2749,7 @@ A strong production design commonly looks like:
                     Network
 ```
 
-With:
+Core components:
 
 ```text
 FGCP
@@ -2770,11 +2767,9 @@ Configuration Backup
 Controlled Failover Testing
 ```
 
-you have the foundation of a robust FortiGate HA deployment.
-
 ---
 
-## SheynShield — HA Mental Model
+# SheynShield — HA Mental Model
 
 ```text
                  FORTIGATE HA
@@ -2799,20 +2794,54 @@ you have the foundation of a robust FortiGate HA deployment.
     Reserved Management
 ```
 
-**Core distinction to memorize:**
+## Core Distinction
 
 ```text
-FGCP → "Who is my cluster and who is Primary?"
+FGCP
+→ "Who is my cluster and who is Primary?"
 
-FGSP → "Which FortiGate knows this session?"
+FGSP
+→ "Which FortiGate knows this session?"
 
-VRRP → "Which device owns the virtual gateway?"
+VRRP
+→ "Which device owns the virtual gateway?"
 
-vCluster → "Which FortiGate should own this VDOM?"
+vCluster
+→ "Which FortiGate should own this VDOM?"
 
-Session Pickup → "Can I continue the session after failover?"
+Session Pickup
+→ "Can I continue the session after failover?"
 
-Heartbeat → "Are my HA peers alive and synchronized?"
+Heartbeat
+→ "Are my HA peers alive and synchronized?"
 
-Reserved Management → "How do I reach each physical member individually?"
+Reserved Management
+→ "How do I reach each physical member individually?"
 ```
+
+---
+
+# SheynShield — Command Annotation Standard
+
+For every CLI command in this  :
+
+```bash
+command
+# Short English explanation of what the command does.
+```
+
+This keeps the document:
+
+```text
+Fast to Read
+      +
+Easy to Search
+      +
+Easy to Teach
+      +
+Exam Friendly
+      +
+GitHub Ready
+```
+
+**SheynShield — Engineering Secure Networks**
