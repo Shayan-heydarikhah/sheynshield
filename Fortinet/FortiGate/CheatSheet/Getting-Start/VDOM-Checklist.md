@@ -1182,27 +1182,28 @@ The difference between basic configuration knowledge and advanced FortiGate engi
 
 ---
 
-# 🔗 SheynShield Resources
+## 🔗 SheynShield Resources
 
-## 🎥 Video Learning
+### 🎥 Video Learning
 
-* [ ] [YouTube — SheynShield](https://youtube.com/@sheynshield)
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
 
   * Fortinet NSE content
   * FortiGate troubleshooting
   * Network Security Engineering
 
-## 📚 Notes & Updates
+### 📚 Notes & Updates
 
-* [ ] [Telegram — SheynShield](https://t.me/sheynshield)
+* [Telegram — SheynShield](https://t.me/sheynshield)
 
-## 💼 Professional Network
+### 💼 Professional Network
 
-* [ ] [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
 
-## 🐙 Technical Knowledge Base
+### 🐙 Technical Knowledge Base
 
-* [ ] [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+
 
 ---
 
