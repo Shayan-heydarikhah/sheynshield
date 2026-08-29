@@ -163,7 +163,7 @@ next
 # Saves the current policy entry.
 
 end
-# Exits the configuration context.
+
 ```
 
 ---
