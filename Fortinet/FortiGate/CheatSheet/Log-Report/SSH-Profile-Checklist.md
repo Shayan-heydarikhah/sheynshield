@@ -907,8 +907,8 @@ end
 > **Logging = Create the evidence required for troubleshooting, auditing and detection**
 
 ---
-
-# 18. SheynShield Resources
+ 
+## 🔗 SheynShield Resources
 
 ### 🎥 Video Learning
 
@@ -924,11 +924,12 @@ end
 
 ### 💼 Professional Network
 
-* [LinkedIn — Shayan Heydari-khah](https://linkedin.com/in/shayan-heydarikhah)
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
 
 ### 🐙 Technical Knowledge Base
 
 * [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+
 
 ---
 
