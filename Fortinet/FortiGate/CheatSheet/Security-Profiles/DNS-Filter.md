@@ -1,4 +1,4 @@
-# FortiGate DNS Filter —  
+# FortiGate DNS Filter 
 
 > **FortiGate DNS Filter | FortiGuard Secure DNS | DNS Proxy | Botnet C&C | DNS Translation | DoH/DoT | DNS Troubleshooting**
 >
