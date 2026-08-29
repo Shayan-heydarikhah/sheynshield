@@ -1081,7 +1081,7 @@ Before declaring the deployment ready:
 
 ---
 
-## 🏷️ Suggested GitHub Topics
+## 🏷️ Topics
 
 ```text
 fortigate
