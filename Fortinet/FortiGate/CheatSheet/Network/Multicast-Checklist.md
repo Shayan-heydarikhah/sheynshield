@@ -1,4 +1,4 @@
-# 🔥 IPv4 Multicast Security & Networking Checklist — FortiGate / Cisco
+# 🔥 IPv4 Multicast Security & Networking Checklist  
 
 > **SheynShield | Network Security & Design Knowledge Base**  
 > IPv4 Multicast • IGMP • PIM • RP • SSM • MSDP • IGMP Snooping • FortiGate
