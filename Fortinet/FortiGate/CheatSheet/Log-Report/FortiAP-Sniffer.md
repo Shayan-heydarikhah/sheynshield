@@ -718,3 +718,25 @@ Correlation & Troubleshooting
 
 > **Production mindset:**
 > Wireless troubleshooting becomes significantly more powerful when **signal strength + SNR + authentication + traffic logs** are correlated against the exact timestamp of the incident. For traffic investigations, use **Firewall Sniffer** when you need configured inspection/logging, and **diagnose sniffer** when you need immediate packet-level troubleshooting.
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
