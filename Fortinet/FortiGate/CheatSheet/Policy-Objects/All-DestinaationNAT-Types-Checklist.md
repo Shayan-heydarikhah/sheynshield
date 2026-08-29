@@ -1,238 +1,977 @@
-# 🔗 SheynShield Resources Checklist
+# 🔗 SheynShield Resources
 
-> **SheynShield Knowledge Ecosystem**
->
-> Fortinet | FortiGate | Network Security | Firewall Engineering | Cybersecurity Training
+# FortiGate VIP, DNAT, Virtual Server & ZTNA Access Proxy Checklist
 
-![SheynShield](https://img.shields.io/badge/SheynShield-Engineering%20Secure%20Networks-black)
-![Fortinet](https://img.shields.io/badge/Fortinet-Security-red)
-![Network Security](https://img.shields.io/badge/Network-Security-blue)
-![Knowledge Base](https://img.shields.io/badge/Technical-Knowledge%20Base-green)
-
+> **FortiOS | VIP Matching, DNAT, VIP Types, Load Balancing, FQDN VIP, DNS Translation & ZTNA Access Proxy**
 
 ---
 
-# 📌 Resource Navigation Checklist
+# ✅ FortiGate VIP / DNAT / ZTNA Deployment Checklist
 
-- [ ] Access video training resources
-- [ ] Follow technical updates
-- [ ] Connect with security professionals
-- [ ] Explore technical documentation
-- [ ] Contribute to security knowledge sharing
+## 📌 Table of Contents
 
+- [1. VIP Architecture Validation](#1-vip-architecture-validation)
+- [2. VIP Matching & match-vip](#2-vip-matching--match-vip)
+- [3. Static NAT VIP Checklist](#3-static-nat-vip-checklist)
+- [4. Port Forwarding Checklist](#4-port-forwarding-checklist)
+- [5. Virtual Server & Load Balance Checklist](#5-virtual-server--load-balance-checklist)
+- [6. Load Balance Algorithm Checklist](#6-load-balance-algorithm-checklist)
+- [7. Session Persistence Checklist](#7-session-persistence-checklist)
+- [8. Multiplexing & SSL Checklist](#8-multiplexing--ssl-checklist)
+- [9. Gratuitous ARP Checklist](#9-gratuitous-arp-checklist)
+- [10. DNS Translation Checklist](#10-dns-translation-checklist)
+- [11. FQDN VIP Checklist](#11-fqdn-vip-checklist)
+- [12. ZTNA Access Proxy Checklist](#12-ztna-access-proxy-checklist)
+- [13. EMS Tag Based Access Control Checklist](#13-ems-tag-based-access-control-checklist)
+- [14. VIP Troubleshooting Workflow](#14-vip-troubleshooting-workflow)
+- [15. NSE Exam Key Points](#15-nse-exam-key-points)
+- [16. Production Security Checklist](#16-production-security-checklist)
 
 ---
 
-# 🎥 Video Learning Platform Checklist
+# 1. VIP Architecture Validation
 
-## YouTube — SheynShield
+## ✅ Before Deployment
 
+- [ ] Identify external/public IP
+- [ ] Identify mapped/internal server IP
+- [ ] Confirm incoming interface
+- [ ] Confirm backend routing
+- [ ] Confirm return path through FortiGate
+- [ ] Confirm required service ports
+- [ ] Confirm application dependency
 
-🔗 https://youtube.com/@sheynshield
+---
 
-
-### Available Content
-
-
-- [ ] Fortinet NSE Training
-- [ ] FortiGate Configuration Tutorials
-- [ ] FortiGate Troubleshooting
-- [ ] Firewall Engineering Concepts
-- [ ] Network Security Architecture
-- [ ] Security Design Principles
-
-
-### Learning Path
-
+## Packet Flow Validation
 
 ```text
-Network Fundamentals
-
-        |
-
-        v
-
-Network Security
-
-        |
-
-        v
-
-Fortinet Firewall Engineering
-
-        |
-
-        v
-
-Advanced FortiGate Troubleshooting
-
-        |
-
-        v
-
-Security Architecture Design
+Client
+   |
+   |
+External IP:Port
+   |
+   ▼
+FortiGate VIP
+   |
+   ▼
+DNAT Processing
+   |
+   ▼
+Internal Server
+   |
+   ▼
+Return Traffic
 ````
 
-### Recommended Usage
+Checklist:
 
-* [ ] Watch technical lessons
-* [ ] Review configuration examples
-* [ ] Practice troubleshooting scenarios
-* [ ] Apply enterprise security concepts
+* [ ] Client reaches FortiGate
+* [ ] VIP matches traffic
+* [ ] Firewall policy matches
+* [ ] DNAT occurs
+* [ ] Backend responds
+* [ ] Reply path is correct
 
 ---
 
-# 📚 Notes & Technical Updates Checklist
+# 2. VIP Matching & match-vip
 
-## Telegram — SheynShield
+## ✅ Understanding
 
-🔗 [https://t.me/sheynshield](https://t.me/sheynshield)
+VIP changes destination evaluation.
 
-### Resources
-
-* [ ] Security notes
-* [ ] Technical updates
-* [ ] Cheat Sheets
-* [ ] Configuration references
-* [ ] Engineering tips
-
-### Best Practice Workflow
+Example:
 
 ```text
-GitHub Documentation
+Client
+192.168.101.50
 
-        +
-
-Telegram Updates
-
-        +
-
-Video Training
+Destination:
+192.168.101.100
 
         |
+        ▼
 
-        v
+VIP
 
-Complete Security Engineering Knowledge
+        |
+        ▼
+
+Internal Server
+192.168.20.200
 ```
 
 ---
 
-# 💼 Professional Network Checklist
+## match-vip Checklist
 
-## LinkedIn — Shayan Heydari-khah
+Enable when policy must explicitly match VIP traffic.
 
-🔗 [https://linkedin.com/in/shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+```bash
+set match-vip enable
+```
 
-### Professional Content
+Verify:
 
-* [ ] Network Security Articles
-* [ ] Fortinet Engineering Posts
-* [ ] Security Architecture Discussions
-* [ ] Technical Video Content
-* [ ] Industry Knowledge Sharing
-
-### Networking Goals
-
-* [ ] Connect with security engineers
-* [ ] Share technical experience
-* [ ] Follow cybersecurity trends
-* [ ] Build professional visibility
+* [ ] Deny policies can identify VIP traffic
+* [ ] VIP access control is intentional
+* [ ] Policy order is correct
+* [ ] VIP policy is not bypassed
 
 ---
 
-# 🐙 Technical Knowledge Base Checklist
+## Security Validation
 
-## SheynShield GitHub Repository
-
-🔗 [https://github.com/Shayan-heydarikhah/sheynshield](https://github.com/Shayan-heydarikhah/sheynshield)
-
-### Documentation Resources
-
-* [ ] FortiGate Cheat Sheets
-* [ ] Fortinet NSE Notes
-* [ ] Security Checklists
-* [ ] Troubleshooting Guides
-* [ ] Network Design References
-* [ ] Configuration Examples
-
-### Repository Structure
+Example:
 
 ```text
-SheynShield
+Kali
+ |
+ ▼
+VIP IIS
 
-│
-├── Fortinet
-│   │
-│   ├── FortiGate Cheat Sheets
-│   ├── NSE4 Notes
-│   ├── NSE7 Resources
-│   ├── Troubleshooting
-│   └── Security Checklists
-│
-├── Network Security
-│
-├── Architecture Design
-│
-└── Engineering Documentation
+Should:
+DENY
 ```
+
+Verify:
+
+* [ ] Source restriction exists
+* [ ] VIP matching works
+* [ ] Logs confirm correct policy hit
 
 ---
 
-# 🚀 SheynShield Learning Ecosystem
+# 3. Static NAT VIP Checklist
+
+## Architecture
 
 ```text
-              YouTube
-                 |
-                 |
-        Video Training Content
-                 |
-                 v
+External IP
 
-Telegram ---------------- GitHub
+192.168.101.100
 
-Updates              Technical Knowledge
+        |
+        |
+       VIP
 
+        |
+        |
 
-                 |
+Internal Server
 
-                 v
-
-             LinkedIn
-
-      Professional Community
+192.168.20.200
 ```
 
 ---
 
-# 🎯 Engineer Growth Checklist
+## Configuration Checklist
 
-## Beginner Level
-
-* [ ] Learn networking fundamentals
-* [ ] Understand firewall concepts
-* [ ] Follow security basics
-
-## Professional Level
-
-* [ ] Master FortiGate administration
-* [ ] Understand troubleshooting methodology
-* [ ] Build security architecture skills
-
-## Expert Level
-
-* [ ] Design enterprise security solutions
-* [ ] Analyze complex firewall behavior
-* [ ] Share technical knowledge
-* [ ] Build security engineering expertise
+* [ ] VIP object created
+* [ ] External IP configured
+* [ ] Mapped IP configured
+* [ ] Interface selected
+* [ ] Firewall policy created
+* [ ] NAT disabled in policy
 
 ---
 
-# 🔥 SheynShield Mission
+## Policy Validation
 
-> Building a practical cybersecurity knowledge ecosystem for engineers who want to master secure network design, firewall engineering, and enterprise security operations.
+Recommended:
+
+```text
+Destination:
+
+VIP Object
+```
+
+Avoid:
+
+```text
+Destination:
+
+all
+```
 
 ---
+
+## Service Security
+
+Prefer:
+
+```text
+HTTP
+HTTPS
+SSH
+RDP
+```
+
+Avoid:
+
+```text
+ALL
+```
+
+---
+
+# 4. Port Forwarding Checklist
+
+## Port Translation Example
+
+```text
+External:
+
+192.168.101.100:8081
+
+
+Internal:
+
+192.168.20.200:80
+```
+
+---
+
+## Validation
+
+* [ ] External port defined
+* [ ] Internal port defined
+* [ ] Custom service created
+* [ ] Policy matches external port
+* [ ] Backend service is running
+
+---
+
+## Common Error
+
+Wrong:
+
+```text
+VIP:
+
+8081 → 80
+
+
+Policy:
+
+HTTP
+```
+
+Correct:
+
+```text
+VIP:
+
+8081 → 80
+
+
+Policy:
+
+TCP/8081
+```
+
+---
+
+# 5. Virtual Server & Load Balance Checklist
+
+## Identify Requirement
+
+Choose:
+
+### Static VIP
+
+```text
+One External IP
+
+↓
+
+One Backend Server
+```
+
+---
+
+### Load Balance VIP
+
+```text
+One External IP
+
+↓
+
+Multiple Backend Servers
+```
+
+---
+
+Checklist:
+
+* [ ] Backend pool defined
+* [ ] Health checks configured
+* [ ] Load algorithm selected
+* [ ] Persistence requirement evaluated
+
+---
+
+# 6. Load Balance Algorithm Checklist
+
+## Least Sessions
+
+Validate:
+
+* [ ] Session count monitoring enabled
+* [ ] Backend distribution checked
+
+Example:
+
+```text
+Server A
+100 sessions
+
+Server B
+20 sessions
+
+Server C
+40 sessions
+```
+
+Traffic preference:
+
+```text
+Server B
+```
+
+---
+
+## Least RTT
+
+Validate:
+
+* [ ] Response time monitored
+* [ ] Health measurement works
+
+Example:
+
+```text
+Server A
+80ms
+
+
+Server B
+20ms
+```
+
+Preferred:
+
+```text
+Server B
+```
+
+---
+
+# 7. Session Persistence Checklist
+
+Required when applications maintain local sessions.
+
+Validate:
+
+* [ ] Application requires stickiness
+* [ ] Persistence method selected
+* [ ] Cookie/session behavior tested
+
+Without persistence:
+
+```text
+Client
+
+Request 1 → Server A
+
+Request 2 → Server B
+
+Request 3 → Server C
+```
+
+With persistence:
+
+```text
+Client
+
+Request 1 → Server A
+
+Request 2 → Server A
+
+Request 3 → Server A
+```
+
+---
+
+# 8. Multiplexing & SSL Checklist
+
+## Multiplexing
+
+Validate:
+
+* [ ] Proxy architecture supports reuse
+* [ ] Backend connection optimization required
+* [ ] Application compatibility tested
+
+Concept:
+
+```text
+Many Clients
+
+      |
+      ▼
+
+FortiGate
+
+      |
+      ▼
+
+Backend Connection Reuse
+```
+
+---
+
+## SSL Rekey
+
+Checklist:
+
+* [ ] SSL inspection/termination requirement confirmed
+* [ ] Certificate configured
+* [ ] FortiOS version behavior verified
+
+Example:
+
+```bash
+set ssl-client-rekey-count 0
+```
+
+Always verify version-specific behavior.
+
+---
+
+# 9. Gratuitous ARP Checklist
+
+Validate:
+
+* [ ] VIP ownership changes considered
+* [ ] Neighbor ARP updates required
+* [ ] GARP behavior verified
+
+Concept:
+
+```text
+VIP Change
+
+↓
+
+Gratuitous ARP
+
+↓
+
+Updated ARP Tables
+```
+
+---
+
+# 10. DNS Translation Checklist
+
+## Validation
+
+* [ ] DNS feature enabled
+* [ ] DNS record exists
+* [ ] VIP DNS mapping configured
+* [ ] TTL behavior verified
+
+Example:
+
+```text
+shayan.test.co
+
+↓
+
+192.168.101.104
+
+↓
+
+VIP
+
+↓
+
+192.168.20.200
+```
+
+---
+
+Troubleshoot:
+
+* [ ] DNS server
+* [ ] DNS records
+* [ ] Interface DNS settings
+* [ ] VIP configuration
+* [ ] Firewall policy
+
+---
+
+# 11. FQDN VIP Checklist
+
+## Flow
+
+```text
+Client
+
+↓
+
+FQDN
+
+↓
+
+DNS Resolution
+
+↓
+
+VIP
+
+↓
+
+Backend Server
+```
+
+---
+
+Validation:
+
+* [ ] External FQDN resolves
+* [ ] DNS record correct
+* [ ] VIP resolves correctly
+* [ ] Backend reachable
+
+---
+
+Example:
+
+```text
+public.example.com
+
+↓
+
+192.168.101.105
+```
+
+---
+
+# 12. ZTNA Access Proxy Checklist
+
+## Enable Features
+
+* [ ] ZTNA enabled
+* [ ] Certificate configured
+* [ ] Access proxy created
+* [ ] Application published
+
+---
+
+Architecture:
+
+```text
+Remote User
+
+↓
+
+FortiGate
+
+↓
+
+ZTNA Access Proxy
+
+↓
+
+Identity Check
+
+↓
+
+EMS Tag Check
+
+↓
+
+Internal Application
+```
+
+---
+
+Validate:
+
+* [ ] External IP
+* [ ] External Port
+* [ ] Certificate
+* [ ] Virtual Host
+* [ ] Backend Server
+
+---
+
+# 13. EMS Tag Based Access Control Checklist
+
+ZTNA Decision:
+
+```text
+Endpoint
+
+↓
+
+FortiClient
+
+↓
+
+EMS
+
+↓
+
+Security Tag
+
+↓
+
+FortiGate
+
+↓
+
+Policy Decision
+```
+
+---
+
+Validate:
+
+* [ ] Endpoint registered
+* [ ] EMS connected
+* [ ] Tag synchronized
+* [ ] Proxy policy matches tag
+
+---
+
+Example:
+
+Trusted:
+
+```text
+Low Risk
+```
+
+Action:
+
+```text
+ALLOW
+```
+
+---
+
+Malicious:
+
+```text
+Malicious-File-Detected
+```
+
+Action:
+
+```text
+DENY
+```
+
+---
+
+# 14. VIP Troubleshooting Workflow
+
+## Step 1 — Packet Arrival
+
+Check:
+
+* [ ] Source IP
+* [ ] Destination IP
+* [ ] Destination port
+* [ ] Incoming interface
+
+---
+
+## Step 2 — VIP Match
+
+Verify:
+
+* [ ] External IP
+* [ ] External interface
+* [ ] External port
+* [ ] VIP type
+
+---
+
+## Step 3 — Firewall Policy
+
+Check:
+
+* [ ] Source
+* [ ] Destination VIP
+* [ ] Service
+* [ ] Schedule
+* [ ] Policy order
+
+---
+
+## Step 4 — DNAT
+
+Confirm:
+
+```text
+External:
+
+192.168.101.100:8081
+
+
+After DNAT:
+
+192.168.20.200:80
+```
+
+---
+
+## Step 5 — Backend Reachability
+
+Verify:
+
+* [ ] Server listening
+* [ ] Server firewall
+* [ ] Default gateway
+* [ ] Return route
+
+---
+
+## Diagnostic Commands
+
+Endpoint:
+
+```bash
+diagnose endpoint record list
+```
+
+ZTNA UID:
+
+```bash
+diagnose endpoint lls-comm send ztna find-uid <UID>
+```
+
+FCNACD:
+
+```bash
+diagnose test application fcnacd 7
+```
+
+---
+
+# 15. NSE Exam Key Points 🧠
+
+## VIP
+
+Remember:
+
+```text
+VIP = Destination NAT Publication
+```
+
+---
+
+## match-vip
+
+```bash
+set match-vip enable
+```
+
+Meaning:
+
+```text
+Policy explicitly understands VIP destination
+```
+
+---
+
+## Port Forwarding
+
+Remember:
+
+```text
+External Port != Internal Port
+```
+
+Example:
+
+```text
+8081 → 80
+```
+
+---
+
+## Load Balance
+
+Remember:
+
+```text
+Least Sessions
+
+Least RTT
+
+Persistence
+```
+
+---
+
+## ZTNA
+
+Remember:
+
+```text
+Identity
+
++
+
+Certificate
+
++
+
+EMS Tag
+
++
+
+Application Policy
+```
+
+---
+
+# 16. Production Security Checklist
+
+## VIP Security
+
+* [ ] Use specific services
+* [ ] Avoid ALL service
+* [ ] Restrict source addresses
+* [ ] Enable logging
+* [ ] Review policy order
+* [ ] Validate match-vip
+
+---
+
+## Application Security
+
+* [ ] Protect exposed services
+* [ ] Patch backend servers
+* [ ] Monitor logs
+* [ ] Validate certificates
+
+---
+
+## ZTNA Security
+
+Avoid:
+
+```text
+IP Based Trust Only
+```
+
+Prefer:
+
+```text
+Identity
+
++
+
+Device Posture
+
++
+
+Certificate
+
++
+
+EMS Tag
+
++
+
+Application Control
+```
+
+---
+
+# 🔥 Golden Mental Model
+
+```text
+                 FORTIGATE VIP
+
+                      |
+     -------------------------------------
+
+     Static VIP       Load Balance       ZTNA
+
+        |                  |               |
+
+       DNAT          Backend Pool     Identity
+
+                          |               |
+
+                  Session / RTT       EMS Tags
+
+                          |               |
+
+                     Servers        Applications
+```
+
+---
+
+# ⚡ 30 Second Review
+
+```text
+VIP
+ |
+ |-- Static NAT
+ |      External IP → Internal IP
+ |
+ |-- Port Forwarding
+ |      External Port → Internal Port
+ |
+ |-- FQDN VIP
+ |      DNS → VIP
+ |
+ |-- Load Balance
+ |      Multiple Backend Servers
+ |
+ |-- DNS Translation
+ |      DNS Mapping
+ |
+ |-- Access Proxy
+        ZTNA Application Access
+```
+
+---
+
+# ⭐ Five Things To Remember
+
+```text
+1.
+VIP publishes internal services.
+
+
+2.
+match-vip controls VIP-aware policy matching.
+
+
+3.
+External service and backend service can be different.
+
+
+4.
+Load balancing depends on sessions, RTT and persistence.
+
+
+5.
+ZTNA replaces IP trust with identity-based access.
+```
+
+---
+
 ## 🔗 SheynShield Resources
 
 ### 🎥 Video Learning
@@ -257,15 +996,6 @@ Updates              Technical Knowledge
 
 ---
 
-# ⭐ Support SheynShield
+⭐ **SheynShield | Engineering Secure Networks**
 
-* [ ] Star the GitHub repository ⭐
-* [ ] Share technical resources
-* [ ] Follow new security content
-* [ ] Join engineering discussions
-* [ ] Help grow the security community
-
----
-
-**SheynShield — Engineering Secure Networks**
-
+```
