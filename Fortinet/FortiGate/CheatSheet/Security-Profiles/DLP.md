@@ -1856,3 +1856,25 @@ Test cases:
 > **Document Source → Fingerprint Database → Fingerprint Match → DLP Action**
 >
 > Finally, when troubleshooting cloud-storage DLP, separate **detection accuracy** from **metadata/logging accuracy**. A file can be successfully detected and blocked even when a cloud application's API causes the filename recorded in the log to be incomplete or inaccurate.
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
