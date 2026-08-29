@@ -2167,7 +2167,7 @@ It is part of a larger forwarding and security architecture:
 
 ---
 
-# 🔖 SEO / Search Keywords
+# 🔖 Keywords
 
 `FortiGate Interface Configuration`
 `FortiOS Interface Configuration`
