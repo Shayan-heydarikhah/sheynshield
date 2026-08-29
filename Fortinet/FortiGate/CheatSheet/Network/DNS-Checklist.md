@@ -1160,7 +1160,7 @@ diagnose debug disable
 
 ---
 
-# 🔗 SheynShield Resources
+## 🔗 SheynShield Resources
 
 ### 🎥 Video Learning
 
@@ -1181,6 +1181,7 @@ diagnose debug disable
 ### 🐙 Technical Knowledge Base
 
 * [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+
 
 ---
 
