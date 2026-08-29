@@ -795,23 +795,25 @@ Receiver
 
 ---
 
-# 🔗 SheynShield Resources
+## 🔗 SheynShield Resources
 
-## 🎥 Video Learning
+### 🎥 Video Learning
 
-* YouTube:
-  [https://youtube.com/@sheynshield](https://youtube.com/@sheynshield)
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
 
-## 📚 Notes
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
 
-* Telegram:
-  [https://t.me/sheynshield](https://t.me/sheynshield)
+### 📚 Notes & Updates
 
-## 🐙 Knowledge Base
+* [Telegram — SheynShield](https://t.me/sheynshield)
 
-* GitHub:
-  [https://github.com/Shayan-heydarikhah/sheynshield](https://github.com/Shayan-heydarikhah/sheynshield)
+### 💼 Professional Network
 
----
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
 
-**SheynShield | Engineering Secure Networks**
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
+
