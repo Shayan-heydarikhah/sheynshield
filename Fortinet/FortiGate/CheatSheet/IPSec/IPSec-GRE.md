@@ -1135,3 +1135,25 @@ IPsec
 > **6. A tunnel being UP does not guarantee application connectivity — verify routing and firewall policy.**
 
 > **7. Do not copy legacy DES/MD5 lab configurations into production.**
+
+## 🔗 SheynShield Resources
+
+### 🎥 Video Learning
+
+* [YouTube — SheynShield](https://youtube.com/@sheynshield)
+
+  * Fortinet NSE content
+  * FortiGate troubleshooting
+  * Network Security Engineering
+
+### 📚 Notes & Updates
+
+* [Telegram — SheynShield](https://t.me/sheynshield)
+
+### 💼 Professional Network
+
+* [LinkedIn — Shayan-heydarikhah](https://linkedin.com/in/shayan-heydarikhah)
+
+### 🐙 Technical Knowledge Base
+
+* [SheynShield GitHub](https://github.com/Shayan-heydarikhah/sheynshield)
