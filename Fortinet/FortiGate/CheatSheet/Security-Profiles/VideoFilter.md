@@ -1,4 +1,4 @@
-# FortiGate Video Filter —  
+# FortiGate Video Filter
 
 > **FortiGate Video Filter | YouTube Channel Filtering | YouTube API | FortiGuard Video Rating | WAD | QUIC/HTTP3**
 >
