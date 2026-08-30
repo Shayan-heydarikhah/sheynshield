@@ -1,6 +1,3 @@
-حتماً — این نسخه را به‌صورت **GitHub-ready GFM Checklist** بازطراحی کردم؛ یعنی به‌جای صرفاً تبدیل متن به checklist، ساختار را برای **NSE revision، troubleshooting، production deployment، GitHub SEO و scanability** بهینه کردم. موارد مفهومی، CLI، validation و operational checks از هم تفکیک شده‌اند.
-
-````markdown
 # 🛡️ FortiGate IPS — Engineering & Tuning Checklist
 
 > **FortiOS IPS | Custom IPS Signatures | Protocol Decoders | PCRE | Rate-Based Detection | Tags | Hold Time | Hardware Acceleration | Performance Tuning**
