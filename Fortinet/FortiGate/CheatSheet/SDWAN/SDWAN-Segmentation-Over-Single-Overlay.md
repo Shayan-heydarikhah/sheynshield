@@ -1,4 +1,4 @@
-# FortiGate SD-WAN — Advanced Routing & Segmentation — Part 1
+# FortiGate SD-WAN — Advanced Routing & Segmentation 
 
 > **Scope:** SD-WAN + BGP + ADVPN + VRF/VPNv4 + MPLS concepts + HA + Advanced troubleshooting
 
