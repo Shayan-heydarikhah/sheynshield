@@ -1292,7 +1292,7 @@ VIDEO FILTER
 
 ---
 
-## 🏷️ Suggested GitHub Tags
+## 🏷️ Tags
 
 `fortigate` `fortios` `video-filter` `youtube` `fortiguard` `wad` `application-control` `quic` `http3` `network-security` `cybersecurity` `nse7` `nse4` `-`
 
