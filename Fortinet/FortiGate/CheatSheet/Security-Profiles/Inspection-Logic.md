@@ -1731,7 +1731,7 @@ Deep Inspection
 
 ---
 
-## Suggested GitHub  Keywords
+## Keywords
 
 `FortiGate SSL Inspection` · `FortiGate Deep Inspection` · `FortiOS SSL Inspection  ` · `FortiGate Certificate Inspection` · `FortiGate SSL MITM` · `FortiGate CA Certificate` · `FortiGate JA3` · `FortiGate JA4` · `FortiGate Psiphon Detection` · `FortiGate Application Control` · `FortiGate Flow Inspection` · `FortiGate Proxy Inspection` · `FortiGate Antivirus` · `FortiGate Sandbox` · `FortiGate IPS` · `FortiGate NSE4` · `FortiGate NSE7`
 
